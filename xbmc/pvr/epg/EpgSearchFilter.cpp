@@ -57,7 +57,7 @@ bool CPVREpgSearchFilter::MatchGenre(const std::shared_ptr<CPVREpgInfoTag>& tag)
   if (m_searchData.m_iGenreType != EPG_SEARCH_UNSET)
   {
     bool bIsUnknownGenre(tag->GenreType() > EPG_EVENT_CONTENTMASK_USERDEFINED ||
-                         tag->GenreType() < EPG_EVENT_CONTENTMASK_MOVIEDRAMA);
+                         tag->GenreType() < 0);
     bReturn = ((m_bIncludeUnknownGenres && bIsUnknownGenre) || m_bEpgSearchDataFiltered ||
                tag->GenreType() == m_searchData.m_iGenreType);
   }

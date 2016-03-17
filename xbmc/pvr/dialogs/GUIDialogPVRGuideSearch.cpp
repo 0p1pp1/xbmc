@@ -106,17 +106,18 @@ void CGUIDialogPVRGuideSearch::UpdateGenreSpin()
 {
   std::vector< std::pair<std::string, int> > labels;
   labels.emplace_back(g_localizeStrings.Get(593), EPG_SEARCH_UNSET);
-  labels.emplace_back(g_localizeStrings.Get(19500), EPG_EVENT_CONTENTMASK_MOVIEDRAMA);
-  labels.emplace_back(g_localizeStrings.Get(19516), EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS);
-  labels.emplace_back(g_localizeStrings.Get(19532), EPG_EVENT_CONTENTMASK_SHOW);
-  labels.emplace_back(g_localizeStrings.Get(19548), EPG_EVENT_CONTENTMASK_SPORTS);
-  labels.emplace_back(g_localizeStrings.Get(19564), EPG_EVENT_CONTENTMASK_CHILDRENYOUTH);
-  labels.emplace_back(g_localizeStrings.Get(19580), EPG_EVENT_CONTENTMASK_MUSICBALLETDANCE);
-  labels.emplace_back(g_localizeStrings.Get(19596), EPG_EVENT_CONTENTMASK_ARTSCULTURE);
-  labels.emplace_back(g_localizeStrings.Get(19612), EPG_EVENT_CONTENTMASK_SOCIALPOLITICALECONOMICS);
-  labels.emplace_back(g_localizeStrings.Get(19628), EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE);
-  labels.emplace_back(g_localizeStrings.Get(19644), EPG_EVENT_CONTENTMASK_LEISUREHOBBIES);
-  labels.emplace_back(g_localizeStrings.Get(19660), EPG_EVENT_CONTENTMASK_SPECIAL);
+  labels.emplace_back(g_localizeStrings.Get(19500), 0);
+  labels.emplace_back(g_localizeStrings.Get(19516), 0x10);
+  labels.emplace_back(g_localizeStrings.Get(19532), 0x20);
+  labels.emplace_back(g_localizeStrings.Get(19548), 0x30);
+  labels.emplace_back(g_localizeStrings.Get(19564), 0x40);
+  labels.emplace_back(g_localizeStrings.Get(19580), 0x50);
+  labels.emplace_back(g_localizeStrings.Get(19596), 0x60);
+  labels.emplace_back(g_localizeStrings.Get(19612), 0x70);
+  labels.emplace_back(g_localizeStrings.Get(19628), 0x80);
+  labels.emplace_back(g_localizeStrings.Get(19644), 0x90);
+  labels.emplace_back(g_localizeStrings.Get(19660), 0xa0);
+  labels.emplace_back(g_localizeStrings.Get(19676), 0xb0);
   labels.emplace_back(g_localizeStrings.Get(19499), EPG_EVENT_CONTENTMASK_USERDEFINED);
 
   SET_CONTROL_LABELS(CONTROL_SPIN_GENRE, m_searchFilter->GetGenreType(), &labels);
