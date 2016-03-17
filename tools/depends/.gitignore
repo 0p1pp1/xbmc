@@ -12,6 +12,9 @@
 
 /target/*/.patched-*
 /target/*/.installed-*
+/target/*/native
+/target/*/*-install
+/target/*/*.tar.gz
 /target/*/x86/*
 /target/*/x86_64-linux-gnu/*
 /target/*/armeabi-v7a/*
