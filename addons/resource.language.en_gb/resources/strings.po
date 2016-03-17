@@ -10943,569 +10943,656 @@ msgstr ""
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19499"
-msgid "Other / Unknown"
+msgid "その他"
 msgstr ""
 
-#. label for epg "movie/drama" genre value
+#. label for epg "ニュース / 報道" genre value
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19500"
-msgid "Movie / Drama"
+msgid "ニュース / 報道"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19501"
-msgid "Detective / Thriller"
+msgid "定時・総合"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19502"
-msgid "Adventure / Western / War"
+msgid "天気"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19503"
-msgid "Science fiction / Fantasy / Horror"
+msgid "特集・ドキュメント"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19504"
-msgid "Comedy"
+msgid "政治・国会"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19505"
-msgid "Soap / Melodrama / Folkloric"
+msgid "経済・市況"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19506"
-msgid "Romance"
+msgid "海外・国際"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19507"
-msgid "Serious / Classical / Religious / Historical movie / drama"
+msgid "解説"
 msgstr ""
 
-#. label for epg "movie/drama" subgenre value
+#. label for epg "ニュース / 報道" subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19508"
-msgid "Adult movie / drama"
+msgid "討論・会談"
 msgstr ""
 
-#empty strings from id 19509 to 19515
+#. label for epg "ニュース / 報道" subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19509"
+msgid "報道特番"
+msgstr ""
 
-#. label for "news/current affairs" epg genre value
+#. label for epg "ニュース / 報道" subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19510"
+msgid "ローカル・地域"
+msgstr ""
+
+#. label for epg "ニュース / 報道" subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19511"
+msgid "交通"
+msgstr ""
+
+#empty strings from id 19512 to 19515
+
+#. label for "スポーツ" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19516"
-msgid "News / Current affairs"
+msgid "スポーツ"
 msgstr ""
 
-#. label for "news/current affairs" epg subgenre value
+#. label for "スポーツ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19517"
-msgid "News / Weather report"
+msgid "スポーツニュース"
 msgstr ""
 
-#. label for "news/current affairs" epg subgenre value
+#. label for "スポーツ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19518"
-msgid "News magazine"
+msgid "野球"
 msgstr ""
 
-#. label for "news/current affairs" epg subgenre value
+#. label for "スポーツ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19519"
-msgid "Documentary"
+msgid "サッカー"
 msgstr ""
 
-#. label for "news/current affairs" epg subgenre value
+#. label for "スポーツ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19520"
-msgid "Discussion / Interview / Debate"
+msgid "ゴルフ"
 msgstr ""
 
-#empty strings from id 19521 to 19531
-
-#. label for "show/game show" epg subgenre value
+#. label for "スポーツ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
-#: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
-msgctxt "#19532"
-msgid "Show / Game show"
+msgctxt "#19521"
+msgid "その他の球技"
 msgstr ""
 
-#. label for "show/game show" epg subgenre value
+#. label for "スポーツ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19522"
+msgid "相撲・格闘技"
+msgstr ""
+
+#. label for "スポーツ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19523"
+msgid "オリンピック・国際大会"
+msgstr ""
+
+#. label for "スポーツ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19524"
+msgid "マラソン・陸上・水泳"
+msgstr ""
+
+#. label for "スポーツ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19525"
+msgid "モータースポーツ"
+msgstr ""
+
+#. label for "スポーツ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19526"
+msgid "マリンスポーツ・ウインタースポーツ"
+msgstr ""
+
+#. label for "スポーツ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19527"
+msgid "競馬・公営競技"
+msgstr ""
+
+#empty strings from id 19528 to 19531
+
+#. label for "情報 / ワイドショー" epg genre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19532"
+msgid "情報 / ワイドショー"
+msgstr ""
+
+#. label for "情報 / ワイドショー" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19533"
-msgid "Game show / Quiz / Contest"
+msgid "芸能・ワイドショー"
 msgstr ""
 
-#. label for "show/game show" epg subgenre value
+#. label for "情報 / ワイドショー" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19534"
-msgid "Variety show"
+msgid "ファッション"
 msgstr ""
 
-#. label for "show/game show" epg subgenre value
+#. label for "情報 / ワイドショー" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19535"
-msgid "Talk show"
+msgid "暮らし・住まい"
 msgstr ""
 
-#empty strings from id 19536 to 19547
-
-#. label for "sports" epg genre value
+#. label for "情報 / ワイドショー" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
-#: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
-msgctxt "#19548"
-msgid "Sports"
+msgctxt "#19536"
+msgid "健康・医療"
 msgstr ""
 
-#. label for "sports" epg subgenre value
+#. label for "情報 / ワイドショー" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19537"
+msgid "ショッピング・通販"
+msgstr ""
+
+#. label for "情報 / ワイドショー" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19538"
+msgid "グルメ・料理"
+msgstr ""
+
+#. label for "情報 / ワイドショー" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19539"
+msgid "イベント"
+msgstr ""
+
+#. label for "情報 / ワイドショー" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19540"
+msgid "番組紹介・お知らせ"
+msgstr ""
+
+#empty strings from id 19541 to 19547
+
+#. label for "ドラマ" epg genre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19548"
+msgid "ドラマ"
+msgstr ""
+
+#. label for "ドラマ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19549"
-msgid "Special event"
+msgid "国内ドラマ"
 msgstr ""
 
-#. label for "sports" epg subgenre value
+#. label for "ドラマ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19550"
-msgid "Sport magazine"
+msgid "海外ドラマ"
 msgstr ""
 
-#. label for "sports" epg subgenre value
+#. label for "ドラマ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19551"
-msgid "Football"
+msgid "時代劇"
 msgstr ""
 
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19552"
-msgid "Tennis / Squash"
-msgstr ""
+#empty strings from id 19551 to 19563
 
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19553"
-msgid "Team sports"
-msgstr ""
-
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19554"
-msgid "Athletics"
-msgstr ""
-
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19555"
-msgid "Motor sport"
-msgstr ""
-
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19556"
-msgid "Water sport"
-msgstr ""
-
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19557"
-msgid "Winter sports"
-msgstr ""
-
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19558"
-msgid "Equestrian"
-msgstr ""
-
-#. label for "sports" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19559"
-msgid "Martial sports"
-msgstr ""
-
-#empty strings from id 19560 to 19563
-
-#. label for "children's/youth programmes" epg genre value
+#. label for "音楽" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19564"
-msgid "Children's / Youth programmes"
+msgid "音楽"
 msgstr ""
 
-#. label for "children's/youth programmes" epg subgenre value
+#. label for "音楽" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19565"
-msgid "Pre-school children's programmes"
+msgid "国内ロック・ポップス"
 msgstr ""
 
-#. label for "children's/youth programmes" epg subgenre value
+#. label for "音楽" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19566"
-msgid "Entertainment programmes for 6 to 14"
+msgid "海外ロック・ポップス"
 msgstr ""
 
-#. label for "children's/youth programmes" epg subgenre value
+#. label for "音楽" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19567"
-msgid "Entertainment programmes for 10 to 16"
+msgid "クラシック・オペラ"
 msgstr ""
 
-#. label for "children's/youth programmes" epg subgenre value
+#. label for "音楽" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19568"
-msgid "Informational / Educational / School programme"
+msgid "ジャズ・フュージョン"
 msgstr ""
 
-#. label for "children's/youth programmes" epg subgenre value
+#. label for "音楽" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19569"
-msgid "Cartoons / Puppets"
+msgid "歌謡曲・演歌"
 msgstr ""
 
-#empty strings from id 19570 to 19579
-
-#. label for "music/ballet/dance" epg genre value
+#. label for "音楽" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
-#: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
-msgctxt "#19580"
-msgid "Music / Ballet / Dance"
+msgctxt "#19570"
+msgid "ライブ・コンサート"
 msgstr ""
 
-#. label for "music/ballet/dance" epg subgenre value
+#. label for "音楽" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19571"
+msgid "ランキング・リクエスト"
+msgstr ""
+
+#. label for "音楽" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19572"
+msgid "カラオケ・のど自慢"
+msgstr ""
+
+#. label for "音楽" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19573"
+msgid "民謡・邦楽"
+msgstr ""
+
+#. label for "音楽" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19574"
+msgid "童謡・キッズ"
+msgstr ""
+
+#. label for "音楽" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19575"
+msgid "民族音楽・ワールドミュージック"
+msgstr ""
+
+#empty strings from id 19576 to 19579
+
+#. label for "バラエティ" epg genre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19580"
+msgid "バラエティ"
+msgstr ""
+
+#. label for "バラエティ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19581"
-msgid "Rock / Pop"
+msgid "クイズ"
 msgstr ""
 
-#. label for "music/ballet/dance" epg subgenre value
+#. label for "バラエティ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19582"
-msgid "Serious / Classical music"
+msgid "ゲーム"
 msgstr ""
 
-#. label for "music/ballet/dance" epg subgenre value
+#. label for "バラエティ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19583"
-msgid "Folk / Traditional music"
+msgid "トークバラエティ"
 msgstr ""
 
-#. label for "music/ballet/dance" epg subgenre value
+#. label for "バラエティ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19584"
-msgid "Musical / Opera"
+msgid "お笑い・コメディ"
 msgstr ""
 
-#. label for "music/ballet/dance" epg subgenre value
+#. label for "バラエティ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19585"
-msgid "Ballet"
+msgid "音楽バラエティ"
 msgstr ""
 
-#empty strings from id 19586 to 19595
-
-#. label for "arts/culture" epg genre value
+#. label for "バラエティ" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
-#: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
-msgctxt "#19596"
-msgid "Arts / Culture"
+msgctxt "#19586"
+msgid "旅バラエティ"
 msgstr ""
 
-#. label for "arts/culture" epg subgenre value
+#. label for "バラエティ" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19587"
+msgid "料理バラエティ"
+msgstr ""
+
+#empty strings from id 19588 to 19595
+
+#. label for "映画" epg genre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19596"
+msgid "映画"
+msgstr ""
+
+#. label for "映画" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19597"
-msgid "Performing arts"
+msgid "洋画"
 msgstr ""
 
-#. label for "arts/culture" epg subgenre value
+#. label for "映画" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19598"
-msgid "Fine arts"
+msgid "邦画"
 msgstr ""
 
-#. label for "arts/culture" epg subgenre value
+#. label for "映画" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19599"
-msgid "Religion"
+msgid "アニメ"
 msgstr ""
 
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19600"
-msgid "Popular culture / Traditional arts"
-msgstr ""
+#empty strings from id 19600 to 19611
 
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19601"
-msgid "Literature"
-msgstr ""
-
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19602"
-msgid "Film / Cinema"
-msgstr ""
-
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19603"
-msgid "Experimental film / video"
-msgstr ""
-
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19604"
-msgid "Broadcasting / Press"
-msgstr ""
-
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19605"
-msgid "New media"
-msgstr ""
-
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19606"
-msgid "Arts / Culture magazines"
-msgstr ""
-
-#. label for "arts/culture" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19607"
-msgid "Fashion"
-msgstr ""
-
-#empty strings from id 19608 to 19611
-
-#. label for "social/political/economics" epg genre value
+#. label for "アニメ / 特撮" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19612"
-msgid "Social / Political / Economics"
+msgid "アニメ / 特撮"
 msgstr ""
 
-#. label for "social/political/economics" epg subgenre value
+#. label for "アニメ / 特撮" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19613"
-msgid "Magazines / Reports / Documentary"
+msgid "国内アニメ"
 msgstr ""
 
-#. label for "social/political/economics" epg subgenre value
+#. label for "アニメ / 特撮" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19614"
-msgid "Economics / Social advisory"
+msgid "海外アニメ"
 msgstr ""
 
-#. label for "social/political/economics" epg subgenre value
+#. label for "アニメ / 特撮" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19615"
-msgid "Remarkable people"
+msgid "特撮"
 msgstr ""
 
 #empty strings from id 19616 to 19627
 
-#. label for "education/science/factual" epg genre value
+#. label for "ドキュメンタリー / 教養" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19628"
-msgid "Education / Science / Factual"
+msgid "ドキュメンタリー / 教養"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19629"
-msgid "Nature / Animals / Environment"
+msgid "社会・時事"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19630"
-msgid "Technology / Natural sciences"
+msgid "歴史・紀行"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19631"
-msgid "Medicine / Physiology / Psychology"
+msgid "自然・動物・環境"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19632"
-msgid "Foreign countries / Expeditions"
+msgid "宇宙・科学・医学"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19633"
-msgid "Social / Spiritual sciences"
+msgid "カルチャー・伝統文化"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19634"
-msgid "Further education"
+msgid "文学・文芸"
 msgstr ""
 
-#. label for "education/science/factual" epg subgenre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19635"
-msgid "Languages"
+msgid "スポーツ"
 msgstr ""
 
-#empty strings from id 19636 to 19643
+#. label for "ドキュメンタリー / 教養" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19636"
+msgid "ドキュメンタリー全般"
+msgstr ""
 
-#. label for "leisure/hobbies" epg genre value
+#. label for "ドキュメンタリー / 教養" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19637"
+msgid "インタビュー・討論"
+msgstr ""
+
+#empty strings from id 19638 to 19643
+
+#. label for "劇場 / 公演" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
 #: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19644"
-msgid "Leisure / Hobbies"
+msgid "劇場 / 公演"
 msgstr ""
 
-#. label for "leisure/hobbies" epg subgenre value
+#. label for "劇場 / 公演" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19645"
-msgid "Tourism / Travel"
+msgid "時代劇・新劇"
 msgstr ""
 
-#. label for "leisure/hobbies" epg subgenre value
+#. label for "劇場 / 公演" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19646"
-msgid "Handicraft"
+msgid "ミュージカル"
 msgstr ""
 
-#. label for "leisure/hobbies" epg subgenre value
+#. label for "劇場 / 公演" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19647"
-msgid "Motoring"
+msgid "ダンス・バレエ"
 msgstr ""
 
-#. label for "leisure/hobbies" epg subgenre value
+#. label for "劇場 / 公演" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19648"
-msgid "Fitness & health"
+msgid "落語・演芸"
 msgstr ""
 
-#. label for "leisure/hobbies" epg subgenre value
+#. label for "劇場 / 公演" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19649"
-msgid "Cooking"
+msgid "歌舞伎・古典"
 msgstr ""
 
-#. label for "leisure/hobbies" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19650"
-msgid "Advertisement / Shopping"
-msgstr ""
+#empty strings from id 19650 to 19659
 
-#. label for "leisure/hobbies" epg subgenre value
+#. label for "趣味 / 教育" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19651"
-msgid "Gardening"
-msgstr ""
-
-#empty strings from id 19652 to 19659
-
-#. label for "special characteristics" epg genre value
-#: xbmc/pvr/epg/Epg.cpp
-#: xbmc/pvr/dialogs/GUIDialogPVRGuideSearch.cpp
 msgctxt "#19660"
-msgid "Special characteristics"
+msgid "趣味 / 教育"
 msgstr ""
 
-#. label for "special characteristics" epg subgenre value
+#. label for "趣味 / 教育" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19661"
-msgid "Original language"
+msgid "旅・釣り・アウトドア"
 msgstr ""
 
-#. label for "special characteristics" epg subgenre value
+#. label for "趣味 / 教育" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19662"
-msgid "Black & white"
+msgid "園芸・ペット・手芸"
 msgstr ""
 
-#. label for "special characteristics" epg subgenre value
+#. label for "趣味 / 教育" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19663"
-msgid "Unpublished"
+msgid "音楽・美術・工芸"
 msgstr ""
 
-#. label for "special characteristics" epg subgenre value
+#. label for "趣味 / 教育" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19664"
-msgid "Live broadcast"
+msgid "囲碁・将棋"
 msgstr ""
 
-#empty strings from id 19665 to 19675
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19665"
+msgid "麻雀・パチンコ"
+msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19666"
+msgid "車・オートバイ"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19667"
+msgid "コンピュータ・TVゲーム"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19668"
+msgid "会話・語学"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19669"
+msgid "幼児・小学生"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19670"
+msgid "中学生・高校生"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19671"
+msgid "大学生・受験"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19672"
+msgid "生涯教育・資格"
+msgstr ""
+
+#. label for "趣味 / 教育" epg subgenre value
+#: xbmc/pvr/epg/Epg.cpp
+msgctxt "#19673"
+msgid "教育問題"
+msgstr ""
+
+#empty strings from id 19674 to 19675
+
+#. label for "福祉" epg genre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19676"
-msgid "Drama"
+msgid "福祉"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19677"
-msgid "Detective / Thriller"
+msgid "高齢者"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19678"
-msgid "Adventure / Western / War"
+msgid "障害者"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19679"
-msgid "Science fiction / Fantasy / Horror"
+msgid "社会福祉"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19680"
-msgid "Comedy"
+msgid "ボランティア"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19681"
-msgid "Soap / Melodrama / Folkloric"
+msgid "手話"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19682"
-msgid "Romance"
+msgid "文字（字幕）"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
+#. label for "福祉" epg subgenre value
 #: xbmc/pvr/epg/Epg.cpp
 msgctxt "#19683"
-msgid "Serious / Classical / Religion / Historical"
+msgid "音声解説"
 msgstr ""
 
-#. label for "user defined" epg subgenre value
-#: xbmc/pvr/epg/Epg.cpp
-msgctxt "#19684"
-msgid "Adult"
-msgstr ""
+#empty strings id 19684
 
 #. Title for shutdown confirmation dialog
 #: xbmc/pvr/PVRManager.cpp

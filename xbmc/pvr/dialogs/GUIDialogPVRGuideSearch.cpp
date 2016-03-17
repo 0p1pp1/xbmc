@@ -102,18 +102,18 @@ void CGUIDialogPVRGuideSearch::UpdateGroupsSpin(void)
 void CGUIDialogPVRGuideSearch::UpdateGenreSpin(void)
 {
   std::vector< std::pair<std::string, int> > labels;
-  labels.push_back(std::make_pair(g_localizeStrings.Get(593),   EPG_SEARCH_UNSET));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19500), EPG_EVENT_CONTENTMASK_MOVIEDRAMA));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19516), EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19532), EPG_EVENT_CONTENTMASK_SHOW));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19548), EPG_EVENT_CONTENTMASK_SPORTS));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19564), EPG_EVENT_CONTENTMASK_CHILDRENYOUTH));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19580), EPG_EVENT_CONTENTMASK_MUSICBALLETDANCE));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19596), EPG_EVENT_CONTENTMASK_ARTSCULTURE));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19612), EPG_EVENT_CONTENTMASK_SOCIALPOLITICALECONOMICS));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19628), EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19644), EPG_EVENT_CONTENTMASK_LEISUREHOBBIES));
-  labels.push_back(std::make_pair(g_localizeStrings.Get(19660), EPG_EVENT_CONTENTMASK_SPECIAL));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19500), 0));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19516), 0x10));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19532), 0x20));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19548), 0x30));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19564), 0x40));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19580), 0x50));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19596), 0x60));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19612), 0x70));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19628), 0x80));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19644), 0x90));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19660), 0xa0));
+  labels.push_back(std::make_pair(g_localizeStrings.Get(19676), 0xb0));
   labels.push_back(std::make_pair(g_localizeStrings.Get(19499), EPG_EVENT_CONTENTMASK_USERDEFINED));
 
   SET_CONTROL_LABELS(CONTROL_SPIN_GENRE, m_searchFilter->GetGenreType(), &labels);

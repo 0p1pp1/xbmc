@@ -651,41 +651,41 @@ const std::string& CPVREpg::ConvertGenreIdToString(int iID, int iSubID)
   unsigned int iLabelId = 19499;
   switch (iID)
   {
-    case EPG_EVENT_CONTENTMASK_MOVIEDRAMA:
-      iLabelId = (iSubID <= 8) ? 19500 + iSubID : 19500;
+    case 0:
+      iLabelId = (iSubID <= 10) ? 19500 + iSubID + 1 : 19500;
       break;
-    case EPG_EVENT_CONTENTMASK_NEWSCURRENTAFFAIRS:
-      iLabelId = (iSubID <= 4) ? 19516 + iSubID : 19516;
+    case 0x10:
+      iLabelId = (iSubID <= 10) ? 19516 + iSubID + 1 : 19516;
       break;
-    case EPG_EVENT_CONTENTMASK_SHOW:
-      iLabelId = (iSubID <= 3) ? 19532 + iSubID : 19532;
+    case 0x20:
+      iLabelId = (iSubID <= 7) ? 19532 + iSubID + 1 : 19532;
       break;
-    case EPG_EVENT_CONTENTMASK_SPORTS:
-      iLabelId = (iSubID <= 11) ? 19548 + iSubID : 19548;
+    case 0x30:
+      iLabelId = (iSubID <= 2) ? 19548 + iSubID + 1 : 19548;
       break;
-    case EPG_EVENT_CONTENTMASK_CHILDRENYOUTH:
-      iLabelId = (iSubID <= 5) ? 19564 + iSubID : 19564;
+    case 0x40:
+      iLabelId = (iSubID <= 10) ? 19564 + iSubID + 1 : 19564;
       break;
-    case EPG_EVENT_CONTENTMASK_MUSICBALLETDANCE:
-      iLabelId = (iSubID <= 6) ? 19580 + iSubID : 19580;
+    case 0x50:
+      iLabelId = (iSubID <= 6) ? 19580 + iSubID + 1 : 19580;
       break;
-    case EPG_EVENT_CONTENTMASK_ARTSCULTURE:
-      iLabelId = (iSubID <= 11) ? 19596 + iSubID : 19596;
+    case 0x60:
+      iLabelId = (iSubID <= 2) ? 19596 + iSubID + 1 : 19596;
       break;
-    case EPG_EVENT_CONTENTMASK_SOCIALPOLITICALECONOMICS:
-      iLabelId = (iSubID <= 3) ? 19612 + iSubID : 19612;
+    case 0x70:
+      iLabelId = (iSubID <= 2) ? 19612 + iSubID + 1 : 19612;
       break;
-    case EPG_EVENT_CONTENTMASK_EDUCATIONALSCIENCE:
-      iLabelId = (iSubID <= 7) ? 19628 + iSubID : 19628;
+    case 0x80:
+      iLabelId = (iSubID <= 8) ? 19628 + iSubID + 1 : 19628;
       break;
-    case EPG_EVENT_CONTENTMASK_LEISUREHOBBIES:
-      iLabelId = (iSubID <= 7) ? 19644 + iSubID : 19644;
+    case 0x90:
+      iLabelId = (iSubID <= 4) ? 19644 + iSubID + 1 : 19644;
       break;
-    case EPG_EVENT_CONTENTMASK_SPECIAL:
-      iLabelId = (iSubID <= 3) ? 19660 + iSubID : 19660;
+    case 0xa0:
+      iLabelId = (iSubID <= 12) ? 19660 + iSubID + 1 : 19660;
       break;
-    case EPG_EVENT_CONTENTMASK_USERDEFINED:
-      iLabelId = (iSubID <= 8) ? 19676 + iSubID : 19676;
+    case 0xb0:
+      iLabelId = (iSubID <= 6) ? 19676 + iSubID + 1 : 19676;
       break;
     default:
       break;
