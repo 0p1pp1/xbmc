@@ -1581,9 +1581,15 @@ if test "${USE_STATIC_FFMPEG}" = "1"; then
 fi
 
 if test "$FFMPEG_FOUND" != "true"; then
+  if test "${USE_STATIC_FFMPEG}" = "1"; then
+    PKG_CHECK_MODULES_STATIC([FFMPEG], [$FFMPEG_LIBNAMES],
+      [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"],
+      [AC_MSG_ERROR("ffmpeg not found")])
+  else
   PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_LIBNAMES],
     [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"], 
     [AC_MSG_ERROR("ffmpeg not found")])
+  fi
 fi
 
 if test "${USE_STATIC_FFMPEG}" = "1"; then

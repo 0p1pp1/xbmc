@@ -1,0 +1,161 @@
+From b8b2f460e0eaea1e3fd63532ecb6fe20e52b54cc Mon Sep 17 00:00:00 2001
+From: 0p1pp1 <0p1pp1@fms.freenet>
+Date: Sat, 26 Mar 2016 02:27:32 +0900
+Subject: [PATCH 5/5] mpegts: parse EIT and set metadata of audio streams
+
+Signed-off-by: 0p1pp1 <0p1pp1@fms.freenet>
+---
+ libavformat/mpegts.c | 102 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ libavformat/mpegts.h |   2 +
+ 2 files changed, 104 insertions(+)
+
+diff --git a/libavformat/mpegts.c b/libavformat/mpegts.c
+index 7fa01b0..72f533e 100644
+--- a/libavformat/mpegts.c
++++ b/libavformat/mpegts.c
+@@ -2286,6 +2286,106 @@ static void sdt_cb(MpegTSFilter *filter, const uint8_t *section, int section_len
+     }
+ }
+ 
++static void eit_cb(MpegTSFilter *filter, const uint8_t *section, int section_len)
++{
++    MpegTSContext *ts = filter->u.section_filter.opaque;
++    MpegTSSectionFilter *tssf = &filter->u.section_filter;
++    AVFormatContext *ac = ts->stream;
++    SectionHeader h1, *h = &h1;
++    const uint8_t *p, *p_end;
++    AVProgram *program;
++    int i, dlen;
++
++    p_end = section + section_len - 4;
++    p     = section;
++    if (parse_section_header(h, &p, p_end) < 0)
++        return;
++    if (h->tid != EIT_TID || h->sec_num != 0)
++        return;
++    if (ts->skip_changes)
++        return;
++    if (skip_identical(h, tssf))
++        return;
++    if (!h->current)
++        return;
++
++    program = NULL;
++    for (i = 0; i < ac->nb_programs; i++)
++        if (ac->programs[i]->id == h->id)
++            program = ac->programs[i];
++    if (!program || program->nb_stream_indexes <= 0)
++        return;
++
++    av_dlog(ts->stream, "EIT:\n");
++    hex_dump_debug(ts->stream, section, section_len);
++
++    if (p + 6 + 12 > p_end)
++        return;
++    p += 6 + 10;
++    dlen = get16(&p, p_end) & 0x0fff;
++    if (p + dlen > p_end)
++        return;
++    p_end = p + dlen;
++    for (;;) {
++        int desc_tag, desc_len;
++
++        desc_tag = get8(&p, p_end);
++        if (desc_tag < 0)
++            break;
++        desc_len = get8(&p, p_end);
++        if (desc_len < 0 || p + desc_len > p_end)
++            break;
++
++        av_dlog(ts->stream, "tag: 0x%02x len=%d\n", desc_tag, desc_len);
++        switch (desc_tag) {
++        case 0xc4:  /* audio component descriptor */
++            {
++                int comp_tag;
++                AVStream *stream;
++                int is_dmono, is_multi;
++                char lang[4];
++
++                comp_tag = p[2];
++
++                for (i = 0; i < program->nb_stream_indexes; i++) {
++                    int idx = program->stream_index[i];
++
++                    if (idx < 0 || idx > ac->nb_streams)
++                        continue;
++
++                    stream = ac->streams[idx];
++                    if (stream && stream->stream_identifier == comp_tag + 1)
++                        break;
++                }
++                if (i == program->nb_stream_indexes)
++                    break;
++
++                is_dmono = (p[1] == 0x02);
++                is_multi = !!(p[5] & 0x80);
++                memcpy(lang, p + 6, 3);
++                lang[3] = '\0';
++                av_dict_set(&stream->metadata, "language", lang, 0);
++                av_dict_set_int(&stream->metadata, "isdmono", is_dmono, 0);
++
++                av_log(ts->stream, AV_LOG_VERBOSE,
++                       "prog:%d audio[pid: 0x%04x tag: 0x%02x](%s) dmono:%d\n",
++                       program->id, stream->id, comp_tag, lang, is_dmono);
++
++                if (is_multi) {
++                    memcpy(lang, p + 9, 3);
++                    lang[3] = '\0';
++                } else
++                    lang[0] = '\0';
++                av_dict_set(&stream->metadata, "language2", lang, 0);
++            }
++            break;
++        default:
++            break;
++        }
++        p += desc_len;
++    }
++}
++
+ static int parse_pcr(int64_t *ppcr_high, int *ppcr_low,
+                      const uint8_t *packet);
+ 
+@@ -2698,6 +2798,7 @@ static int mpegts_read_header(AVFormatContext *s)
+         mpegts_open_section_filter(ts, PAT_PID, pat_cb, ts, 1);
+ 
+         handle_packets(ts, probesize / ts->raw_packet_size);
++        mpegts_open_section_filter(ts, EIT_PID, eit_cb, ts, 1);
+         /* if could not find service, enable auto_guess */
+ 
+         if (ts->progid <= 0) {
+@@ -2945,6 +3046,7 @@ MpegTSContext *avpriv_mpegts_parse_open(AVFormatContext *s)
+     ts->auto_guess = 1;
+     mpegts_open_section_filter(ts, SDT_PID, sdt_cb, ts, 1);
+     mpegts_open_section_filter(ts, PAT_PID, pat_cb, ts, 1);
++    mpegts_open_section_filter(ts, EIT_PID, eit_cb, ts, 1);
+ 
+     return ts;
+ }
+diff --git a/libavformat/mpegts.h b/libavformat/mpegts.h
+index b2e0376..02ef475 100644
+--- a/libavformat/mpegts.h
++++ b/libavformat/mpegts.h
+@@ -35,6 +35,7 @@
+ /* pids */
+ #define PAT_PID                 0x0000
+ #define SDT_PID                 0x0011
++#define EIT_PID                 0x0012
+ 
+ /* table ids */
+ #define PAT_TID   0x00
+@@ -41,6 +42,7 @@
+ #define PMT_TID   0x02
+ #define M4OD_TID  0x05
+ #define SDT_TID   0x42
++#define EIT_TID   0x4e
+ 
+ #define STREAM_TYPE_VIDEO_MPEG1     0x01
+ #define STREAM_TYPE_VIDEO_MPEG2     0x02
+-- 
+2.8.0
+

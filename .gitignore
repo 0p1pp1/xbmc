@@ -346,7 +346,7 @@ lib/cpluff/stamp-h1
 /tools/depends/native/TexturePacker/bin/
 /tools/depends/target/ffmpeg/.ffmpeg-installed
 /tools/depends/target/ffmpeg/ffmpeg-*-*.tar.gz
-/tools/depends/target/ffmpeg/ffmpeg-*-*/
+/tools/depends/target/ffmpeg/ffmpeg-*/
 /tools/depends/target/ffmpeg/ffmpeg-install/
 /tools/depends/target/Toolchain_binaddons.cmake
 /tools/depends/target/config-binaddons.site

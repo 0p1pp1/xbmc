@@ -1,0 +1,29 @@
+From f42d773f363edcf99f958d8a36e807021bc14ab1 Mon Sep 17 00:00:00 2001
+From: 0p1pp1 <0p1pp1@fms.freenet>
+Date: Tue, 29 Mar 2016 19:06:05 +0900
+Subject: [PATCH 1/5] aacdec: improve switching to dual mono
+
+Signed-off-by: 0p1pp1 <0p1pp1@fms.freenet>
+---
+ libavcodec/aacdec_template.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/libavcodec/aacdec_template.c b/libavcodec/aacdec_template.c
+index fb1ce2c..8d4d82c 100644
+--- a/libavcodec/aacdec_template.c
++++ b/libavcodec/aacdec_template.c
+@@ -2803,7 +2803,10 @@ static int parse_adts_frame_header(AACContext *ac, GetBitContext *gb)
+              * WITHOUT specifying PCE.
+              *  thus, set dual mono as default.
+              */
+-            if (ac->dmono_mode && ac->oc[0].status == OC_NONE) {
++            if (ac->dmono_mode
++                && !(ac->oc[0].status != OC_NONE
++                     && ac->oc[0].m4ac.chan_config == 0
++                     && ac->oc[0].channel_layout == (AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT))) {
+                 layout_map_tags = 2;
+                 layout_map[0][0] = layout_map[1][0] = TYPE_SCE;
+                 layout_map[0][2] = layout_map[1][2] = AAC_CHANNEL_FRONT;
+-- 
+2.8.0
+
