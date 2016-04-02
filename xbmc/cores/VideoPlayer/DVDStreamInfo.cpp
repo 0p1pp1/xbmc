@@ -69,6 +69,8 @@ void CDVDStreamInfo::Clear()
   bitrate    = 0;
   bitspersample = 0;
   channellayout = 0;
+  is_dmono   = false;
+  dmono_mode = 0;
 
   orientation = 0;
 }
@@ -146,6 +148,7 @@ bool CDVDStreamInfo::Equal(const CDVDStreamInfo& right, int compare)
 
   // AUDIO
   if( channels      != right.channels
+  ||  is_dmono      != right.is_dmono
   ||  samplerate    != right.samplerate
   ||  blockalign    != right.blockalign
   ||  bitrate       != right.bitrate
@@ -234,6 +237,8 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
   bitrate       = right.bitrate;
   bitspersample = right.bitspersample;
   channellayout = right.channellayout;
+  is_dmono      = right.is_dmono;
+  dmono_mode    = right.dmono_mode;
 
   // SUBTITLE
 }
@@ -272,6 +277,8 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
     bitrate       = stream->iBitRate;
     bitspersample = stream->iBitsPerSample;
     channellayout = stream->iChannelLayout;
+    is_dmono      = stream->bIsDmono;
+    dmono_mode    = stream->iDmonoMode;
   }
   else if (right.type == STREAM_VIDEO)
   {

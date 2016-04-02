@@ -589,6 +589,12 @@ void CVideoPlayerAudio::SetSpeed(int speed)
     m_speed = speed;
 }
 
+void CVideoPlayerAudio::SetDmonoMode(int mode)
+{
+  if (m_pAudioCodec)
+    m_pAudioCodec->SetDmonoMode(mode);
+}
+
 void CVideoPlayerAudio::Flush(bool sync)
 {
   m_messageQueue.Flush();

@@ -79,6 +79,11 @@ public:
   virtual void Reset() = 0;
 
   /*
+   * set dualmono mode
+   */
+  virtual void SetDmonoMode(int mode) {}
+
+  /*
    * returns the format for the audio stream
    */
   virtual AEAudioFormat GetFormat() = 0;
