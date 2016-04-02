@@ -1043,18 +1043,38 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const std::string &method, ITra
       if (g_application.GetAppPlayer().HasPlayer())
       {
         int index = -1;
+        EDMONOMODE mode = DMONO_LEFT;
         if (parameterObject["stream"].isString())
         {
+          AudioStreamInfo info;
+          int cur = g_application.GetAppPlayer().GetAudioStream();
+          if (cur >= 0)
+            g_application.GetAppPlayer().GetAudioStreamInfo(cur, info);
+
           std::string action = parameterObject["stream"].asString();
           if (action.compare("previous") == 0)
           {
-            index = g_application.GetAppPlayer().GetAudioStream() - 1;
+            if (info.is_dmono && info.dmono_mode != EDMONOMODE::DMONO_LEFT)
+            {
+              g_application.GetAppPlayer().SetAudioDmonoMode(EDMONOMODE::DMONO_LEFT);
+              return ACK;
+            }
+            mode = EDMONOMODE::DMONO_RIGHT;
+
+            index = cur - 1;
             if (index < 0)
               index = g_application.GetAppPlayer().GetAudioStreamCount() - 1;
           }
           else if (action.compare("next") == 0)
           {
-            index = g_application.GetAppPlayer().GetAudioStream() + 1;
+            if (info.is_dmono && info.dmono_mode == EDMONOMODE::DMONO_LEFT)
+            {
+              g_application.GetAppPlayer().SetAudioDmonoMode(EDMONOMODE::DMONO_RIGHT);
+              return ACK;
+            }
+            mode = EDMONOMODE::DMONO_LEFT;
+
+            index = cur + 1;
             if (index >= g_application.GetAppPlayer().GetAudioStreamCount())
               index = 0;
           }
@@ -1068,6 +1088,7 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const std::string &method, ITra
           return InvalidParams;
 
         g_application.GetAppPlayer().SetAudioStream(index);
+        g_application.GetAppPlayer().SetAudioDmonoMode(mode);
       }
       else
         return FailedToExecute;

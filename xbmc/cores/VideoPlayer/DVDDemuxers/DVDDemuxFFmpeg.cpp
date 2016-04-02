@@ -1041,6 +1041,14 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         pPacket->dts = ConvertTimestamp(m_pkt.pkt.dts, stream->time_base.den, stream->time_base.num);
         pPacket->duration =  DVD_SEC_TO_TIME((double)m_pkt.pkt.duration * stream->time_base.num / stream->time_base.den);
 
+        if (stream->codecpar && stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+        {
+            uint8_t *side_data;
+            side_data = av_packet_new_side_data(&m_pkt.pkt, AV_PKT_DATA_JP_DUALMONO, 1);
+            if (side_data)
+              *side_data = 0;
+        }
+
         CDVDDemuxUtils::StoreSideData(pPacket, &m_pkt.pkt);
 
         CDVDInputStream::IDisplayTime *inputStream = m_pInput->GetIDisplayTime();
@@ -1100,6 +1108,31 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
       {
         // content has changed
         stream = AddStream(pPacket->iStreamId);
+      }
+      else
+      {
+        AVStream *avst = static_cast<AVStream*>(stream->pPrivate);
+        AVDictionaryEntry *e;
+        int is_dmono;
+
+        e = av_dict_get(avst->metadata, "isdmono", NULL, 0);
+        is_dmono = (e && std::strtol(e->value, NULL, 0) != 0);
+        if (((CDemuxStreamAudio*)stream)->bIsDmono != is_dmono)
+        {
+          AVDictionaryEntry *e2;
+
+          ((CDemuxStreamAudio*)stream)->bIsDmono = is_dmono;
+          e2 = av_dict_get(avst->metadata, "language", NULL, 0);
+          if (e2)
+            stream->language = std::string(e2->value, 3);
+          else
+            stream->language = "";
+          e2 = av_dict_get(avst->metadata, "language2", NULL, 0);
+          if (e2)
+            ((CDemuxStreamAudio*)stream)->sublang = std::string(e2->value, 3);
+          else
+            ((CDemuxStreamAudio*)stream)->sublang = "";
+        }
       }
     }
     else if (stream->type == STREAM_VIDEO)
@@ -1500,6 +1533,13 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
 
         if(av_dict_get(pStream->metadata, "title", NULL, 0))
           st->m_description = av_dict_get(pStream->metadata, "title", NULL, 0)->value;
+
+        if(av_dict_get(pStream->metadata, "isdmono", NULL, 0))
+          st->bIsDmono = std::strtol(av_dict_get(pStream->metadata, "isdmono", NULL, 0)->value, NULL, 0) != 0;
+        if(av_dict_get(pStream->metadata, "language2", NULL, 0))
+          st->sublang = std::string(av_dict_get(pStream->metadata, "language2", NULL, 0)->value, 3);
+        if (st->bIsDmono)
+          st->m_channelLayoutName = "dual-mono";
 
         break;
       }
@@ -1944,10 +1984,10 @@ bool CDVDDemuxFFmpeg::IsProgramChange()
     return true;
   }
 
-  if (m_pFormatContext->programs[m_program]->nb_stream_indexes != m_streamsInProgram)
+  if (m_program >= m_pFormatContext->nb_programs)
     return true;
 
-  if (m_program >= m_pFormatContext->nb_programs)
+  if (m_pFormatContext->programs[m_program]->nb_stream_indexes != m_streams.size())
     return true;
 
   for (unsigned int i = 0; i < m_pFormatContext->programs[m_program]->nb_stream_indexes; i++)

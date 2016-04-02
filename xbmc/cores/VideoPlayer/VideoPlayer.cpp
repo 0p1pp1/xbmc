@@ -450,6 +450,8 @@ void CSelectionStreams::Update(std::shared_ptr<CDVDInputStream> input, CDVDDemux
       s.language = g_LangCodeExpander.ConvertToISO6392B(info.language);
       s.channels = info.channels;
       s.flags = info.flags;
+      s.is_dmono = info.is_dmono;
+      s.dmono_mode = info.dmono_mode;
       Update(s);
     }
 
@@ -530,7 +532,8 @@ void CSelectionStreams::Update(std::shared_ptr<CDVDInputStream> input, CDVDDemux
       if(stream->type == STREAM_AUDIO)
       {
         std::string type;
-        type = static_cast<CDemuxStreamAudio*>(stream)->GetStreamType();
+        CDemuxStreamAudio *ast = static_cast<CDemuxStreamAudio*>(stream);
+        type = ast->GetStreamType();
         if(type.length() > 0)
         {
           if(s.name.length() > 0)
@@ -539,6 +542,13 @@ void CSelectionStreams::Update(std::shared_ptr<CDVDInputStream> input, CDVDDemux
         }
         s.channels = static_cast<CDemuxStreamAudio*>(stream)->iChannels;
         s.bitrate = static_cast<CDemuxStreamAudio*>(stream)->iBitRate;
+        s.is_dmono = ast->bIsDmono;
+        s.dmono_mode = static_cast<EDMONOMODE>(ast->iDmonoMode);
+        if (s.is_dmono)
+        {
+          s.channels = 2;
+          s.language2 = g_LangCodeExpander.ConvertToISO6392T(ast->sublang);
+        }
       }
       Update(s);
     }
@@ -643,6 +653,7 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
   m_HasVideo = false;
   m_HasAudio = false;
   m_UpdateStreamDetails = false;
+  m_messenger.Init();
 
   memset(&m_SpeedState, 0, sizeof(m_SpeedState));
 
@@ -5137,6 +5148,8 @@ void CVideoPlayer::GetAudioStreamInfo(int index, AudioStreamInfo &info)
   SelectionStream& s = m_content.m_selectionStreams.Get(STREAM_AUDIO, index);
   if (s.language.length() > 0)
     info.language = s.language;
+  if(s.language2.length() > 0)
+    info.language2 = s.language2;
 
   if (s.name.length() > 0)
     info.name = s.name;
@@ -5149,6 +5162,8 @@ void CVideoPlayer::GetAudioStreamInfo(int index, AudioStreamInfo &info)
   info.channels = s.channels;
   info.codecName = s.codec;
   info.flags = s.flags;
+  info.is_dmono = s.is_dmono;
+  info.dmono_mode = s.dmono_mode;
 }
 
 int CVideoPlayer::GetAudioStreamCount()
@@ -5168,6 +5183,28 @@ void CVideoPlayer::SetAudioStream(int iStream)
   m_messenger.Put(new CDVDMsgPlayerSetAudioStream(iStream));
   m_processInfo->UpdateVideoSettings().SetAudioStream(iStream);
   SynchronizeDemuxer();
+}
+
+void CVideoPlayer::SetAudioDmonoMode(EDMONOMODE mode)
+{
+  int index = GetAudioStream();
+  if (index < 0 || index > GetAudioStreamCount() - 1 )
+    return;
+
+  {
+    CSingleLock lock(m_content.m_section);
+
+    SelectionStream& s = m_SelectionStreams.Get(STREAM_AUDIO, index);
+    s.dmono_mode = mode;
+  }
+  m_CurrentAudio.hint.dmono_mode = mode;
+
+  CDemuxStream* stream;
+  stream = m_pDemuxer->GetStream(m_CurrentAudio.demuxerId, m_CurrentAudio.id);
+  if (stream && stream->type == STREAM_AUDIO)
+    ((CDemuxStreamAudio*)stream)->iDmonoMode = mode;
+
+  m_VideoPlayerAudio->SetDmonoMode(mode);
 }
 
 void CVideoPlayer::GetSubtitleStreamInfo(int index, SubtitleStreamInfo &info)

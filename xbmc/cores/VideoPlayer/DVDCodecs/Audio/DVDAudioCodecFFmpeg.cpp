@@ -26,6 +26,7 @@ CDVDAudioCodecFFmpeg::CDVDAudioCodecFFmpeg(CProcessInfo &processInfo) : CDVDAudi
 
   m_channels = 0;
   m_layout = 0;
+  m_iDmonoMode = 0;
 
   m_pFrame = nullptr;
   m_iSampleFormat = AV_SAMPLE_FMT_NONE;
@@ -119,6 +120,8 @@ bool CDVDAudioCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
   m_matrixEncoding = AV_MATRIX_ENCODING_NONE;
   m_hasDownmix = false;
 
+  m_iDmonoMode = hints.dmono_mode;
+
   m_codecName = "ff-" + std::string(m_pCodecContext->codec->name);
 
   CLog::Log(LOGNOTICE,"CDVDAudioCodecFFmpeg::Open() Successful opened audio decoder %s", m_pCodecContext->codec->name);
@@ -150,6 +153,11 @@ bool CDVDAudioCodecFFmpeg::AddData(const DemuxPacket &packet)
   avpkt.pts = (packet.pts == DVD_NOPTS_VALUE) ? AV_NOPTS_VALUE : static_cast<int64_t>(packet.pts / DVD_TIME_BASE * AV_TIME_BASE);
   avpkt.side_data = static_cast<AVPacketSideData*>(packet.pSideData);
   avpkt.side_data_elems = packet.iSideDataElems;
+
+  uint8_t *sd;
+  sd = av_packet_get_side_data(&avpkt, AV_PKT_DATA_JP_DUALMONO, NULL);
+  if (sd)
+    *sd = static_cast<uint8_t>(m_iDmonoMode);
 
   int ret = avcodec_send_packet(m_pCodecContext, &avpkt);
 
@@ -211,6 +219,12 @@ void CDVDAudioCodecFFmpeg::GetData(DVDAudioFrame &frame)
   }
 }
 
+void CDVDAudioCodecFFmpeg::SetDmonoMode(int mode)
+{
+  if (mode >= 0 && mode <= 2)
+    m_iDmonoMode = mode;
+}
+
 int CDVDAudioCodecFFmpeg::GetData(uint8_t** dst)
 {
   int ret = avcodec_receive_frame(m_pCodecContext, m_pFrame);
@@ -257,6 +271,7 @@ void CDVDAudioCodecFFmpeg::Reset()
 {
   if (m_pCodecContext) avcodec_flush_buffers(m_pCodecContext);
   m_eof = false;
+  m_iDmonoMode = 0;
 }
 
 int CDVDAudioCodecFFmpeg::GetChannels()

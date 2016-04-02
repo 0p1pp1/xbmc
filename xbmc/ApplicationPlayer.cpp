@@ -661,6 +661,13 @@ void CApplicationPlayer::SetAudioStream(int iStream)
   }
 }
 
+void CApplicationPlayer::SetAudioDmonoMode(EDMONOMODE mode)
+{
+  std::shared_ptr<IPlayer> player = GetInternal();
+  if (player)
+    player->SetAudioDmonoMode(mode);
+}
+
 void CApplicationPlayer::GetSubtitleStreamInfo(int index, SubtitleStreamInfo &info)
 {
   std::shared_ptr<IPlayer> player = GetInternal();
