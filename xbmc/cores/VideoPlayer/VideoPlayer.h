@@ -176,6 +176,7 @@ typedef struct SelectionStream
   std::string  filename;
   std::string  filename2;  // for vobsub subtitles, 2 files are necessary (idx/sub)
   std::string  language;
+  std::string  language2;  // for dual-mono audio
   std::string  name;
   CDemuxStream::EFlags flags = CDemuxStream::FLAG_NONE;
   int          source = 0;
@@ -190,6 +191,8 @@ typedef struct SelectionStream
   CRect        DestRect;
   std::string  stereo_mode;
   float        aspect_ratio = 0.0f;
+  bool         is_dmono = false;
+  EDMONOMODE   dmono_mode = DMONO_LEFT;
 } SelectionStream;
 
 typedef std::vector<SelectionStream> SelectionStreams;
@@ -255,6 +258,7 @@ public:
   virtual void SetVolume(float nVolume)                         { m_VideoPlayerAudio->SetVolume(nVolume); }
   virtual void SetMute(bool bOnOff)                             { m_VideoPlayerAudio->SetMute(bOnOff); }
   virtual void SetDynamicRangeCompression(long drc)             { m_VideoPlayerAudio->SetDynamicRangeCompression(drc); }
+  virtual void SetAudioDmonoMode(EDMONOMODE mode);
   virtual bool CanRecord();
   virtual bool IsRecording();
   virtual bool CanPause();

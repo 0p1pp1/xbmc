@@ -167,6 +167,7 @@ public:
   void  SeekTime(int64_t iTime = 0);
   void  SeekTimeRelative(int64_t iTime = 0);
   void  SetAudioStream(int iStream);
+  void  SetAudioDmonoMode(EDMONOMODE mode);
   void  SetAVDelay(float fValue = 0.0f);
   void  SetDynamicRangeCompression(long drc);
   void  SetMute(bool bOnOff);

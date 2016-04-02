@@ -861,6 +861,25 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         // content has changed
         stream = AddStream(pPacket->iStreamId);
       }
+      else
+      {
+        AVStream *avst = static_cast<AVStream*>(stream->pPrivate);
+        AVDictionaryEntry *e;
+        int is_dmono;
+
+        e = av_dict_get(avst->metadata, "isdmono", NULL, 0);
+        is_dmono = (e && std::strtol(e->value, NULL, 0) != 0);
+        if (((CDemuxStreamAudio*)stream)->bIsDmono != is_dmono)
+        {
+          AVDictionaryEntry *e2;
+
+          ((CDemuxStreamAudio*)stream)->bIsDmono = is_dmono;
+          e2 = av_dict_get(avst->metadata, "language", NULL, 0);
+          strncpy(stream->language, e2 ? e2->value : "", 3);
+          e2 = av_dict_get(avst->metadata, "language2", NULL, 0);
+          strncpy(((CDemuxStreamAudio*)stream)->sublang, e2 ? e2->value : "", 3);
+        }
+      }
     }
     else if (stream->type == STREAM_VIDEO)
     {
@@ -1122,6 +1141,11 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
 	
         if(av_dict_get(pStream->metadata, "title", NULL, 0))
           st->m_description = av_dict_get(pStream->metadata, "title", NULL, 0)->value;
+
+        if(av_dict_get(pStream->metadata, "isdmono", NULL, 0))
+          st->bIsDmono = std::strtol(av_dict_get(pStream->metadata, "isdmono", NULL, 0)->value, NULL, 0) != 0;
+        if(av_dict_get(pStream->metadata, "language2", NULL, 0))
+          strncpy(st->sublang, av_dict_get(pStream->metadata, "language2", NULL, 0)->value, 3);
 
         break;
       }
@@ -1546,10 +1570,10 @@ bool CDVDDemuxFFmpeg::IsProgramChange()
   if (m_program == 0 && !m_pFormatContext->nb_programs)
     return false;
 
-  if(m_pFormatContext->programs[m_program]->nb_stream_indexes != m_streams.size())
+  if (m_program >= m_pFormatContext->nb_programs)
     return true;
 
-  if (m_program >= m_pFormatContext->nb_programs)
+  if(m_pFormatContext->programs[m_program]->nb_stream_indexes != m_streams.size())
     return true;
 
   for (unsigned int i = 0; i < m_pFormatContext->programs[m_program]->nb_stream_indexes; i++)

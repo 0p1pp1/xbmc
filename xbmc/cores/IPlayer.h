@@ -82,6 +82,13 @@ enum IPlayerSubtitleCapabilities
   IPC_SUBS_OFFSET
 };
 
+enum EDMONOMODE
+{
+  DMONO_LEFT,
+  DMONO_RIGHT,
+  DMONO_BOTH
+};
+
 struct SPlayerAudioStreamInfo
 {
   int bitrate;
@@ -89,8 +96,11 @@ struct SPlayerAudioStreamInfo
   int samplerate;
   int bitspersample;
   std::string language;
+  std::string language2;
   std::string name;
   std::string audioCodecName;
+  bool is_dmono;
+  EDMONOMODE dmono_mode;
 
   SPlayerAudioStreamInfo()
   {
@@ -98,6 +108,7 @@ struct SPlayerAudioStreamInfo
     channels = 0;
     samplerate = 0;
     bitspersample = 0;
+    is_dmono = false;
   }
 };
 
@@ -284,6 +295,7 @@ public:
   virtual int  GetAudioStream()       { return -1; }
   virtual void SetAudioStream(int iStream){};
   virtual void GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info){};
+  virtual void SetAudioDmonoMode(EDMONOMODE mode){}
 
   virtual int GetVideoStream() const { return -1; }
   virtual int GetVideoStreamCount() const { return 0; }

@@ -42,7 +42,8 @@ CDVDAudioCodecFFmpeg::CDVDAudioCodecFFmpeg() : CDVDAudioCodec()
 
   m_channels = 0;
   m_layout = 0;
-  
+  m_iDmonoMode = 0;
+
   m_pFrame1 = NULL;
   m_iSampleFormat = AV_SAMPLE_FMT_NONE;
   m_gotFrame = 0;
@@ -119,7 +120,7 @@ bool CDVDAudioCodecFFmpeg::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options
   m_bOpenedCodec = true;
   m_iSampleFormat = AV_SAMPLE_FMT_NONE;
   m_matrixEncoding = AV_MATRIX_ENCODING_NONE;
-
+  m_iDmonoMode = hints.dmono_mode;
   return true;
 }
 
@@ -145,6 +146,12 @@ int CDVDAudioCodecFFmpeg::Decode(uint8_t* pData, int iSize, double dts, double p
 
   AVPacket avpkt;
   av_init_packet(&avpkt);
+
+  uint8_t *side_data;
+  side_data = av_packet_new_side_data(&avpkt, AV_PKT_DATA_JP_DUALMONO, 1);
+  if (side_data)
+    *side_data = static_cast<uint8_t>(m_iDmonoMode);
+
   avpkt.data = pData;
   avpkt.size = iSize;
   avpkt.dts = (dts == DVD_NOPTS_VALUE) ? AV_NOPTS_VALUE : dts / DVD_TIME_BASE * AV_TIME_BASE;
@@ -153,6 +160,7 @@ int CDVDAudioCodecFFmpeg::Decode(uint8_t* pData, int iSize, double dts, double p
                                                  , m_pFrame1
                                                  , &m_gotFrame
                                                  , &avpkt);
+  av_packet_free_side_data(&avpkt);
   if (iBytesUsed < 0 || !m_gotFrame)
   {
     return iBytesUsed;
@@ -216,6 +224,12 @@ void CDVDAudioCodecFFmpeg::GetData(DVDAudioFrame &frame)
     frame.pts = DVD_NOPTS_VALUE;
 }
 
+void CDVDAudioCodecFFmpeg::SetDmonoMode(int mode)
+{
+  if (mode >= 0 && mode <= 2)
+    m_iDmonoMode = mode;
+}
+
 int CDVDAudioCodecFFmpeg::GetData(uint8_t** dst)
 {
   if(m_gotFrame)
@@ -234,6 +248,7 @@ void CDVDAudioCodecFFmpeg::Reset()
 {
   if (m_pCodecContext) avcodec_flush_buffers(m_pCodecContext);
   m_gotFrame = 0;
+  m_iDmonoMode = 0;
 }
 
 int CDVDAudioCodecFFmpeg::GetChannels()

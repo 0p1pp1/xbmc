@@ -45,6 +45,7 @@ public:
   virtual enum AVMatrixEncoding GetMatrixEncoding();
   virtual enum AVAudioServiceType GetAudioServiceType();
   virtual int GetProfile();
+  virtual void SetDmonoMode(int mode);
 
 protected:
   enum AEDataFormat GetDataFormat();
@@ -65,6 +66,7 @@ protected:
   bool m_bOpenedCodec;
   int m_channels;
   uint64_t m_layout;
+  int m_iDmonoMode;
 
   void BuildChannelMap();
   void ConvertToFloat();

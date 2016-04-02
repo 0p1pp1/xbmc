@@ -25,6 +25,7 @@ std::string CDemuxStreamAudio::GetStreamType()
   char sInfo[64] = {0};
 
   if (codec == AV_CODEC_ID_AC3) strcpy(sInfo, "AC3 ");
+  else if (codec == AV_CODEC_ID_AAC) strcpy(sInfo, "AAC ");
   else if (codec == AV_CODEC_ID_DTS)
   {
 #ifdef FF_PROFILE_DTS_HD_MA
@@ -41,6 +42,7 @@ std::string CDemuxStreamAudio::GetStreamType()
   else strcpy(sInfo, "");
 
   if (iChannels == 1) strcat(sInfo, "Mono");
+  else if (bIsDmono) strcat(sInfo, "Dual Mono");
   else if (iChannels == 2) strcat(sInfo, "Stereo");
   else if (iChannels == 6) strcat(sInfo, "5.1");
   else if (iChannels == 8) strcat(sInfo, "7.1");

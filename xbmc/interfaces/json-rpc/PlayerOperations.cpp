@@ -921,18 +921,38 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const std::string &method, ITra
       if (g_application.m_pPlayer->HasPlayer())
       {
         int index = -1;
+        EDMONOMODE mode = DMONO_LEFT;
         if (parameterObject["stream"].isString())
         {
+          SPlayerAudioStreamInfo info;
+          int cur = g_application.m_pPlayer->GetAudioStream();
+          if (cur >= 0)
+            g_application.m_pPlayer->GetAudioStreamInfo(cur, info);
+
           std::string action = parameterObject["stream"].asString();
           if (action.compare("previous") == 0)
           {
-            index = g_application.m_pPlayer->GetAudioStream() - 1;
+            if (info.is_dmono && info.dmono_mode != DMONO_LEFT)
+            {
+              g_application.m_pPlayer->SetAudioDmonoMode(DMONO_LEFT);
+              return ACK;
+            }
+            mode = DMONO_RIGHT;
+
+            index = cur - 1;
             if (index < 0)
               index = g_application.m_pPlayer->GetAudioStreamCount() - 1;
           }
           else if (action.compare("next") == 0)
           {
-            index = g_application.m_pPlayer->GetAudioStream() + 1;
+            if (info.is_dmono && info.dmono_mode == DMONO_LEFT)
+            {
+              g_application.m_pPlayer->SetAudioDmonoMode(DMONO_RIGHT);
+              return ACK;
+            }
+            mode = DMONO_LEFT;
+
+            index = cur + 1;
             if (index >= g_application.m_pPlayer->GetAudioStreamCount())
               index = 0;
           }
@@ -946,6 +966,7 @@ JSONRPC_STATUS CPlayerOperations::SetAudioStream(const std::string &method, ITra
           return InvalidParams;
 
         g_application.m_pPlayer->SetAudioStream(index);
+        g_application.m_pPlayer->SetAudioDmonoMode(mode);
       }
       else
         return FailedToExecute;

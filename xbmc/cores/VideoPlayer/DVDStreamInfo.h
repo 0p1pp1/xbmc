@@ -83,6 +83,8 @@ public:
   int blockalign;
   int bitspersample;
   uint64_t channellayout;
+  bool is_dmono;
+  int dmono_mode;
 
   // SUBTITLE
 

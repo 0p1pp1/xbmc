@@ -532,6 +532,7 @@ void CSelectionStreams::Update(CDVDInputStream* input, CDVDDemux* demuxer, std::
       if(stream->type == STREAM_AUDIO)
       {
         std::string type;
+        CDemuxStreamAudio *ast = static_cast<CDemuxStreamAudio*>(stream);
         type = ((CDemuxStreamAudio*)stream)->GetStreamType();
         if(type.length() > 0)
         {
@@ -540,6 +541,13 @@ void CSelectionStreams::Update(CDVDInputStream* input, CDVDDemux* demuxer, std::
           s.name += type;
         }
         s.channels = ((CDemuxStreamAudio*)stream)->iChannels;
+        s.is_dmono = ast->bIsDmono;
+        s.dmono_mode = static_cast<EDMONOMODE>(ast->iDmonoMode);
+        if (s.is_dmono)
+        {
+          s.channels = 2;
+          s.language2 = g_LangCodeExpander.ConvertToISO6392T(ast->sublang);
+        }
       }
       Update(s);
     }
@@ -640,6 +648,7 @@ CVideoPlayer::CVideoPlayer(IPlayerCallback& callback)
   m_caching = CACHESTATE_DONE;
   m_HasVideo = false;
   m_HasAudio = false;
+  m_messenger.Init();
 
   memset(&m_SpeedState, 0, sizeof(m_SpeedState));
 
@@ -3271,6 +3280,11 @@ void CVideoPlayer::UpdateStreamInfos()
     CDemuxStream* stream = m_pDemuxer->GetStream(m_CurrentAudio.demuxerId, m_CurrentAudio.id);
     if (stream && stream->type == STREAM_AUDIO)
     {
+      CDemuxStreamAudio* ast = static_cast<CDemuxStreamAudio*>(stream);
+      s.is_dmono = ast->bIsDmono;
+      s.dmono_mode = static_cast<EDMONOMODE>(ast->iDmonoMode);
+      s.language = g_LangCodeExpander.ConvertToISO6392T(stream->language);
+      s.language2 = g_LangCodeExpander.ConvertToISO6392T(ast->sublang);
       s.codec = m_pDemuxer->GetStreamCodecName(stream->demuxerId, stream->uniqueId);
     }
   }
@@ -4550,6 +4564,8 @@ void CVideoPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
   SelectionStream& s = m_SelectionStreams.Get(STREAM_AUDIO, index);
   if(s.language.length() > 0)
     info.language = s.language;
+  if(s.language2.length() > 0)
+    info.language2 = s.language2;
 
   if(s.name.length() > 0)
     info.name = s.name;
@@ -4560,6 +4576,30 @@ void CVideoPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
   info.bitrate = s.bitrate;
   info.channels = s.channels;
   info.audioCodecName = s.codec;
+  info.is_dmono = s.is_dmono;
+  info.dmono_mode = s.dmono_mode;
+}
+
+void CVideoPlayer::SetAudioDmonoMode(EDMONOMODE mode)
+{
+  {
+    CSingleLock lock(m_SelectionStreams.m_section);
+
+    int index = GetAudioStream();
+    if (index < 0 || index > GetAudioStreamCount() - 1 )
+      return;
+
+    SelectionStream& s = m_SelectionStreams.Get(STREAM_AUDIO, index);
+    s.dmono_mode = mode;
+  }
+  m_CurrentAudio.hint.dmono_mode = mode;
+
+  CDemuxStream* stream;
+  stream = m_pDemuxer->GetStream(m_CurrentAudio.demuxerId, m_CurrentAudio.id);
+  if (stream && stream->type == STREAM_AUDIO)
+    ((CDemuxStreamAudio*)stream)->iDmonoMode = mode;
+
+  m_VideoPlayerAudio->SetDmonoMode(mode);
 }
 
 int CVideoPlayer::AddSubtitleFile(const std::string& filename, const std::string& subfilename)

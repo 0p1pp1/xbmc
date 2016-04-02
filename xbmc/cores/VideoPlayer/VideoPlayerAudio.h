@@ -58,6 +58,7 @@ public:
 
   void SetVolume(float fVolume)                         { m_dvdAudio.SetVolume(fVolume); }
   void SetMute(bool bOnOff)                             { }
+  void SetDmonoMode(int mode);
   void SetDynamicRangeCompression(long drc)             { m_dvdAudio.SetDynamicRangeCompression(drc); }
   float GetDynamicRangeAmplification() const            { return 0.0f; }
 

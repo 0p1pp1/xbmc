@@ -188,6 +188,9 @@ public:
     iBitRate = 0;
     iBitsPerSample = 0;
     iChannelLayout = 0;
+    memset(sublang, 0, sizeof(sublang));
+    bIsDmono = false;
+    iDmonoMode = 0;
     type = STREAM_AUDIO;
   }
 
@@ -201,6 +204,9 @@ public:
   int iBitRate;
   int iBitsPerSample;
   uint64_t iChannelLayout;
+  char sublang[4];
+  bool bIsDmono;
+  int iDmonoMode;
 };
 
 class CDemuxStreamSubtitle : public CDemuxStream
