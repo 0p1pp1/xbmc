@@ -42,11 +42,21 @@ protected:
   virtual ~StreamInfo() = default;
 };
 
+enum EDMONOMODE
+{
+  DMONO_LEFT,
+  DMONO_RIGHT,
+  DMONO_BOTH
+};
+
 struct AudioStreamInfo : StreamInfo
 {
   int channels = 0;
   int samplerate = 0;
   int bitspersample = 0;
+  std::string language2;
+  bool is_dmono = false;
+  EDMONOMODE dmono_mode = EDMONOMODE::DMONO_LEFT;
 };
 
 struct SubtitleStreamInfo : StreamInfo

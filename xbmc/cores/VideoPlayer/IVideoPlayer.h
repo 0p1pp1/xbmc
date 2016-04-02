@@ -114,6 +114,7 @@ public:
   void SendMessage(CDVDMsg* pMsg, int priority = 0) override = 0;
   virtual void SetVolume(float fVolume) {};
   virtual void SetMute(bool bOnOff) {};
+  virtual void SetDmonoMode(int mode) {};
   virtual void SetDynamicRangeCompression(long drc) = 0;
   virtual std::string GetPlayerInfo() = 0;
   virtual int GetAudioChannels() = 0;

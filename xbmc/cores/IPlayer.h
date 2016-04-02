@@ -132,6 +132,7 @@ public:
   virtual int  GetAudioStream()       { return -1; }
   virtual void SetAudioStream(int iStream){};
   virtual void GetAudioStreamInfo(int index, AudioStreamInfo &info){};
+  virtual void SetAudioDmonoMode(EDMONOMODE mode){}
 
   virtual int GetVideoStream() const { return -1; }
   virtual int GetVideoStreamCount() const { return 0; }
