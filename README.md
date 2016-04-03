@@ -21,6 +21,12 @@
   <a href="http://jenkins.kodi.tv/"><img alt="Build" src="https://img.shields.io/badge/CI-jenkins-brightgreen.svg?style=flat-square"></a>
   <a href="https://github.com/xbmc/xbmc/commits/master"><img alt="Commits" src="https://img.shields.io/github/commits-since/xbmc/xbmc/latest.svg?style=flat-square"></a>
 </p>
+## ISDB向けパッチ概要
+
+- デュアルモノ音声対応
+- EPGジャンルのISDB対応
+
+tvheadendの[ISDBパッチ版] (https://github.com/0p1pp1/tvheadend.git) と組み合わせて使用することを想定。
 
 <h1 align="center">
   Welcome to Kodi Home Theater Software!
