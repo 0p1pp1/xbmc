@@ -3,6 +3,13 @@
 ![Kodi logo](https://raw.githubusercontent.com/xbmc/xbmc-forum/master/xbmc/images/logo-sbs-black.png)
 # Kodi Home Theater Software
 
+## ISDB向けパッチ概要
+
+- デュアルモノ音声対応
+- EPGジャンルのISDB対応
+
+tvheadendの[ISDBパッチ版] (https://github.com/0p1pp1/tvheadend.git) と組み合わせて使用することを想定。
+
 **Welcome to Kodi!**
 
 Kodi is an award-winning free and open source (GPL) software media player and
