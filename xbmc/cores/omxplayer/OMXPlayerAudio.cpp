@@ -87,7 +87,7 @@ OMXPlayerAudio::OMXPlayerAudio(OMXClock *av_clock, CDVDMessageQueue& parent, CPr
   m_messageQueue.SetMaxTimeSize(8.0);
   m_passthrough = false;
   m_silence = false;
-  m_flush = false;  
+  m_flush = false;
 }
 
 
@@ -270,7 +270,7 @@ bool OMXPlayerAudio::Decode(DemuxPacket *pkt, bool bDropPacket, bool bTrickPlay)
           Sleep(10);
           continue;
         }
-        
+
         if(!bDropPacket)
         {
           // Zero out the frame data if we are supposed to silence the audio
@@ -309,7 +309,7 @@ bool OMXPlayerAudio::Decode(DemuxPacket *pkt, bool bDropPacket, bool bTrickPlay)
         Sleep(10);
         continue;
       }
-        
+
       if(!bDropPacket)
       {
         if(m_silence)
@@ -571,7 +571,7 @@ bool OMXPlayerAudio::OpenDecoder()
 
   m_codec_name = "";
   m_bad_state  = !bAudioRenderOpen;
-  
+
   if(!bAudioRenderOpen)
   {
     CLog::Log(LOGERROR, "OMXPlayerAudio : Error open audio output");
@@ -626,6 +626,12 @@ void OMXPlayerAudio::SetSpeed(int speed)
     m_messageQueue.Put( new CDVDMsgInt(CDVDMsg::PLAYER_SETSPEED, speed), 1 );
   else
     m_speed = speed;
+}
+
+void OMXPlayerAudio::SetDmonoMode(int mode)
+{
+  if (m_pAudioCodec)
+    m_pAudioCodec->SetDmonoMode(mode);
 }
 
 int OMXPlayerAudio::GetAudioBitrate()

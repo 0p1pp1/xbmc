@@ -44,6 +44,7 @@ COMXAudioCodecOMX::COMXAudioCodecOMX()
   m_bOpenedCodec = false;
 
   m_channels = 0;
+  m_iDmonoMode = 0;
   m_pFrame1 = NULL;
   m_frameSize = 0;
   m_bGotFrame = false;
@@ -89,6 +90,7 @@ bool COMXAudioCodecOMX::Open(CDVDStreamInfo &hints)
     m_pCodecContext->flags |= CODEC_FLAG_TRUNCATED;
 
   m_channels = 0;
+  m_iDmonoMode = hints.dmono_mode;
   m_pCodecContext->channels = hints.channels;
   m_pCodecContext->sample_rate = hints.samplerate;
   m_pCodecContext->block_align = hints.blockalign;
@@ -158,12 +160,19 @@ int COMXAudioCodecOMX::Decode(BYTE* pData, int iSize, double dts, double pts)
   if (m_bGotFrame)
     return 0;
   av_init_packet(&avpkt);
+
+  uint8_t *side_data;
+  side_data = av_packet_new_side_data(&avpkt, AV_PKT_DATA_JP_DUALMONO, 1);
+  if (side_data)
+    *side_data = static_cast<uint8_t>(m_iDmonoMode);
+
   avpkt.data = pData;
   avpkt.size = iSize;
   iBytesUsed = avcodec_decode_audio4( m_pCodecContext
                                                  , m_pFrame1
                                                  , &got_frame
                                                  , &avpkt);
+  av_packet_free_side_data(&avpkt);
   if (iBytesUsed < 0 || !got_frame)
   {
     return iBytesUsed;
@@ -242,9 +251,9 @@ int COMXAudioCodecOMX::GetData(BYTE** dst, double &dts, double &pts)
     {
       m_iSampleFormat = m_pCodecContext->sample_fmt;
       m_pConvert = swr_alloc_set_opts(NULL,
-                      av_get_default_channel_layout(m_pCodecContext->channels), 
+                      av_get_default_channel_layout(m_pCodecContext->channels),
                       m_desiredSampleFormat, m_pCodecContext->sample_rate,
-                      av_get_default_channel_layout(m_pCodecContext->channels), 
+                      av_get_default_channel_layout(m_pCodecContext->channels),
                       m_pCodecContext->sample_fmt, m_pCodecContext->sample_rate,
                       0, NULL);
 
@@ -285,11 +294,18 @@ int COMXAudioCodecOMX::GetData(BYTE** dst, double &dts, double &pts)
   return 0;
 }
 
+void COMXAudioCodecOMX::SetDmonoMode(int mode)
+{
+  if (mode >= 0 && mode <= 2)
+    m_iDmonoMode = mode;
+}
+
 void COMXAudioCodecOMX::Reset()
 {
   if (m_pCodecContext) avcodec_flush_buffers(m_pCodecContext);
   m_bGotFrame = false;
   m_iBufferOutputUsed = 0;
+  m_iDmonoMode = 0;
 }
 
 int COMXAudioCodecOMX::GetChannels()

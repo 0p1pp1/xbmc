@@ -99,6 +99,7 @@ public:
 
   void SetVolume(float fVolume)                          { m_omxAudio.SetVolume(fVolume); }
   void SetMute(bool bOnOff)                              { m_omxAudio.SetMute(bOnOff); }
+  void SetDmonoMode(int mode);
   void SetDynamicRangeCompression(long drc)              { m_omxAudio.SetDynamicRangeCompression(drc); }
   float GetDynamicRangeAmplification() const             { return m_omxAudio.GetDynamicRangeAmplification(); }
   void SetSpeed(int iSpeed);
@@ -108,4 +109,3 @@ public:
 
   bool BadState() { return m_bad_state; }
 };
-

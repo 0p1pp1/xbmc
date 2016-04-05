@@ -50,6 +50,7 @@ public:
   static const char* GetName() { return "FFmpeg"; }
   int GetBitRate();
   unsigned int GetFrameSize() { return m_frameSize; }
+  void SetDmonoMode(int mode);
 
 protected:
   AVCodecContext* m_pCodecContext;
@@ -67,6 +68,7 @@ protected:
 
   int     m_channels;
   CAEChannelInfo m_channelLayout;
+  int  m_iDmonoMode;
   bool m_bFirstFrame;
   bool m_bGotFrame;
   bool m_bNoConcatenate;

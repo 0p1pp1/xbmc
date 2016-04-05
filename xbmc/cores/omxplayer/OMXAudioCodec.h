@@ -67,6 +67,11 @@ public:
   virtual void Reset() = 0;
 
   /*
+   * set dualmono mode
+   */
+  virtual void SetDmonoMode(int mode) {}
+ 
+  /*
    * returns the nr of channels for the decoded audio stream
    */
   virtual int GetChannels() = 0;
@@ -97,7 +102,7 @@ public:
   virtual uint32_t GetSyncWord() = 0;
 
   /*
-   * should return the average input bit rate 
+   * should return the average input bit rate
    */
   virtual int GetBitRate() { return 0; }
 
