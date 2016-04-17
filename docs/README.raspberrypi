@@ -39,26 +39,35 @@ build for the first Raspberry Pi, the commands have to be adapted to use
 
     $ cd xbmc/tools/depends
     $ ./bootstrap
-    PATH="$PATH:/opt/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin" \
-       ./configure --host=arm-linux-gnueabihf \
-       --prefix=/opt/xbmc-bcm/xbmc-dbg \
-       --with-toolchain=/usr/local/bcm-gcc/arm-bcm2708hardfp-linux-gnueabi/sysroot \
-       --with-firmware=/opt/bcm-rootfs \
-       --with-platform=raspberry-pi2 \
-       --build=i686-linux
+    $ ./configure CFLAGS=-isystem/opt/rpi/rootfs/usr/include \
+         CXXFLAGS=-isystem/opt/rpi/rootfs/usr/include \
+         CPPFLAGS=-isystem/opt/rpi/rootfs/usr/include \
+         LDFLAGS=--sysroot=/opt/rpi/rootfs \
+         -L/opt/rpi/rootfs/lib/arm-linux-gnueabihf \
+         -L/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf \
+         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/usr/lib \
+         --host=arm-linux-gnueabihf --prefix=/opt/rpi/kodi-bcm \
+         --with-toolchain=/opt/rpi/tools-master/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
+         --with-firmware=/opt/rpi/rootfs --with-platform=raspberry-pi
 
     $ make
     $ cd ../..
 
-    CONFIG_EXTRA="--with-platform=raspberry-pi2 \
-       --enable-libcec --enable-player=omxplayer \
-       --disable-x11 --disable-xrandr --disable-openmax \
-       --disable-optical-drive --disable-dvdcss --disable-joystick \
-       --disable-crystalhd --disable-vtbdecoder --disable-vaapi \
-       --disable-vdpau --enable-alsa" \
+    $ export CONFIG_EXTRA="--with-platform=raspberry-pi \
+       --enable-player=omxplayer --disable-x11 \
+       --disable-optical-drive --disable-gtest \
+       --disable-mysql --enable-alsa \
+       PKG_CONFIG_SYSROOT_DIR=/opt/rpi/rootfs \
+       CXXFLAGS=-D__STDC_LIMIT_MACROS=1"
     $ make -C tools/depends/target/xbmc
 
     $ make
+
+    $ make -C tools/depends/target/binary-addons ADDONS="pvr.hts"
+    $ make # (source is fetched and build fails)
+    $ (cd tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts && patch -p0 < ../../../pvr.hts.patch)
+    $ make
+
     $ sudo make install
 
 -----------------------------------------------------------------------------

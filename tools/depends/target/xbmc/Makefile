@@ -9,7 +9,7 @@ export CXXFLAGS+=-O3
 export CFLAGS+=-O3
 
 # configuration settings
-CONFIGURE = cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/ ;\
+CONFIGURE = cp -f $(CONFIG_SUB) $(CONFIG_GUESS) $(CONFIG_GUESS:config.guess=install-sh) $(CONFIG_GUESS:config.guess=compile) $(CONFIG_GUESS:config.guess=missing) build-aux/ ;\
   ./configure --prefix=$(PREFIX) $(DEBUG)
 
 ifeq ($(OS),android)
@@ -32,7 +32,7 @@ debug: $(SOURCE)/lib$(APP_NAME).so
 
 $(SOURCE)/lib$(APP_NAME).so:
 	cd $(SOURCE); BOOTSTRAP_FROM_DEPENDS=yes ./bootstrap
-	cd $(SOURCE); echo $(CONFIGURE)
+	cd $(SOURCE); $(CONFIGURE)
 
 ../../Makefile.include:
 	$(error Please run configure)

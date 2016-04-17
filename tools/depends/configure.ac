@@ -400,13 +400,13 @@ platform_cflags+=" $passed_cflags"
 platform_ldflags+=" $passed_ldflags $LIBS"
 platform_cxxflags+=" $passed_cxxflags"
 
-if test -n $use_build_toolchain; then
+if test -n $use_toolchain; then
   PATH_FOR_HOST=$use_toolchain:$use_toolchain/usr/bin:$use_toolchain/bin:$PATH
 else
   PATH_FOR_HOST=$PATH
 fi
 if test -n $use_build_toolchain; then
-  PATH_FOR_BUILD=$use_build_toolchain:$use_build_toolchain/usr/bin:$use_toolchain/bin:$PATH
+  PATH_FOR_BUILD=$use_build_toolchain:$use_build_toolchain/usr/bin:$use_build_toolchain/bin:$PATH
 else
   PATH_FOR_BUILD=$PATH
 fi

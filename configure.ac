@@ -924,7 +924,7 @@ if test "$use_gles" = "yes"; then
       AC_DEFINE([HAVE_LIBEGL],[1],["Define to 1 if you have the `EGL' library (-lEGL)."])
       AC_DEFINE([HAVE_LIBGLESV2],[1],["Define to 1 if you have the `GLESv2' library (-lGLESv2)."])
       AC_MSG_RESULT(== WARNING: OpenGLES support is assumed.)
-      LIBS="$LIBS -lEGL -lGLESv2 -lbcm_host -lvcos -lvchiq_arm -lmmal -lmmal_core -lmmal_util"
+      LIBS="$LIBS -lEGL -lGLESv2 -lbcm_host -lvcos -lvchiq_arm -lmmal -lmmal_core -lmmal_util -lmmal_vc_client -lmmal_components -lvcsm -lcontainers -lpthread -ldl -lrt -lc"
     else
       AC_CHECK_LIB([EGL],   [main],, AC_MSG_ERROR($missing_library))
       AC_CHECK_LIB([GLESv2],[main],, AC_MSG_ERROR($missing_library))
@@ -1519,7 +1519,9 @@ fi
 if test "${USE_STATIC_FFMPEG}" = "1"; then
   AC_DEFINE([USE_STATIC_FFMPEG], [1], [FFmpeg linked statically])
   ff_libs=$(${ECHO} ${FFMPEG_LIBNAMES} | ${AWK} '/lib/{print $1}' ORS=' ')
-  if test -n "${PKG_CONFIG_SYSROOT_DIR}"; then
+  if test "$cross_compiling" == "yes" && test "${target_platform}" = "target_raspberry_pi"; then
+    pkg_cfg_prefix=/
+  elif test -n "${PKG_CONFIG_SYSROOT_DIR}"; then
     # workaround for cross compiling with buildroot on different buildsystem
     # Rpi buildroots pkg-config returns static libs with
     # PKG_CONFIG_SYSROOT_DIR prefixed, OEs does not
@@ -1575,16 +1577,19 @@ if test "${USE_STATIC_FFMPEG}" = "1"; then
     elif test "$with_ffmpeg" != "no"; then
       # user passed --with-ffmpeg=/some/path, lets use it
       AC_MSG_NOTICE("using ffmpeg: ${with_ffmpeg}")
-      export PKG_CONFIG_PATH="${with_ffmpeg}/lib/pkgconfig:$PKG_CONFIG_PATH"
+      export PKG_CONFIG_PATH="${with_ffmpeg}/pkgconfig:$PKG_CONFIG_PATH"
     fi
   fi
 fi
 
 if test "$FFMPEG_FOUND" != "true"; then
   if test "${USE_STATIC_FFMPEG}" = "1"; then
-    PKG_CHECK_MODULES_STATIC([FFMPEG], [$FFMPEG_LIBNAMES],
+    save_PKG_CONFIG="$PKG_CONFIG"
+    PKG_CONFIG="$PKG_CONFIG --static"
+    PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_LIBNAMES],
       [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"],
       [AC_MSG_ERROR("ffmpeg not found")])
+    PKG_CONFIG="$save_PKG_CONFIG"
   else
   PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_LIBNAMES],
     [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"], 
@@ -2402,6 +2407,7 @@ XB_CONFIG_MODULE([lib/cpluff], [
     --prefix="${prefix}" --includedir="${includedir}" --libdir="${libdir}" --datadir="${datadir}" \
     --host=$host_alias \
     --build=$build_alias \
+    --disable-shared --disable-rpath \
     --target=$target_alias CFLAGS="$CFLAGS" CC="$CC" CXX="$CXX" LDFLAGS="$LDFLAGS" LIBS=""
     #LDFLAGS="$LDFLAGS -Wl,-read_only_relocs,suppress"    
 ], [0])

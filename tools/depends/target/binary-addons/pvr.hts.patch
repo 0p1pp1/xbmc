@@ -1,0 +1,61 @@
+# after build failer,
+# cd arm-linux-gnueabihf/build/pvr.hts; patch -p0 < ../../../pvr.hts.patch
+# and re-run make
+
+diff -ur ./src/HTSPConnection.cpp /opt/rpi/kodi/tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts/src/HTSPConnection.cpp
+--- ./src/HTSPConnection.cpp	2016-04-18 02:45:30.428858655 +0900
++++ /opt/rpi/kodi/tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts/src/HTSPConnection.cpp	2016-04-14 23:41:39.072166809 +0900
+@@ -105,19 +105,6 @@
+   StopThread(0);
+ }
+ 
+-void CHTSPConnection::Start()
+-{
+-  // Note: "connecting" must only be set one time, before the very first connection attempt, not on every reconnect.
+-  SetState(PVR_CONNECTION_STATE_CONNECTING);
+-  CreateThread();
+-}
+-
+-void CHTSPConnection::Stop()
+-{
+-  StopThread(-1);
+-  Disconnect();
+-}
+-
+ /*
+  * Info
+  */
+diff -ur ./src/Tvheadend.cpp /opt/rpi/kodi/tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts/src/Tvheadend.cpp
+--- ./src/Tvheadend.cpp	2016-04-18 02:45:30.428858655 +0900
++++ /opt/rpi/kodi/tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts/src/Tvheadend.cpp	2016-04-14 23:43:57.935443854 +0900
+@@ -52,15 +52,15 @@
+   {
+     delete dmx;
+   }
+-
+-  m_conn.Stop();
++  m_conn.StopThread(-1);
++  m_conn.Disconnect();
+   StopThread();
+ }
+ 
+ void CTvheadend::Start ( void )
+ {
+   CreateThread();
+-  m_conn.Start();
++  m_conn.CreateThread();
+ }
+ 
+ /* **************************************************************************
+diff -ur ./src/Tvheadend.h /opt/rpi/kodi/tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts/src/Tvheadend.h
+--- ./src/Tvheadend.h	2016-04-18 02:45:30.428858655 +0900
++++ /opt/rpi/kodi/tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts/src/Tvheadend.h	2016-04-14 23:44:39.344433071 +0900
+@@ -171,8 +171,6 @@
+   CHTSPConnection();
+   ~CHTSPConnection();
+ 
+-  void Start       ( void );
+-  void Stop        ( void );
+   void Disconnect  ( void );
+   
+   bool      SendMessage0    ( const char *method, htsmsg_t *m );
