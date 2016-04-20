@@ -18,11 +18,8 @@
  *
  */
 
-#include <string>
-#include <cstdlib>
-#include <memory>
-#include "threads/SystemClock.h"
 #include "DVDFileInfo.h"
+#include "threads/SystemClock.h"
 #include "FileItem.h"
 #include "settings/AdvancedSettings.h"
 #include "pictures/Picture.h"
@@ -56,6 +53,8 @@
 #include "Util.h"
 #include "utils/LangCodeExpander.h"
 
+#include <cstdlib>
+#include <memory>
 
 bool CDVDFileInfo::GetFileDuration(const std::string &path, int& duration)
 {
@@ -103,24 +102,16 @@ bool CDVDFileInfo::ExtractThumb(const std::string &strPath,
   std::string redactPath = CURL::GetRedacted(strPath);
   unsigned int nTime = XbmcThreads::SystemClockMillis();
   CFileItem item(strPath, false);
+
+  if (item.IsDiscImage() ||
+      item.IsPVR())
+    return false;
+
+  item.SetMimeTypeForInternetFile();
   CDVDInputStream *pInputStream = CDVDFactoryInputStream::CreateInputStream(NULL, item);
   if (!pInputStream)
   {
     CLog::Log(LOGERROR, "InputStream: Error creating stream for %s", redactPath.c_str());
-    return false;
-  }
-
-  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD)
-   || pInputStream->IsStreamType(DVDSTREAM_TYPE_BLURAY))
-  {
-    CLog::Log(LOGDEBUG, "%s: disc streams not supported for thumb extraction, file: %s", __FUNCTION__, redactPath.c_str());
-    delete pInputStream;
-    return false;
-  }
-
-  if (pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
-  {
-    delete pInputStream;
     return false;
   }
 
@@ -281,7 +272,7 @@ bool CDVDFileInfo::ExtractThumb(const std::string &strPath,
               aspect = hint.aspect;
             unsigned int nHeight = (unsigned int)((double)g_advancedSettings.m_imageRes / aspect);
 
-            uint8_t *pOutBuf = new uint8_t[nWidth * nHeight * 4];
+            uint8_t *pOutBuf = (uint8_t*)av_malloc(nWidth * nHeight * 4);
             struct SwsContext *context = sws_getContext(picture.iWidth, picture.iHeight,
                   AV_PIX_FMT_YUV420P, nWidth, nHeight, AV_PIX_FMT_BGRA, SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
@@ -300,8 +291,7 @@ bool CDVDFileInfo::ExtractThumb(const std::string &strPath,
               CPicture::CacheTexture(pOutBuf, nWidth, nHeight, nWidth * 4, orientation, nWidth, nHeight, CTextureCache::GetCachedPath(details.file));
               bOk = true;
             }
-
-            delete [] pOutBuf;
+            av_free(pOutBuf);
           }
         }
         else
@@ -351,6 +341,7 @@ bool CDVDFileInfo::GetFileStreamDetails(CFileItem *pItem)
     playablePath = XFILE::CStackDirectory::GetFirstStackedFile(playablePath);
 
   CFileItem item(playablePath, false);
+  item.SetMimeTypeForInternetFile();
   CDVDInputStream *pInputStream = CDVDFactoryInputStream::CreateInputStream(NULL, item);
   if (!pInputStream)
     return false;
@@ -488,8 +479,6 @@ bool CDVDFileInfo::AddExternalSubtitleToDetails(const std::string &path, CStream
     CDVDDemuxVobsub v;
     if (!v.Open(filename, STREAM_SOURCE_NONE, vobsubfile))
       return false;
-
-    int count = v.GetNrOfStreams();
 
     for(CDemuxStream* stream : v.GetStreams())
     {

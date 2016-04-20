@@ -118,6 +118,7 @@ public:
   class IDemux
   {
     public:
+    virtual ~IDemux() {}
     virtual bool OpenDemux() = 0;
     virtual DemuxPacket* ReadDemux() = 0;
     virtual CDemuxStream* GetStream(int iStreamId) const = 0;
@@ -130,6 +131,7 @@ public:
     virtual bool SeekTime(int time, bool backward = false, double* startpts = NULL) = 0;
     virtual void AbortDemux() = 0;
     virtual void FlushDemux() = 0;
+    virtual void SetVideoResolution(int width, int height) {};
   };
 
   enum ENextStream
@@ -139,7 +141,7 @@ public:
     NEXTSTREAM_RETRY,
   };
 
-  CDVDInputStream(DVDStreamType m_streamType, CFileItem& fileitem);
+  CDVDInputStream(DVDStreamType m_streamType, const CFileItem& fileitem);
   virtual ~CDVDInputStream();
   virtual bool Open();
   virtual void Close();

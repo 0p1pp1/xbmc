@@ -6,12 +6,13 @@
 		<top>0</top>
 		<height>70</height>
 		<radioposx>330</radioposx>
+		<textwidth>320</textwidth>
 		<aligny>center</aligny>
 		<textcolor>white</textcolor>
 		<invalidcolor>invalid</invalidcolor>
-		<texturefocus>lists/focus.png</texturefocus>
+		<texturefocus colordiffuse="button_focus">lists/focus.png</texturefocus>
 		<texturenofocus border="30">lists/separator.png</texturenofocus>
-		<alttexturefocus>lists/focus.png</alttexturefocus>
+		<alttexturefocus colordiffuse="button_focus">lists/focus.png</alttexturefocus>
 		<alttexturenofocus border="30">lists/separator.png</alttexturenofocus>
 	</include>
 	<include name="PVRQuickNavItemsCommon">
@@ -23,7 +24,7 @@
 				<align>center</align>
 				<aligny>center</aligny>
 				<font>-</font>
-				<texturefocus border="40">buttons/button-theme-fo.png</texturefocus>
+				<texturefocus border="40" colordiffuse="button_focus">buttons/button-fo.png</texturefocus>
 				<texturenofocus border="40">buttons/button-nofo.png</texturenofocus>
 				<radioposx>26</radioposx>
 				<radioposy>0</radioposy>
@@ -34,8 +35,8 @@
 				<textureradioofffocus>$PARAM[icon]</textureradioofffocus>
 				<textureradiooffnofocus>$PARAM[icon]</textureradiooffnofocus>
 				<textureradiooffdisabled colordiffuse="button_focus">$PARAM[icon]</textureradiooffdisabled>
-				<onclick condition="IsEmpty(Window.Property(IsRadio))">ActivateWindow(TV$PARAM[area])</onclick>
-				<onclick condition="!IsEmpty(Window.Property(IsRadio))">ActivateWindow(Radio$PARAM[area])</onclick>
+				<onclick condition="String.IsEmpty(Window.Property(IsRadio))">ActivateWindow(TV$PARAM[area])</onclick>
+				<onclick condition="!String.IsEmpty(Window.Property(IsRadio))">ActivateWindow(Radio$PARAM[area])</onclick>
 				<enable>!Window.IsActive(TV$PARAM[area]) + !Window.IsActive(Radio$PARAM[area])</enable>
 			</control>
 		</definition>
@@ -89,32 +90,32 @@
 						<onup>14100</onup>
 						<ondown>6054</ondown>
 						<width>1000</width>
-						<include name="PVRQuickNavItemsCommon">
+						<include content="PVRQuickNavItemsCommon">
 							<param name="control_id" value="100" />
 							<param name="area" value="Channels" />
 							<param name="icon" value="icons/submenu/channels.png" />
 						</include>
-						<include name="PVRQuickNavItemsCommon">
+						<include content="PVRQuickNavItemsCommon">
 							<param name="control_id" value="101" />
 							<param name="area" value="Guide" />
 							<param name="icon" value="icons/submenu/guide.png" />
 						</include>
-						<include name="PVRQuickNavItemsCommon">
+						<include content="PVRQuickNavItemsCommon">
 							<param name="control_id" value="102" />
 							<param name="area" value="Recordings" />
 							<param name="icon" value="icons/submenu/recordings.png" />
 						</include>
-						<include name="PVRQuickNavItemsCommon">
+						<include content="PVRQuickNavItemsCommon">
 							<param name="control_id" value="103" />
 							<param name="area" value="Timers" />
 							<param name="icon" value="icons/submenu/timers.png" />
 						</include>
-						<include name="PVRQuickNavItemsCommon">
+						<include content="PVRQuickNavItemsCommon">
 							<param name="control_id" value="104" />
 							<param name="area" value="TimerRules" />
 							<param name="icon" value="icons/submenu/timer-rules.png" />
 						</include>
-						<include name="PVRQuickNavItemsCommon">
+						<include content="PVRQuickNavItemsCommon">
 							<param name="control_id" value="105" />
 							<param name="area" value="Search" />
 							<param name="icon" value="icons/submenu/tv-search.png" />
@@ -207,27 +208,27 @@
 						<onleft>14100</onleft>
 						<onup>8</onup>
 						<ondown>6056</ondown>
-						<visible>Player.HasMedia + [ControlGroup(9000).HasFocus | Control.HasFocus(6130)]</visible>
+						<visible>Player.HasMedia + [$EXP[sidebar_focused]]</visible>
 						<visible>!System.HasModalDialog</visible>
-						<include name="BottomMainMenuItem">
+						<include content="BottomMainMenuItem">
 							<param name="control_id" value="14101" />
 							<param name="height" value="95" />
 							<param name="onclick" value="Pause" />
 							<param name="icon" value="icons/now-playing/pause.png" />
 						</include>
-						<include name="BottomMainMenuItem">
+						<include content="BottomMainMenuItem">
 							<param name="control_id" value="14102" />
 							<param name="height" value="95" />
 							<param name="onclick" value="Stop" />
 							<param name="icon" value="icons/now-playing/stop.png" />
 						</include>
-						<include name="BottomMainMenuItem">
+						<include content="BottomMainMenuItem">
 							<param name="control_id" value="14104" />
 							<param name="height" value="95" />
 							<param name="onclick" value="Next" />
 							<param name="icon" value="icons/now-playing/next.png" />
 						</include>
-						<include name="BottomMainMenuItem">
+						<include content="BottomMainMenuItem">
 							<param name="control_id" value="14105" />
 							<param name="height" value="95" />
 							<param name="onclick" value="Fullscreen" />
@@ -252,11 +253,11 @@
 	<include name="MediaMenuCommon">
 		<include>OpenClose_Left</include>
 		<depth>DepthSideBlade</depth>
-		<animation type="Conditional" condition="ControlGroup(9000).HasFocus | Control.HasFocus(6130)">
+		<animation type="Conditional" condition="$EXP[sidebar_focused]">
 			<effect type="fade" start="0" end="100" time="300" tween="sine" easing="out" />
 			<effect type="slide" start="-320" end="0" time="400" tween="cubic" easing="out" />
 		</animation>
-		<animation type="Conditional" condition="!ControlGroup(9000).HasFocus + !Control.HasFocus(6130)">
+		<animation type="Conditional" condition="!$EXP[sidebar_focused]">
 			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="in" />
 			<effect type="slide" start="0" end="-320" time="300" tween="cubic" easing="in" />
 		</animation>
@@ -285,27 +286,27 @@
 			<itemgap>-17</itemgap>
 			<left>5</left>
 			<onleft>14100</onleft>
-			<visible>Player.HasMedia + [ControlGroup(9000).HasFocus | Control.HasFocus(6130)]</visible>
+			<visible>Player.HasMedia + [$EXP[sidebar_focused]]</visible>
 			<visible>!System.HasModalDialog</visible>
-			<include name="BottomMainMenuItem">
+			<include content="BottomMainMenuItem">
 				<param name="control_id" value="14101" />
 				<param name="height" value="95" />
 				<param name="onclick" value="Pause" />
 				<param name="icon" value="icons/now-playing/pause.png" />
 			</include>
-			<include name="BottomMainMenuItem">
+			<include content="BottomMainMenuItem">
 				<param name="control_id" value="14102" />
 				<param name="height" value="95" />
 				<param name="onclick" value="Stop" />
 				<param name="icon" value="icons/now-playing/stop.png" />
 			</include>
-			<include name="BottomMainMenuItem">
+			<include content="BottomMainMenuItem">
 				<param name="control_id" value="14104" />
 				<param name="height" value="95" />
 				<param name="onclick" value="Next" />
 				<param name="icon" value="icons/now-playing/next.png" />
 			</include>
-			<include name="BottomMainMenuItem">
+			<include content="BottomMainMenuItem">
 				<param name="control_id" value="14105" />
 				<param name="height" value="95" />
 				<param name="onclick" value="Fullscreen" />
@@ -314,7 +315,6 @@
 		</control>
 	</include>
 	<include name="MediaMenuListCommon">
-		<param name="viewtype_button_vis">true</param>
 		<definition>
 			<left>0</left>
 			<top>100</top>
@@ -333,7 +333,7 @@
 				<include>MediaMenuItemsCommon</include>
 				<label>$LOCALIZE[31023]</label>
 				<label2>[B]$INFO[Container.Viewmode][/B]</label2>
-				<enable>$PARAM[viewtype_button_vis]</enable>
+				<enable>Integer.IsGreater(Container.ViewCount,1)</enable>
 				<onclick>Container.NextViewMode</onclick>
 			</control>
 			<control type="button" id="6053">

@@ -21,8 +21,16 @@ msgid "Now playing"
 msgstr "Відтворюється"
 
 msgctxt "#31001"
-msgid "Search"
+msgid "Search..."
 msgstr "Пошук"
+
+msgctxt "#31004"
+msgid "Change mode"
+msgstr "Зміна режиму"
+
+msgctxt "#31005"
+msgid "Watch as 2D"
+msgstr "Переглядати як 2D"
 
 msgctxt "#31019"
 msgid "Forecast"

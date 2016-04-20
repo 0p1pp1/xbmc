@@ -57,6 +57,8 @@ public:
   virtual bool IsFiltered();
   virtual bool IsSameStartFolder(const std::string &dir);
 
+  virtual std::string GetRootPath() const { return ""; }
+
   const CFileItemList &CurrentDirectory() const;
   const CGUIViewState *GetViewState() const;
 
@@ -69,7 +71,7 @@ protected:
 
   // custom methods
   virtual void SetupShares();
-  virtual void GoParentFolder();
+  virtual bool GoParentFolder();
   virtual bool OnClick(int iItem, const std::string &player = "");
 
   /* \brief React to a "Select" action on an item in a view.
@@ -81,6 +83,8 @@ protected:
 
   virtual void GetContextButtons(int itemNumber, CContextButtons &buttons);
   virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button);
+  virtual bool OnAddMediaSource() { return false; };
+
   virtual void FormatItemLabels(CFileItemList &items, const LABEL_MASKS &labelMasks);
   virtual void UpdateButtons();
   virtual void SaveControlStates() override;

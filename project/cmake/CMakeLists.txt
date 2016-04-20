@@ -57,6 +57,9 @@ endif()
 get_filename_component(CORE_SOURCE_DIR ${PROJECT_SOURCE_DIR}/../.. ABSOLUTE)
 set(CORE_BUILD_DIR build)
 
+message(STATUS "Source directory: ${CORE_SOURCE_DIR}")
+message(STATUS "Build directory: ${CMAKE_BINARY_DIR}")
+
 include(scripts/common/generatorsetup.cmake)
 include(scripts/common/addoptions.cmake)
 include(scripts/common/archsetup.cmake)
@@ -205,6 +208,8 @@ endif()
 
 # Compile Info
 add_custom_command(OUTPUT ${CORE_BUILD_DIR}/xbmc/CompileInfo.cpp
+                          ${CMAKE_BINARY_DIR}/addons/xbmc.addon/addon.xml
+                          ${CMAKE_BINARY_DIR}/addons/kodi.guilib/addon.xml
                    COMMAND ${CMAKE_COMMAND} -DCORE_SOURCE_DIR=${CORE_SOURCE_DIR}
                                             -DCORE_SYSTEM_NAME=${CORE_SYSTEM_NAME}
                                             -DCORE_BUILD_DIR=${CORE_BUILD_DIR}
@@ -218,6 +223,8 @@ add_custom_command(OUTPUT ${CORE_BUILD_DIR}/xbmc/CompileInfo.cpp
                           ${CORE_SOURCE_DIR}/addons/kodi.guilib/addon.xml.in
                           ${CORE_SOURCE_DIR}/xbmc/CompileInfo.cpp.in)
 list(APPEND install_data addons/xbmc.addon/addon.xml)
+list(APPEND install_data addons/xbmc.json/addon.xml)
+list(APPEND install_data addons/kodi.guilib/addon.xml)
 add_library(compileinfo OBJECT ${CORE_BUILD_DIR}/xbmc/CompileInfo.cpp)
 target_compile_options(compileinfo PRIVATE "${SYSTEM_DEFINES}")
 
@@ -243,6 +250,11 @@ mark_as_advanced(test_sources)
 file(STRINGS ${PROJECT_SOURCE_DIR}/installdata/addon-bindings.txt bindings)
 foreach(binding ${bindings})
   list(APPEND addon_bindings ${CORE_SOURCE_DIR}/${binding})
+endforeach()
+
+file(STRINGS ${PROJECT_SOURCE_DIR}/installdata/cmake-files.txt cmakefiles)
+foreach(cmakefile ${cmakefiles})
+  list(APPEND cmake_files ${CORE_SOURCE_DIR}/${cmakefile})
 endforeach()
 
 add_subdirectory(${CORE_SOURCE_DIR}/lib/gtest ${CORE_BUILD_DIR}/gtest EXCLUDE_FROM_ALL)
@@ -277,9 +289,10 @@ endif()
 
 core_link_library(XBMC_addon addons/library.xbmc.addon/libXBMC_addon)
 core_link_library(XBMC_codec addons/library.xbmc.codec/libXBMC_codec)
-core_link_library(KODI_guilib addons/library.kodi.guilib/libKODI_guilib)
+core_link_library(XBMC_pvr addons/library.xbmc.pvr/libXBMC_pvr)
 core_link_library(KODI_adsp addons/library.kodi.adsp/libKODI_adsp)
-core_link_library(XBMC_pvr   addons/library.xbmc.pvr/libXBMC_pvr)
+core_link_library(KODI_audioengine addons/library.kodi.audioengine/libKODI_audioengine)
+core_link_library(KODI_guilib addons/library.kodi.guilib/libKODI_guilib)
 core_link_library(KODI_inputstream addons/library.kodi.inputstream/libKODI_inputstream)
 core_link_library(KODI_peripheral addons/library.kodi.peripheral/libKODI_peripheral)
 
@@ -359,11 +372,22 @@ foreach(msg ${final_message})
 endforeach()
 
 if(VERBOSE)
-  message(STATUS "\n#---- Internal Variables ----# ")
+  message(STATUS "\n#--------------- Internal Variables -------------#")
   message(STATUS "DEPLIBS: ${DEPLIBS}")
-  message(STATUS "SYSTEM_LDFLAGS: ${SYSTEM_LDFLAGS}")
   message(STATUS "core_DEPENDS: ${core_DEPENDS}")
-  message(STATUS "CMAKE_DL_LIBS: ${CMAKE_DL_LIBS}")
+  message(STATUS "#---------------------------------------------#")
+  message(STATUS "SYSTEM_LDFLAGS        : ${SYSTEM_LDFLAGS}")
+  message(STATUS "CMAKE_DL_LIBS         : ${CMAKE_DL_LIBS}")
+  message(STATUS "CMAKE_C_FLAGS         : ${CMAKE_C_FLAGS}")
+  message(STATUS "CMAKE_CXX_FLAGS       : ${CMAKE_CXX_FLAGS}")
+  message(STATUS "CMAKE_EXE_LINKER_FLAGS: ${CMAKE_EXE_LINKER_FLAGS}")
+  message(STATUS "#---------------------------------------------#")
+  message(STATUS "bindir     : ${bindir}")
+  message(STATUS "includedir : ${includedir}")
+  message(STATUS "libdir     : ${libdir}")
+  message(STATUS "datarootdir: ${datarootdir}")
+  message(STATUS "#---------------------------------------------#")
+  message(STATUS "GIT_REV: ${APP_SCMID}")
 endif()
-message(STATUS "#-----------------------#")
+message(STATUS "#---------------------------------------------#")
 

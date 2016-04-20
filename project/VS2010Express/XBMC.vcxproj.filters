@@ -795,6 +795,9 @@
     <ClCompile Include="..\..\xbmc\addons\ContextMenuAddon.cpp">
       <Filter>addons</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\addons\ContextMenus.cpp">
+      <Filter>addons</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\addons\Scraper.cpp">
       <Filter>addons</Filter>
     </ClCompile>
@@ -838,6 +841,9 @@
       <Filter>music</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\music\Artist.cpp">
+      <Filter>music</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\music\ContextMenus.cpp">
       <Filter>music</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\music\GUIViewStateMusic.cpp">
@@ -1494,6 +1500,9 @@
     <ClCompile Include="..\..\xbmc\video\Bookmark.cpp">
       <Filter>video</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\video\ContextMenus.cpp">
+      <Filter>video</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\xbmc\video\GUIViewStateVideo.cpp">
       <Filter>video</Filter>
     </ClCompile>
@@ -1638,9 +1647,6 @@
     <ClCompile Include="..\..\xbmc\filesystem\PVRDirectory.cpp">
       <Filter>filesystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\PVRFile.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\Observer.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -1715,9 +1721,6 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\pvr\channels\PVRRadioRDSInfoTag.cpp">
       <Filter>pvr\channels</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\pvr\addons\PVRClient.cpp">
-      <Filter>pvr\addons</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\dialogs\GUIDialogExtendedProgressBar.cpp">
       <Filter>dialogs</Filter>
@@ -2599,9 +2602,6 @@
     <ClCompile Include="..\..\xbmc\interfaces\json-rpc\PVROperations.cpp">
       <Filter>interfaces\json-rpc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\xbmc\filesystem\HTTPFile.cpp">
-      <Filter>filesystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\xbmc\utils\GroupUtils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
@@ -2613,9 +2613,6 @@
     </ClCompile>
     <ClCompile Include="..\..\xbmc\interfaces\python\PyContext.cpp">
       <Filter>interfaces\python</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\xbmc\video\FFmpegVideoDecoder.cpp">
-      <Filter>video</Filter>
     </ClCompile>
     <ClCompile Include="..\..\xbmc\view\GUIViewControl.cpp">
       <Filter>view</Filter>
@@ -3454,6 +3451,14 @@
     <ClCompile Include="..\..\xbmc\peripherals\addons\AddonButtonMap.cpp">
       <Filter>peripherals\addons</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\xbmc\addons\BinaryAddonCache.cpp">
+      <Filter>addons</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\xbmc\ServiceBroker.cpp" />
+    <ClCompile Include="..\..\xbmc\ServiceManager.cpp" />
+    <ClCompile Include="..\..\xbmc\addons\PVRClient.cpp">
+      <Filter>addons</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\xbmc\win32\pch.h">
@@ -3539,9 +3544,6 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\VideoPlayer\DVDCodecs\Audio\DVDAudioCodecFFmpeg.h">
       <Filter>cores\VideoPlayer\DVDCodecs\Audio</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\cores\VideoPlayer\DVDCodecs\Video\DllLibMpeg2.h">
-      <Filter>cores\VideoPlayer\DVDCodecs\Video</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\cores\VideoPlayer\DVDCodecs\Video\DVDVideoCodec.h">
       <Filter>cores\VideoPlayer\DVDCodecs\Video</Filter>
@@ -3886,6 +3888,9 @@
       <Filter>addons</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\addons\ContextMenuAddon.h">
+      <Filter>addons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\addons\ContextMenus.h">
       <Filter>addons</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\addons\DllAddon.h">
@@ -4661,6 +4666,9 @@
     <ClInclude Include="..\..\xbmc\video\Bookmark.h">
       <Filter>video</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\xbmc\video\ContextMenus.h">
+      <Filter>video</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\xbmc\video\GUIViewStateVideo.h">
       <Filter>video</Filter>
     </ClInclude>
@@ -4817,9 +4825,6 @@
     <ClInclude Include="..\..\xbmc\epg\EpgInfoTag.h">
       <Filter>epg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\PVRFile.h">
-      <Filter>filesystem</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\PVRDirectory.h">
       <Filter>filesystem</Filter>
     </ClInclude>
@@ -4900,9 +4905,6 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\pvr\channels\PVRRadioRDSInfoTag.h">
       <Filter>pvr\channels</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\pvr\addons\PVRClient.h">
-      <Filter>pvr\addons</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\dialogs\GUIDialogExtendedProgressBar.h">
       <Filter>dialogs</Filter>
@@ -5112,9 +5114,6 @@
       <Filter>filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\IFileDirectory.h">
-      <Filter>filesystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\ILiveTV.h">
       <Filter>filesystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\filesystem\iso9660.h">
@@ -5692,9 +5691,6 @@
     <ClInclude Include="..\..\xbmc\interfaces\json-rpc\PVROperations.h">
       <Filter>interfaces\json-rpc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\xbmc\filesystem\HTTPFile.h">
-      <Filter>filesystem</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\xbmc\utils\GroupUtils.h">
       <Filter>utils</Filter>
     </ClInclude>
@@ -5709,9 +5705,6 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\guilib\imagefactory.h">
       <Filter>guilib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\xbmc\video\FFmpegVideoDecoder.h">
-      <Filter>video</Filter>
     </ClInclude>
     <ClInclude Include="..\..\xbmc\view\GUIViewControl.h">
       <Filter>view</Filter>
@@ -6712,6 +6705,17 @@
     </ClInclude>
     <ClInclude Include="..\..\xbmc\peripherals\addons\AddonButtonMap.h">
       <Filter>peripherals\addons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\addons\BinaryAddonCache.h">
+      <Filter>addons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\music\ContextMenus.h">
+      <Filter>music</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\xbmc\ServiceBroker.h" />
+    <ClInclude Include="..\..\xbmc\ServiceManager.h" />
+    <ClInclude Include="..\..\xbmc\addons\PVRClient.h">
+      <Filter>addons</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

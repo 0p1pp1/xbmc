@@ -67,6 +67,9 @@ extern "C" {
       const char *m_strKey;
       const char *m_strValue;
     } m_ListItemProperties[MAX_INFO_COUNT];
+
+    const char *m_libFolder;
+    const char *m_profileFolder;
   } INPUTSTREAM;
 
   /*!
@@ -137,6 +140,7 @@ extern "C" {
     DemuxPacket* (__cdecl* DemuxRead)(void);
     bool (__cdecl* DemuxSeekTime)(int, bool, double*);
     void (__cdecl* DemuxSetSpeed)(int);
+    void (__cdecl* SetVideoResolution)(int, int);
 
     // IDisplayTime
     int (__cdecl* GetTotalTime)(void);

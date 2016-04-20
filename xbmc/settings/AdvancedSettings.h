@@ -333,7 +333,6 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
 
     bool m_guiVisualizeDirtyRegions;
     int  m_guiAlgorithmDirtyRegions;
-    int  m_guiDirtyRegionNoFlipTimeout;
     unsigned int m_addonPackageFolderSize;
 
     unsigned int m_cacheMemBufferSize;
@@ -367,6 +366,8 @@ class CAdvancedSettings : public ISettingCallback, public ISettingsHandler
     std::string m_stereoscopicregex_3d;
     std::string m_stereoscopicregex_sbs;
     std::string m_stereoscopicregex_tab;
+
+    bool m_useDisplayControlHWStereo;
 
     /*!< @brief position behavior of ass subtitiles when setting "subtitle position on screen" set to "fixed"
     True to show at the fixed position set in video calibration

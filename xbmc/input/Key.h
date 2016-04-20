@@ -342,6 +342,7 @@
 #define ACTION_PVR_PLAY               188
 #define ACTION_PVR_PLAY_TV            189
 #define ACTION_PVR_PLAY_RADIO         190
+#define ACTION_PVR_SHOW_TIMER_RULE    191
 
 #define ACTION_TOGGLE_FULLSCREEN      199 //!< switch 2 desktop resolution
 #define ACTION_TOGGLE_WATCHED         200 //!< Toggle watched status (videos)
@@ -384,6 +385,7 @@
 #define ACTION_TRIGGER_OSD            243 //!< show autoclosing OSD. Can b used in videoFullScreen.xml window id=2005
 #define ACTION_INPUT_TEXT             244
 #define ACTION_VOLUME_SET             245
+#define ACTION_TOGGLE_COMMSKIP        246
 
 #define ACTION_TOUCH_TAP              401 //!< touch actions
 #define ACTION_TOUCH_TAP_TEN          410 //!< touch actions

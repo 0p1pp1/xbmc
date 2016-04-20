@@ -133,7 +133,7 @@ protected:
   bool IsVideoReady();
   void ResetVideoStreams();
 
-  AVDictionary *GetFFMpegOptionsFromURL(const CURL &url);
+  AVDictionary *GetFFMpegOptionsFromInput();
   double ConvertTimestamp(int64_t pts, int den, int num);
   void UpdateCurrentPTS();
   bool IsProgramChange();
@@ -167,5 +167,7 @@ protected:
 
   bool m_streaminfo;
   bool m_checkvideo;
+  int m_displayTime;
+  double m_dtsAtDisplayTime;
 };
 

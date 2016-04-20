@@ -21,6 +21,7 @@
  */
 
 #include "DVDInputStream.h"
+#include "DVDDemuxers/DVDDemux.h"
 #include "../IVideoPlayer.h"
 #include "../DVDCodecs/Overlay/DVDOverlaySpu.h"
 #include <string>
@@ -63,8 +64,6 @@ struct DVDNavAudioStreamInfo : DVDNavStreamInfo
 
 struct DVDNavSubtitleStreamInfo : DVDNavStreamInfo
 {
-  std::string name;
-  std::string language;
   CDemuxStream::EFlags flags;
 
   DVDNavSubtitleStreamInfo() : DVDNavStreamInfo(),
@@ -108,7 +107,7 @@ class CDVDInputStreamNavigator
   , public CDVDInputStream::IMenus
 {
 public:
-  CDVDInputStreamNavigator(IVideoPlayer* player, CFileItem& fileitem);
+  CDVDInputStreamNavigator(IVideoPlayer* player, const CFileItem& fileitem);
   virtual ~CDVDInputStreamNavigator();
 
   virtual bool Open();

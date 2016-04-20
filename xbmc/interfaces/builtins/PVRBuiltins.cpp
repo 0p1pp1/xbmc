@@ -23,25 +23,6 @@
 #include "Application.h"
 #include "pvr/PVRManager.h"
 
-/*! \brief Start the PVR manager.
- *  \param params (ignored)
- */
-static int Start(const std::vector<std::string>& params)
-{
-  g_application.StartPVRManager();
-
-  return 0;
-}
-
-/*! \brief Stop the PVR manager.
- *   \param params (ignored)
- */
-static int Stop(const std::vector<std::string>& params)
-{
-  g_application.StopPVRManager();
-
-  return 0;
-}
 
 /*! \brief Search for missing channel icons
  *   \param params (ignored)
@@ -65,18 +46,6 @@ static int SearchMissingIcons(const std::vector<std::string>& params)
 ///     Function,
 ///     Description }
 ///   \table_row2_l{
-///     <b>`PVR.StartManager`</b>\n
-///     <b>`StartPVRManager`</b> (deprecated)
-///     ,
-///     (Re)Starts the PVR manager
-///   }
-///   \table_row2_l{
-///     <b>`PVR.StartManager`</b>\n
-///     <b>`StopPVRManager`</b> (deprecated)
-///     ,
-///     Stops the PVR manager
-///   }
-///   \table_row2_l{
 ///     <b>`PVR.SearchMissingChannelIcons`</b>
 ///     ,
 ///     Will start a search for missing channel icons
@@ -87,10 +56,6 @@ static int SearchMissingIcons(const std::vector<std::string>& params)
 CBuiltins::CommandMap CPVRBuiltins::GetOperations() const
 {
   return {
-           {"startpvrmanager",                {"(Re)Starts the PVR manager",       0, Start}}, // deprecated alias
-           {"pvr.startmanager",               {"(Re)Starts the PVR manager",       0, Start}},
-           {"stoppvrmanager",                 {"Stops the PVR manager",            0, Stop}},
-           {"pvr.stopmanager",                {"Stops the PVR manager",            0, Stop}},
            {"pvr.searchmissingchannelicons",  {"Search for missing channel icons", 0, SearchMissingIcons}}
          };
 }

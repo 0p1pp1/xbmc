@@ -22,7 +22,7 @@
 #include "addons/InputStream.h"
 #include "cores/VideoPlayer/DVDClock.h"
 
-CInputStreamAddon::CInputStreamAddon(CFileItem& fileitem, ADDON::CInputStream *inputStream)
+CInputStreamAddon::CInputStreamAddon(const CFileItem& fileitem, std::shared_ptr<ADDON::CInputStream> inputStream)
 : CDVDInputStream(DVDSTREAM_TYPE_ADDON, fileitem), m_addon(inputStream)
 {
   m_hasDemux = false;
@@ -32,7 +32,7 @@ CInputStreamAddon::~CInputStreamAddon()
 {
   Close();
   m_addon->Stop();
-  delete m_addon;
+  m_addon.reset();
 }
 
 bool CInputStreamAddon::Open()
@@ -264,4 +264,12 @@ void CInputStreamAddon::FlushDemux()
     return;
 
   m_addon->FlushDemux();
+}
+
+void CInputStreamAddon::SetVideoResolution(int width, int height)
+{
+  if (!m_addon)
+    return;
+
+  m_addon->SetVideoResolution(width, height);
 }

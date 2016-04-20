@@ -2961,6 +2961,7 @@ msgctxt "#657"
 msgid "Browse for folder"
 msgstr ""
 
+#: xbmc/music/ContextMenus.h
 msgctxt "#658"
 msgid "Song information"
 msgstr ""
@@ -3836,11 +3837,6 @@ msgid "Enter the username"
 msgstr ""
 
 #: xbmc/dialogs/GUIDialogMediaSource.cpp
-msgctxt "#1020"
-msgid "Add %s source"
-msgstr ""
-
-#: xbmc/dialogs/GUIDialogMediaSource.cpp
 #: addons/skin.estuary/1080i/DialogMediaSource.xml
 msgctxt "#1021"
 msgid "Enter the paths or browse for the media locations."
@@ -3880,10 +3876,6 @@ msgctxt "#1027"
 msgid "Edit source"
 msgstr ""
 
-#: xbmc/dialogs/GUIDialogMediaSource.cpp
-msgctxt "#1028"
-msgid "Edit %s source"
-msgstr ""
 
 msgctxt "#1029"
 msgid "Enter the new label"
@@ -3959,11 +3951,6 @@ msgstr ""
 
 msgctxt "#1044"
 msgid "Set plug-in thumb"
-msgstr ""
-
-#: xbmc/dialogs/GUIDialogContextMenu.cpp
-msgctxt "#1045"
-msgid "Add-on settings"
 msgstr ""
 
 msgctxt "#1046"
@@ -4225,7 +4212,12 @@ msgctxt "#1301"
 msgid "Custom passthrough device"
 msgstr ""
 
-#empty strings from id 1302 to 1374
+#: system/settings/settings.xml
+msgctxt "#1302"
+msgid "Volume control steps"
+msgstr ""
+
+#empty strings from id 1303 to 1374
 #strings from 1350 to 1449 are reserved for weather translation
 
 #. Weather token
@@ -4849,7 +4841,57 @@ msgctxt "#10047"
 msgid "Try changing the setting level to see additional categories and settings."
 msgstr ""
 
-#empty strings from id 10048 to 10099
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10048"
+msgid "Add video source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10049"
+msgid "Add music source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10050"
+msgid "Add picture source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10051"
+msgid "Add program source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10052"
+msgid "Add file source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10053"
+msgid "Edit video source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10054"
+msgid "Edit music source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10055"
+msgid "Edit picture source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10056"
+msgid "Edit program source"
+msgstr ""
+
+#: xbmc/dialogs/GUIDialogMediaSource.cpp
+msgctxt "#10057"
+msgid "Edit file source"
+msgstr ""
+
+#empty strings from id 10058 to 10099
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#10100"
@@ -5027,6 +5069,7 @@ msgctxt "#10522"
 msgid "Now playing - Videos"
 msgstr ""
 
+#: xbmc/music/ContextMenus.h
 msgctxt "#10523"
 msgid "Album information"
 msgstr ""
@@ -5104,7 +5147,12 @@ msgctxt "#12013"
 msgid "Install date"
 msgstr ""
 
-#empty strings from id 12014 to 12020
+#: xbmc/addons/GUIViewStateAddonBrowser.cpp
+msgctxt "#12014"
+msgid "Last updated"
+msgstr ""
+
+#empty strings from id 12015 to 12020
 
 #. Label of various controls for starting playback from the beginning
 #: xbmc/Autorun.cpp
@@ -5121,7 +5169,12 @@ msgctxt "#12022"
 msgid "Resume from %s"
 msgstr ""
 
-#empty strings from id 12023 to 12309
+#: xbmc/video/ContextMenus.cpp
+msgctxt "#12023"
+msgid "Play from beginning"
+msgstr ""
+
+#empty strings from id 12024 to 12309
 
 #: addons/skin.estuary/1080i/DialogNumeric.xml
 #: skin.estouchy
@@ -5683,12 +5736,7 @@ msgctxt "#13101"
 msgid "Let driver choose (requires restart)"
 msgstr ""
 
-#empty strings from id 13102 to 13104
-
-#: system/settings/settings.xml
-msgctxt "#13105"
-msgid "Vertical blank sync"
-msgstr ""
+#empty strings from id 13102 to 13105
 
 #: xbmc/peripherals/bus/PeripheralBus.cpp
 #: system/settings/settings.xml
@@ -6239,7 +6287,7 @@ msgstr ""
 
 #: xbmc/video/jobs/VideoLibraryRefreshingJob.cpp
 #: xbmc/video/windows/GUIWindowVideoBase.cpp
-#: xbmc/video/windows/GUIWindowVideoNav.cpp
+#: xbmc/video/ContextMenus.h
 msgctxt "#13346"
 msgid "Movie information"
 msgstr ""
@@ -6260,6 +6308,7 @@ msgctxt "#13350"
 msgid "Current playlist"
 msgstr ""
 
+#: Not used anymore. Use #10523 instead.
 msgctxt "#13351"
 msgid "Album information"
 msgstr ""
@@ -7625,15 +7674,7 @@ msgctxt "#15047"
 msgid "Audio DSP settings"
 msgstr ""
 
-#: xbmc/cores/AudioEngine/DSPAddons/ActiveAEDSP.cpp
-msgctxt "#15048"
-msgid "No audio DSP add-on enabled"
-msgstr ""
-
-#: xbmc/cores/AudioEngine/DSPAddons/ActiveAEDSP.cpp
-msgctxt "#15049"
-msgid "The audio DSP manager has been enabled without any enabled DSP add-on. Enable at least one add-on in order to use the DSP functionality."
-msgstr ""
+#empty strings from id 15048 to 15049
 
 #. Name of a list with amount of entries behind on GUI
 msgctxt "#15050"
@@ -8647,9 +8688,10 @@ msgctxt "#19033"
 msgid "Information"
 msgstr ""
 
+#. message box text stating that a timer is already set for a given epg event.
 #: xbmc/pvr/windows/GUIWindowPVRBase.cpp
 msgctxt "#19034"
-msgid "Already started recording on this channel"
+msgid "There is already a timer set for this event"
 msgstr ""
 
 msgctxt "#19035"
@@ -8922,49 +8964,7 @@ msgctxt "#19085"
 msgid "Unknown channel %u"
 msgstr ""
 
-msgctxt "#19086"
-msgid "Mo-__-__-__-__-__-__"
-msgstr ""
-
-msgctxt "#19087"
-msgid "__-Tu-__-__-__-__-__"
-msgstr ""
-
-msgctxt "#19088"
-msgid "__-__-We-__-__-__-__"
-msgstr ""
-
-msgctxt "#19089"
-msgid "__-__-__-Th-__-__-__"
-msgstr ""
-
-msgctxt "#19090"
-msgid "__-__-__-__-Fr-__-__"
-msgstr ""
-
-msgctxt "#19091"
-msgid "__-__-__-__-__-Sa-__"
-msgstr ""
-
-msgctxt "#19092"
-msgid "__-__-__-__-__-__-Su"
-msgstr ""
-
-msgctxt "#19093"
-msgid "Mo-Tu-We-Th-Fr-__-__"
-msgstr ""
-
-msgctxt "#19094"
-msgid "Mo-Tu-We-Th-Fr-Sa-__"
-msgstr ""
-
-msgctxt "#19095"
-msgid "Mo-Tu-We-Th-Fr-Sa-Su"
-msgstr ""
-
-msgctxt "#19096"
-msgid "__-__-__-__-__-Sa-Su"
-msgstr ""
+#empty strings from id 19086 to 19096
 
 msgctxt "#19097"
 msgid "Enter the name for the recording"
@@ -9645,15 +9645,7 @@ msgctxt "#19239"
 msgid "Starting background threads"
 msgstr ""
 
-#: xbmc/pvr/addons/PVRClients.cpp
-msgctxt "#19240"
-msgid "No PVR add-on enabled"
-msgstr ""
-
-#: xbmc/pvr/addons/PVRClients.cpp
-msgctxt "#19241"
-msgid "The PVR manager has been enabled without any enabled PVR add-on. Enable at least one add-on in order to use the PVR functionality."
-msgstr ""
+#empty strings from id 19240 to 19241
 
 #. Label for context menu entry to open settings dialog for a timer
 #: xbmc/pvr/windows/GUIWindowPVRGuide.cpp
@@ -9663,6 +9655,8 @@ msgstr ""
 
 #. Label for context menu entry to open settings dialog for a timer rule
 #: xbmc/pvr/windows/GUIWindowPVRGuide.cpp
+#: xbmc/pvr/windows/GUIWindowPVRSearch.cpp
+#: xbmc/pvr/windows/GUIWindowPVRTimersBase.cpp
 msgctxt "#19243"
 msgid "Edit timer rule"
 msgstr ""
@@ -9804,17 +9798,7 @@ msgctxt "#19272"
 msgid "You need a tuner, backend software, and an add-on for the backend to be able to use PVR. Please visit http://kodi.wiki/view/PVR to learn more."
 msgstr ""
 
-#. Header on DialogOK
-#: xbmc/cores/AudioEngine/DSPAddons/ActiveAEDSP.cpp
-msgctxt "#19273"
-msgid "No audio DSP add-ons could be found"
-msgstr ""
-
-#. DialogOK for no installed ADSP add-on available
-#: xbmc/cores/AudioEngine/DSPAddons/ActiveAEDSP.cpp
-msgctxt "#19274"
-msgid "You need an add-on installed to be able to use audio digital signal processing (DSP)."
-msgstr ""
+#empty strings from id 19273 to 19274
 
 #: xbmc/pvr/timers/PVRTimerInfoTag.cpp
 msgctxt "#19275"
@@ -9932,7 +9916,15 @@ msgctxt "#19294"
 msgid "Delete this recording permanently?"
 msgstr ""
 
-#empty strings from id 19295 to 19498
+#. Label for context menu entry to delete a timer rule
+#: xbmc/pvr/windows/GUIWindowPVRGuide.cpp
+#: xbmc/pvr/windows/GUIWindowPVRSearch.cpp
+#: xbmc/pvr/windows/GUIWindowPVRTimersBase.cpp
+msgctxt "#19295"
+msgid "Delete timer rule"
+msgstr ""
+
+#empty strings from id 19296 to 19498
 
 #: xbmc/epg/Epg.cpp
 msgctxt "#19499"
@@ -11067,12 +11059,7 @@ msgctxt "#20126"
 msgid "Log off"
 msgstr ""
 
-#empty string with id 20127
-
-#: xbmc/windows/GUIWindowFileManager.cpp
-msgctxt "#20128"
-msgid "Go to root"
-msgstr ""
+#empty string from id 20127 to 20128
 
 #: xbmc/video/dialogs/GUIDialogVideoSettings.cpp
 msgctxt "#20129"
@@ -11708,17 +11695,17 @@ msgstr ""
 #. Label for showing media rating and votes (combined), for example: "9.1 (87 votes)"
 #: xbmc/GUIInfoManager.cpp
 msgctxt "#20350"
-msgid "%.1f (%i votes)"
+msgid "%s (%s votes)"
 msgstr ""
 
 #: xbmc/video/jobs/VideoLibraryRefreshingJob.cpp
-#: xbmc/video/windows/GUIWindowVideoNav.cpp
+#: xbmc/video/ContextMenus.h
 msgctxt "#20351"
 msgid "TV show information"
 msgstr ""
 
 #: xbmc/video/jobs/VideoLibraryRefreshingJob.cpp
-#: xbmc/video/windows/GUIWindowVideoNav.cpp
+#: xbmc/video/ContextMenus.h
 msgctxt "#20352"
 msgid "Episode information"
 msgstr ""
@@ -11921,7 +11908,7 @@ msgstr ""
 
 #: xbmc/music/windows/GUIWindowMusicNav.cpp
 #: xbmc/video/jobs/VideoLibraryRefreshingJob.cpp
-#: xbmc/video/windows/GUIWindowVideoNav.cpp
+#: xbmc/video/ContextMenus.h
 msgctxt "#20393"
 msgid "Music video information"
 msgstr ""
@@ -12803,11 +12790,11 @@ msgid "Root filesystem"
 msgstr ""
 
 msgctxt "#21454"
-msgid "Cache full"
+msgid "Source too slow"
 msgstr ""
 
 msgctxt "#21455"
-msgid "Cache filled before reaching required amount for continuous playback"
+msgid "Read rate too low for continuous playback"
 msgstr ""
 
 #: xbmc/playlists/SmartPlaylist.cpp
@@ -13257,6 +13244,7 @@ msgctxt "#21890"
 msgid "Select artist"
 msgstr ""
 
+#: xbmc/music/ContextMenus.h
 msgctxt "#21891"
 msgid "Artist information"
 msgstr ""
@@ -13535,11 +13523,16 @@ msgctxt "#24002"
 msgid "Add-on options"
 msgstr ""
 
+#: xbmc/addons/ContextMenus.h
 msgctxt "#24003"
 msgid "Add-on information"
 msgstr ""
 
-#empty string with id 24004
+#. Name of menu in the add-on browser
+#: xbmc/filesystem/AddonsDirectory.cpp
+msgctxt "#24004"
+msgid "Recently updated"
+msgstr ""
 
 #: xbmc/addons/Addon.cpp
 msgctxt "#24005"
@@ -13688,8 +13681,9 @@ msgctxt "#24033"
 msgid "Install from repository"
 msgstr ""
 
-#: xbmc/addons/GUIViewStateAddonBrowser.cpp
 #: addons/skin.estuary/1080i/AddonBrowser.xml
+#: xbmc/addons/ContextMenus.h
+#: xbmc/addons/GUIViewStateAddonBrowser.cpp
 msgctxt "#24034"
 msgid "Check for updates"
 msgstr ""
@@ -14398,7 +14392,22 @@ msgctxt "#25010"
 msgid "Chapter %u"
 msgstr ""
 
-#empty strings from id 25011 to 29800
+#: xbmc/cores/VideoPlayer/VideoPlayer.cpp
+msgctxt "#25011"
+msgid "Commercial"
+msgstr ""
+
+#: xbmc/cores/VideoPlayer/VideoPlayer.cpp
+msgctxt "#25012"
+msgid "Auto-skip off"
+msgstr ""
+
+#: xbmc/cores/VideoPlayer/VideoPlayer.cpp
+msgctxt "#25013"
+msgid "Auto-skip on"
+msgstr ""
+
+#empty strings from id 25014 to 29800
 
 #: unused
 msgctxt "#29801"
@@ -14895,7 +14904,49 @@ msgctxt "#29987"
 msgid "Send present traffic messages around and can be handled from add-ons (nothing inside Kodi)"
 msgstr ""
 
-#empty strings from id 29988 to 33000
+#. Music role category
+#: system/library/music/musicroles/Arrangers.xml
+msgctxt "#29988"
+msgid "Arrangers"
+msgstr ""
+
+#. Music role category
+#: system/library/music/musicroles/Composers.xml
+msgctxt "#29989"
+msgid "Composers"
+msgstr ""
+
+#. Music role category
+#: system/library/music/musicroles/Conductors.xml
+msgctxt "#29990"
+msgid "Conductors"
+msgstr ""
+
+#. Music role category
+#: system/library/music/musicroles/DJ.xml
+msgctxt "#29991"
+msgid "DJ Mixers"
+msgstr ""
+
+#. Music role category
+#: system/library/music/musicroles/Lyricists.xml
+msgctxt "#29992"
+msgid "Lyricists"
+msgstr ""
+
+#. Music role category
+#: system/library/music/musicroles/Orchestras.xml
+msgctxt "#29993"
+msgid "Orchestras"
+msgstr ""
+
+#. Roles from music contributor
+#: system/library/music/musicroles/index.xml
+msgctxt "#29994"
+msgid "Roles"
+msgstr ""
+
+#empty strings from id 29995 to 33000
 #strings 30000 thru 30999 reserved for plug-ins and plug-in settings
 #strings 31000 thru 31999 reserved for skins
 #strings 32000 thru 32999 reserved for scripts
@@ -15756,7 +15807,13 @@ msgctxt "#35508"
 msgid "Access denied."
 msgstr ""
 
-#empty strings from id 35509 to 35999
+#. connection state "connecting" (asynchronous addon start)
+#: xbmc/addons/AddonCallbacksPVR.cpp
+msgctxt "#35509"
+msgid "Connecting to backend."
+msgstr ""
+
+#empty strings from id 35510 to 35999
 
 #: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36000"
@@ -17405,11 +17462,7 @@ msgctxt "#36355"
 msgid "In a multi-screen configuration, the screens not displaying this application are blacked out."
 msgstr ""
 
-#. Description of setting "System -> Video output -> Vertical blank sync" with label #13105
-#: system/settings/settings.xml
-msgctxt "#36356"
-msgid "Eliminates tearing."
-msgstr ""
+#empty strings from id 36356 to 36356
 
 #. Description of setting "System -> Video output -> Video calibration..." with label #214
 #: system/settings/settings.xml
@@ -17908,7 +17961,13 @@ msgctxt "#36441"
 msgid "Enable audio DSP processing"
 msgstr ""
 
-#empty strings from id 36442 to 36459
+#. Description of setting "System -> Audio output -> Volume control steps" with label #1302
+#: system/settings/settings.xml
+msgctxt "#36442"
+msgid "Set the number of volume control steps."
+msgstr ""
+
+#empty strings from id 36443 to 36459
 
 #. Description of settings "System -> Logging -> Enable event logging" with label #14112
 #: system/settings/settings.xml
@@ -18757,32 +18816,32 @@ msgstr ""
 #. Remixer of the song (if present)
 msgctxt "#38036"
 msgid "Remixer"
-msgstr "" 
+msgstr ""
 
 #. Arranger of the song (if present)
 msgctxt "#38037"
 msgid "Arranger"
-msgstr "" 
+msgstr ""
 
 #. Engineer of the song (if present)
 msgctxt "#38038"
 msgid "Engineer"
-msgstr "" 
+msgstr ""
 
 #. Producer of the song (if present)
 msgctxt "#38039"
 msgid "Producer"
-msgstr "" 
+msgstr ""
 
 #. DJMixer of the song (if present)
 msgctxt "#38040"
 msgid "DJMixer"
-msgstr "" 
+msgstr ""
 
 #. Mixer of the song (if present)
 msgctxt "#38041"
 msgid "Mixer"
-msgstr "" 
+msgstr ""
 
 #. Missing artist name
 #: music/MusicDatabase.cpp

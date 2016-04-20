@@ -39,12 +39,13 @@
 #include "URL.h"
 #include "filesystem/File.h"
 #include "utils/URIUtils.h"
-#include "addons/AddonManager.h"
+#include "ServiceBroker.h"
 #include "addons/InputStream.h"
+#include "addons/BinaryAddonCache.h"
 #include "Util.h"
 
 
-CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer, CFileItem fileitem, bool scanforextaudio)
+CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer, const CFileItem &fileitem, bool scanforextaudio)
 {
   std::string file = fileitem.GetPath();
   if (scanforextaudio)
@@ -53,6 +54,7 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer
     std::vector<std::string> filenames;
     filenames.push_back(file);
     CUtil::ScanForExternalAudio(file, filenames);
+    CUtil::ScanForExternalDemuxSub(file, filenames);
     if (filenames.size() >= 2)
     {
       return CreateInputStream(pPlayer, fileitem, filenames);
@@ -60,20 +62,24 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer
   }
 
   ADDON::VECADDONS addons;
-  ADDON::CAddonMgr::GetInstance().GetAddons(addons, ADDON::ADDON_INPUTSTREAM);
+  ADDON::CBinaryAddonCache &addonCache = CServiceBroker::GetBinaryAddonCache();
+  addonCache.GetAddons(addons, ADDON::ADDON_INPUTSTREAM);
   for (size_t i=0; i<addons.size(); ++i)
   {
     std::shared_ptr<ADDON::CInputStream> input(std::static_pointer_cast<ADDON::CInputStream>(addons[i]));
-    ADDON::CInputStream* clone = new ADDON::CInputStream(*input);
-    ADDON_STATUS status = clone->Supports(fileitem) ? clone->Create() : ADDON_STATUS_PERMANENT_FAILURE;
-    if (status == ADDON_STATUS_OK)
+
+    if (input->Supports(fileitem))
     {
-      if (clone->Supports(fileitem))
+      std::shared_ptr<ADDON::CInputStream> addon = input;
+      if (!input->UseParent())
+        addon = std::shared_ptr<ADDON::CInputStream>(new ADDON::CInputStream(*input));
+
+      ADDON_STATUS status = addon->Create();
+      if (status == ADDON_STATUS_OK)
       {
-        return new CInputStreamAddon(fileitem, clone);
+        return new CInputStreamAddon(fileitem, addon);
       }
     }
-    delete clone;
   }
 
   if (fileitem.IsDiscImage())
@@ -135,13 +141,6 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer
     if (fileitem.IsType(".m3u8"))
       return new CDVDInputStreamFFmpeg(fileitem);
 
-    if (fileitem.ContentLookup())
-    {
-      // request header
-      fileitem.SetMimeType("");
-      fileitem.FillInMimeType();
-    }
-
     if (fileitem.GetMimeType() == "application/vnd.apple.mpegurl")
       return new CDVDInputStreamFFmpeg(fileitem);
   }
@@ -150,7 +149,7 @@ CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer
   return (new CDVDInputStreamFile(fileitem));
 }
 
-CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer, CFileItem fileitem, const std::vector<std::string>& filenames)
+CDVDInputStream* CDVDFactoryInputStream::CreateInputStream(IVideoPlayer* pPlayer, const CFileItem &fileitem, const std::vector<std::string>& filenames)
 {
   return (new CInputStreamMultiSource(pPlayer, fileitem, filenames));
 }

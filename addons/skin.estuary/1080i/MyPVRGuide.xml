@@ -7,7 +7,7 @@
 	<controls>
 		<include>DefaultBackground</include>
 		<control type="group" id="50">
-			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="Window.IsActive(pvrguideinfo) | Window.IsActive(pvrrecordinginfo)">Conditional</animation>
+			<animation effect="fade" start="100" end="0" time="200" tween="sine" condition="$EXP[infodialog_active]">Conditional</animation>
 			<control type="group">
 				<description>Guide Timeline</description>
 				<visible>Control.IsVisible(10)</visible>
@@ -121,7 +121,7 @@
 							<left>2</left>
 							<width>54</width>
 							<height>54</height>
-							<texture>lists/focus.png</texture>
+							<texture colordiffuse="button_focus">lists/focus.png</texture>
 							<visible>Control.HasFocus(10)</visible>
 						</control>
 						<control type="image" id="2">
@@ -163,7 +163,7 @@
 						<aspectratio align="center" aligny="top">keep</aspectratio>
 						<fadetime>400</fadetime>
 						<texture>$INFO[ListItem.PlotOutline]</texture>
-						<visible>SubString(ListItem.PlotOutline,http://,Left) | SubString(ListItem.PlotOutline,https://,Left)</visible>
+						<visible>String.StartsWith(ListItem.PlotOutline,http://) | String.StartsWith(ListItem.PlotOutline,https://)</visible>
 					</control>
 					<control type="image">
 						<left>125</left>
@@ -202,11 +202,11 @@
 					</control>
 				</control>
 			</control>
-			<include name="PVRGuideListViewtype">
+			<include content="PVRGuideListViewtype">
 				<param name="container_id" value="11" />
 				<param name="container_name" value="19030" />
 			</include>
-			<include name="PVRGuideListViewtype">
+			<include content="PVRGuideListViewtype">
 				<param name="container_id" value="12" />
 				<param name="container_name" value="19031" />
 			</include>
@@ -280,7 +280,7 @@
 								<left>0</left>
 								<width>1090</width>
 								<height>58</height>
-								<texture>lists/focus.png</texture>
+								<texture colordiffuse="button_focus">lists/focus.png</texture>
 								<visible>Control.HasFocus(13)</visible>
 							</control>
 							<control type="label">
@@ -320,29 +320,29 @@
 			<control type="group">
 				<left>1220</left>
 				<top>150</top>
-				<visible>!IsEmpty(ListItem.ChannelName)</visible>
+				<visible>!String.IsEmpty(ListItem.ChannelName)</visible>
 				<visible>Control.IsVisible(13)</visible>
 				<include>Visible_Right</include>
 				<include>OpenClose_Right</include>
-				<include name="PVRInfoPanel">
+				<include content="PVRInfoPanel">
 					<param name="bottom_label1" value="$INFO[ListItem.NextTitle,[COLOR button_focus]$LOCALIZE[19031]:[/COLOR] ]" />
 					<param name="bottom_label2" value="$INFO[ListItem.NextStartTime]" />
 				</include>
 			</control>
-		</control>
-		<control type="group">
-			<include>MediaMenuCommon</include>
-			<include name="PVRSideBar">
-				<param name="group_label2" value="$INFO[Control.GetLabel(30)]" />
+			<control type="group">
+				<include>MediaMenuCommon</include>
+				<include content="PVRSideBar">
+					<param name="group_label2" value="$INFO[Control.GetLabel(30)]" />
+				</include>
+			</control>
+			<include content="TopBar">
+				<param name="breadcrumbs_label" value="$INFO[Control.GetLabel(29)] - $INFO[Control.GetLabel(30)]" />
+				<param name="breadcrumbs_icon" value="icons/settings/tvguide.png" />
+			</include>
+			<include content="BottomBar">
+				<param name="PageLabel" value="$INFO[Container.NumItems,$LOCALIZE[19019]: ]" />
 			</include>
 		</control>
-		<include name="TopBar">
-			<param name="breadcrumbs_label" value="$INFO[Control.GetLabel(29)] - $INFO[Control.GetLabel(30)]" />
-			<param name="breadcrumbs_icon" value="icons/settings/tvguide.png" />
-		</include>
-		<include name="BottomBar">
-			<param name="PageLabel" value="$INFO[Container.NumItems,$LOCALIZE[19019]: ]" />
-		</include>
 		<control type="label" id="29">
 			<font>-</font>
 			<include>HiddenObject</include>

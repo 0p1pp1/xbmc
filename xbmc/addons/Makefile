@@ -1,5 +1,6 @@
 SRCS=Addon.cpp \
      AddonBuilder.cpp \
+     BinaryAddonCache.cpp \
      AddonDatabase.cpp \
      AddonInstaller.cpp \
      AddonManager.cpp \
@@ -8,6 +9,7 @@ SRCS=Addon.cpp \
      AddonVersion.cpp \
      AudioEncoder.cpp \
      ContextMenuAddon.cpp \
+     ContextMenus.cpp \
      AudioDecoder.cpp \
      GUIDialogAddonInfo.cpp \
      GUIDialogAddonSettings.cpp \
@@ -17,6 +19,7 @@ SRCS=Addon.cpp \
      InputStream.cpp \
      LanguageResource.cpp \
      PluginSource.cpp \
+     PVRClient.cpp \
      Repository.cpp \
      RepositoryUpdater.cpp \
      Scraper.cpp \

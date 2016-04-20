@@ -28,7 +28,7 @@
 #include "events/EventLog.h"
 #include "events/NotificationEvent.h"
 #include "pvr/PVRManager.h"
-#include "pvr/addons/PVRClient.h"
+#include "addons/PVRClient.h"
 #include "pvr/channels/PVRChannelGroupsContainer.h"
 #include "pvr/channels/PVRChannelGroupInternal.h"
 #include "pvr/recordings/PVRRecordings.h"
@@ -341,53 +341,11 @@ void CAddonCallbacksPVR::PVRConnectionStateChange(void* addonData, const char* s
 
   client->SetConnectionState(newState);
 
-  int iMsg(-1);
-  bool bError(true);
-  bool bNotify(true);
+  std::string msg;
+  if (strMessage != nullptr)
+    msg = strMessage;
 
-  switch (newState)
-  {
-    case PVR_CONNECTION_STATE_SERVER_UNREACHABLE:
-      iMsg = 35505; // Server is unreachable
-      break;
-    case PVR_CONNECTION_STATE_SERVER_MISMATCH:
-      iMsg = 35506; // Server does not respond properly
-      break;
-    case PVR_CONNECTION_STATE_VERSION_MISMATCH:
-      iMsg = 35507; // Server version is not compatible
-      break;
-    case PVR_CONNECTION_STATE_ACCESS_DENIED:
-      iMsg = 35508; // Access denied
-      break;
-    case PVR_CONNECTION_STATE_CONNECTED:
-      iMsg = 36034; // Connection established
-      bError = false;
-      // No notification for the first successful connect.
-      bNotify = (prevState != PVR_CONNECTION_STATE_UNKNOWN);
-      break;
-    case PVR_CONNECTION_STATE_DISCONNECTED:
-      iMsg = 36030; // Connection lost
-      break;
-    default:
-      CLog::Log(LOGERROR, "PVR - %s - unknown connection state", __FUNCTION__);
-      return;
-  }
-
-  // Use addon-supplied message, if present
-  std::string strMsg;
-  if (strMessage && strlen(strMessage) > 0)
-    strMsg = strMessage;
-  else
-    strMsg = g_localizeStrings.Get(iMsg);
-
-  // Notify user.
-  if (bNotify && !CSettings::GetInstance().GetBool(CSettings::SETTING_PVRMANAGER_HIDECONNECTIONLOSTWARNING))
-    CGUIDialogKaiToast::QueueNotification(
-      bError ? CGUIDialogKaiToast::Error : CGUIDialogKaiToast::Info, client->Name().c_str(), strMsg, 5000, true);
-
-  // Write event log entry.
-  CEventLog::GetInstance().Add(EventPtr(new CNotificationEvent(
-    client->Name(), strMsg, client->Icon(), bError ? EventLevel::Error : EventLevel::Information)));
+  g_PVRManager.ConnectionStateChange(client->GetID(), std::string(strConnectionString), newState, msg);
 }
 
 typedef struct EpgEventStateChange
@@ -436,9 +394,6 @@ void CAddonCallbacksPVR::PVREpgEventStateChange(void* addonData, EPG_TAG* tag, u
     CLog::Log(LOGERROR, "PVR - %s - invalid handler data", __FUNCTION__);
     return;
   }
-
-  CLog::Log(LOGDEBUG, "PVR - %s - state for epg event '%d' on channel '%d' on client '%s' changed to '%d'.",
-            __FUNCTION__, tag->iUniqueBroadcastId, iUniqueChannelId, client->Name().c_str(), newState);
 
   static CCriticalSection queueMutex;
   static std::vector<EpgEventStateChange> queuedChanges;

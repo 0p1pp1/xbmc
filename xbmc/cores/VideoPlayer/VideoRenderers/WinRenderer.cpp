@@ -106,6 +106,21 @@ static enum AVPixelFormat PixelFormatFromFormat(ERenderFormat format)
   return AV_PIX_FMT_NONE;
 }
 
+bool CWinRenderer::HandlesRenderFormat(ERenderFormat format)
+{
+  if(format == RENDER_FMT_DXVA
+  || format == RENDER_FMT_YUV420P
+  || format == RENDER_FMT_YUV420P10
+  || format == RENDER_FMT_YUV420P16
+  || format == RENDER_FMT_NV12
+  || format == RENDER_FMT_UYVY422
+  || format == RENDER_FMT_YUYV422)
+  {
+    return true;
+  }
+  return false;
+}
+
 void CWinRenderer::ManageTextures()
 {
   if( m_NumYV12Buffers < m_neededBuffers )
@@ -211,11 +226,8 @@ bool CWinRenderer::Configure(unsigned int width, unsigned int height, unsigned i
 
   // calculate the input frame aspect ratio
   CalculateFrameAspectRatio(d_width, d_height);
-  RESOLUTION_INFO res = CDisplaySettings::GetInstance().GetResolutionInfo(RES_DESKTOP);
-  m_destWidth = res.iWidth;
-  m_destHeight = res.iHeight;
   SetViewMode(CMediaSettings::GetInstance().GetCurrentVideoSettings().m_ViewMode);
-  ManageDisplay();
+  ManageRenderArea();
 
   SelectRenderMethod();
   m_bConfigured = true;
@@ -279,8 +291,6 @@ int CWinRenderer::GetImage(YV12Image *image, int source, bool readonly)
   if (!buf)
     return -1;
 
-  buf->StartDecode();
-
   image->cshift_x = 1;
   image->cshift_y = 1;
   image->height = m_sourceHeight;
@@ -303,8 +313,6 @@ int CWinRenderer::GetImage(YV12Image *image, int source, bool readonly)
 
 void CWinRenderer::ReleaseImage(int source, bool preserve)
 {
-  if (m_VideoBuffers[source] != nullptr)
-    m_VideoBuffers[source]->StartRender();
 }
 
 void CWinRenderer::Reset()
@@ -315,7 +323,7 @@ void CWinRenderer::Update()
 {
   if (!m_bConfigured) 
     return;
-  ManageDisplay();
+  ManageRenderArea();
   ManageTextures();
 }
 
@@ -329,16 +337,22 @@ void CWinRenderer::RenderUpdate(bool clear, unsigned int flags, unsigned int alp
 
   g_Windowing.SetAlphaBlendEnable(alpha < 255);
   ManageTextures();
-  ManageDisplay();
+  ManageRenderArea();
   Render(flags);
 }
 
 void CWinRenderer::FlipPage(int source)
 {
+  if (m_VideoBuffers[m_iYV12RenderBuffer] != nullptr)
+    m_VideoBuffers[m_iYV12RenderBuffer]->StartDecode();
+
   if( source >= 0 && source < m_NumYV12Buffers )
     m_iYV12RenderBuffer = source;
   else
     m_iYV12RenderBuffer = NextYV12Texture();;
+
+  if (m_VideoBuffers[m_iYV12RenderBuffer] != nullptr)
+    m_VideoBuffers[m_iYV12RenderBuffer]->StartRender();
 
   return;
 }
@@ -534,6 +548,13 @@ void CWinRenderer::SelectPSVideoFilter()
 
 void CWinRenderer::UpdatePSVideoFilter()
 {
+  RESOLUTION_INFO res = g_graphicsContext.GetResInfo();
+  if (!res.bFullScreen)
+    res = g_graphicsContext.GetResInfo(RES_DESKTOP);
+
+  m_destWidth = res.iScreenWidth;
+  m_destHeight = res.iScreenHeight;
+
   SAFE_DELETE(m_scalerShader);
 
   if (m_bUseHQScaler)
@@ -789,7 +810,7 @@ void CWinRenderer::RenderHQ()
 {
   m_scalerShader->Render(m_IntermediateTarget, m_sourceWidth, m_sourceHeight, m_destWidth, m_destHeight
                        , m_sourceRect, g_graphicsContext.StereoCorrection(m_destRect)
-                       , (m_renderMethod == RENDER_DXVA && g_Windowing.UseLimitedColor()));
+                       , false);
 }
 
 void CWinRenderer::RenderHW(DWORD flags)
@@ -902,7 +923,7 @@ void CWinRenderer::RenderHW(DWORD flags)
 
     // render frame
     CRect tu = { dst.x1 / m_destWidth, dst.y1 / m_destHeight, dst.x2 / m_destWidth, dst.y2 / m_destHeight };
-    CD3DTexture::DrawQuad(dst, 0xFFFFFF, &m_IntermediateTarget, &tu, SHADER_METHOD_RENDER_TEXTURE_BLEND);
+    CD3DTexture::DrawQuad(dst, 0xFFFFFF, &m_IntermediateTarget, &tu, SHADER_METHOD_RENDER_TEXTURE_NOBLEND);
 
     if (stereoHack)
       g_Windowing.SetViewPort(oldViewPort);
@@ -980,7 +1001,6 @@ bool CWinRenderer::CreateYV12Texture(int index)
 
   m_VideoBuffers[index]->StartDecode();
   m_VideoBuffers[index]->Clear();
-  m_VideoBuffers[index]->StartRender();
 
   CLog::Log(LOGDEBUG, "created video buffer %i", index);
   return true;
@@ -1095,7 +1115,7 @@ CRenderInfo CWinRenderer::GetRenderInfo()
   if (m_renderMethod == RENDER_DXVA && m_processor)
     info.optimal_buffer_size = m_processor->Size();
   else
-    info.optimal_buffer_size = 3;
+    info.optimal_buffer_size = 4;
   return info;
 }
 

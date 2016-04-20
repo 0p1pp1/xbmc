@@ -9,7 +9,7 @@
 	<depth>DepthOSD</depth>
 	<controls>
 		<control type="group">
-			<include name="DialogBackgroundCommons">
+			<include content="DialogBackgroundCommons">
 				<param name="DialogBackgroundWidth" value="1220" />
 				<param name="DialogBackgroundHeight" value="742" />
 				<param name="DialogHeaderLabel" value="" />
@@ -33,7 +33,7 @@
 				<onright>61</onright>
 				<pagecontrol>61</pagecontrol>
 				<scrolltime>200</scrolltime>
-				<include name="DefaultSimpleListLayout">
+				<include content="DefaultSimpleListLayout">
 					<param name="width" value="880" />
 					<param name="height" value="69" />
 					<param name="list_id" value="3" />
@@ -83,7 +83,7 @@
 						<height>60</height>
 						<font>font12</font>
 						<textcolor>grey</textcolor>
-						<label>$INFO[ListItem.AddonSummary]</label>
+						<label>$INFO[ListItem.Label2]</label>
 					</control>
 				</itemlayout>
 				<focusedlayout height="125" width="880">
@@ -100,7 +100,7 @@
 						<top>0</top>
 						<width>880</width>
 						<height>125</height>
-						<texture>lists/focus.png</texture>
+						<texture colordiffuse="button_focus">lists/focus.png</texture>
 						<visible>Control.HasFocus(6)</visible>
 					</control>
 					<control type="image">
@@ -127,8 +127,7 @@
 						<width>700</width>
 						<height>60</height>
 						<font>font12</font>
-						<textcolor>grey</textcolor>
-						<label>$INFO[ListItem.AddonSummary]</label>
+						<label>$INFO[ListItem.Label2]</label>
 					</control>
 				</focusedlayout>
 			</control>
@@ -145,9 +144,9 @@
 			<control type="group">
 				<control type="label">
 					<description>number of files/pages in list text label</description>
-					<left>890</left>
+					<left>925</left>
 					<top>695</top>
-					<width>300</width>
+					<width>275</width>
 					<height>35</height>
 					<font>font12</font>
 					<align>right</align>
@@ -161,14 +160,13 @@
 					<onleft>61</onleft>
 					<itemgap>-20</itemgap>
 					<onright>3</onright>
-					<include name="DefaultDialogButton">
+					<include content="DefaultDialogButton">
 						<param name="id" value="5" />
 						<param name="label" value="-" />
 					</include>
-					<include name="DefaultDialogButton">
+					<include content="DefaultDialogButton">
 						<param name="id" value="7" />
 						<param name="label" value="$LOCALIZE[222]" />
-						<param name="onclick" value="Dialog.Close(selectdialog)" />
 					</include>
 				</control>
 			</control>

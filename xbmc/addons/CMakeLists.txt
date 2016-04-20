@@ -1,5 +1,6 @@
 set(SOURCES Addon.cpp
             AddonBuilder.cpp
+            BinaryAddonCache.cpp
             AddonDatabase.cpp
             AddonInstaller.cpp
             AddonManager.cpp
@@ -9,6 +10,7 @@ set(SOURCES Addon.cpp
             AudioDecoder.cpp
             AudioEncoder.cpp
             ContextMenuAddon.cpp
+            ContextMenus.cpp
             GUIDialogAddonInfo.cpp
             GUIDialogAddonSettings.cpp
             GUIViewStateAddonBrowser.cpp
@@ -17,6 +19,7 @@ set(SOURCES Addon.cpp
             InputStream.cpp
             LanguageResource.cpp
             PluginSource.cpp
+            PVRClient.cpp
             Repository.cpp
             RepositoryUpdater.cpp
             Scraper.cpp
@@ -29,6 +32,7 @@ set(SOURCES Addon.cpp
 
 set(HEADERS Addon.h
             AddonBuilder.h
+            BinaryAddonCache.h
             AddonDatabase.h
             AddonDll.h
             AddonInstaller.h
@@ -39,6 +43,7 @@ set(HEADERS Addon.h
             AudioDecoder.h
             AudioEncoder.h
             ContextMenuAddon.h
+            ContextMenus.h
             DllAddon.h
             DllAudioDSP.h
             DllLibCPluff.h
@@ -52,6 +57,7 @@ set(HEADERS Addon.h
             InputStream.h
             LanguageResource.h
             PluginSource.h
+            PVRClient.h
             Repository.h
             RepositoryUpdater.h
             Resource.h

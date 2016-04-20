@@ -17,8 +17,16 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : 1;\n"
 
 msgctxt "#31001"
-msgid "Search"
-msgstr "Пребарај"
+msgid "Search..."
+msgstr "Барај..."
+
+msgctxt "#31004"
+msgid "Change mode"
+msgstr "Измени начин"
+
+msgctxt "#31005"
+msgid "Watch as 2D"
+msgstr "Гледај во 2D"
 
 msgctxt "#31019"
 msgid "Forecast"

@@ -48,6 +48,14 @@ CGUIWindowPVRRecordings::CGUIWindowPVRRecordings(bool bRadio) :
 {
 }
 
+void CGUIWindowPVRRecordings::RegisterObservers(void)
+{
+  CSingleLock lock(m_critSection);
+  g_PVRRecordings->RegisterObserver(this);
+  g_PVRTimers->RegisterObserver(this);
+  g_infoManager.RegisterObserver(this);
+}
+
 void CGUIWindowPVRRecordings::UnregisterObservers(void)
 {
   CSingleLock lock(m_critSection);
@@ -56,15 +64,6 @@ void CGUIWindowPVRRecordings::UnregisterObservers(void)
   if (g_PVRTimers)
     g_PVRTimers->UnregisterObserver(this);
   g_infoManager.UnregisterObserver(this);
-}
-
-void CGUIWindowPVRRecordings::ResetObservers(void)
-{
-  CSingleLock lock(m_critSection);
-  UnregisterObservers();
-  g_PVRRecordings->RegisterObserver(this);
-  g_PVRTimers->RegisterObserver(this);
-  g_infoManager.RegisterObserver(this);
 }
 
 void CGUIWindowPVRRecordings::OnWindowLoaded()
@@ -158,7 +157,7 @@ void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons 
     buttons.Add(CONTEXT_BUTTON_DELETE, 117);        /* Delete */
   }
 
-  if (ActiveAE::CActiveAEDSP::GetInstance().IsProcessing())
+  if (CServiceBroker::GetADSP().IsProcessing())
     buttons.Add(CONTEXT_BUTTON_ACTIVE_ADSP_SETTINGS, 15047);  /* Audio DSP settings */
 
   if (recording)
@@ -170,8 +169,6 @@ void CGUIWindowPVRRecordings::GetContextButtons(int itemNumber, CContextButtons 
 
   if (!isDeletedRecording)
     CGUIWindowPVRBase::GetContextButtons(itemNumber, buttons);
-
-  CContextMenuManager::GetInstance().AddVisibleItems(pItem, buttons);
 }
 
 bool CGUIWindowPVRRecordings::OnAction(const CAction &action)
@@ -304,16 +301,14 @@ bool CGUIWindowPVRRecordings::OnMessage(CGUIMessage &message)
         case ObservableMessageEpgActiveItem:
         case ObservableMessageCurrentItem:
         {
-          if (IsActive())
-            SetInvalid();
+          SetInvalid();
           bReturn = true;
           break;
         }
         case ObservableMessageRecordings:
         case ObservableMessageTimersReset:
         {
-          if (IsActive())
-            Refresh(true);
+          Refresh(true);
           bReturn = true;
           break;
         }

@@ -84,7 +84,7 @@ AC_DEFUN([XB_FIND_SONAME],
     for path in $gcc_lib_path $env_lib_path $host_lib_path; do
       lib=[`ls -- $path/lib$2.dylib 2>/dev/null`]
       if test x$lib != x; then
-        # we want the path/name that is embedded in the dylib 
+        # we want the path/name that is embedded in the dylib
         $1_FILENAME=[`otool -L $lib | grep -v lib$2.dylib | grep lib$2 | awk '{V=1; print $V}'`]
         $1_SONAME=[`basename $$1_FILENAME`]
       fi
@@ -379,7 +379,7 @@ AC_ARG_ENABLE([avahi],
   [disable Avahi support (default is enabled if libavahi-common and libavahi-client is found)])],
   [use_avahi=$enableval],
   [use_avahi=yes])
-  
+
   AC_ARG_ENABLE([mdnsembedded],
   [AS_HELP_STRING([--disable-mdnsembedded],
   [disable mDNSEmbedded support (default is auto)])],
@@ -534,7 +534,7 @@ case $host in
      use_gles=yes
      use_optical_drive=no
      use_x11=no
-     build_shared_lib=yes    
+     build_shared_lib=yes
      ;;
   i*86*-linux-gnu*|i*86*-*-linux-uclibc*)
      target_platform=target_linux
@@ -794,7 +794,7 @@ elif test "$use_arch" = "arm"; then
   CFLAGS="$CFLAGS -mno-apcs-stack-check"
   CXXFLAGS="$CXXFLAGS -mno-apcs-stack-check"
   if test "$use_tegra" = "yes"; then
-    # Compile for ARMv7a architecture, need to test gcc for vfpv3-d16 support 
+    # Compile for ARMv7a architecture, need to test gcc for vfpv3-d16 support
     SAVE_CFLAGS="$CFLAGS"
     CFLAGS="-mfpu=vfpv3-d16"
     AC_COMPILE_IFELSE(
@@ -803,10 +803,10 @@ elif test "$use_arch" = "arm"; then
         CXXFLAGS="$CXXFLAGS -Wno-psabi -Wa,-march=armv7a -mtune=cortex-a9 -mfpu=vfpv3-d16 -mthumb-interwork"
         use_cpu=cortex-a9],
       [ CFLAGS="$SAVE_CFLAGS -Wa,-march=armv6 -mtune=cortex-a8 -mthumb-interwork"
-        CXXFLAGS="$CXXFLAGS -Wa,-march=armv6 -mtune=cortex-a8 -mthumb-interwork"    
+        CXXFLAGS="$CXXFLAGS -Wa,-march=armv6 -mtune=cortex-a8 -mthumb-interwork"
         use_cpu=cortex-a8])
   else
-    if test "$use_neon" = "yes"; then 
+    if test "$use_neon" = "yes"; then
       CFLAGS="$CFLAGS -mfpu=neon -mvectorize-with-neon-quad"
       CXXFLAGS="$CXXFLAGS -mfpu=neon -mvectorize-with-neon-quad"
     fi
@@ -965,7 +965,6 @@ fi
 AC_CHECK_HEADER([ass/ass.h],, AC_MSG_ERROR($missing_library))
 AC_CHECK_HEADER([ogg/ogg.h],,        AC_MSG_ERROR($missing_library))
 AC_CHECK_HEADER([vorbis/vorbisfile.h],, AC_MSG_ERROR($missing_library))
-PKG_CHECK_MODULES([LIBDCADEC], [dcadec],, AC_MSG_ERROR([libdcadec not found]))
 
 PKG_CHECK_MODULES([LIBCURL], [libcurl],, AC_MSG_ERROR([libcurl not found]))
 XB_FIND_SONAME([CURL], [curl])
@@ -1592,7 +1591,7 @@ if test "$FFMPEG_FOUND" != "true"; then
     PKG_CONFIG="$save_PKG_CONFIG"
   else
   PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_LIBNAMES],
-    [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"], 
+    [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"],
     [AC_MSG_ERROR("ffmpeg not found")])
   fi
 fi
@@ -1602,7 +1601,6 @@ if test "${USE_STATIC_FFMPEG}" = "1"; then
   FFMPEG_LIBDIR=${pkg_cfg_prefix}$(PKG_CONFIG_SYSROOT_DIR="" ${PKG_CONFIG} --static --variable=libdir libavcodec)
   GNUTLS_ALL_LIBS=$(${PKG_CONFIG} --static --libs-only-l --silence-errors gnutls)
   VORBISENC_ALL_LIBS=$(${PKG_CONFIG} --static --libs-only-l --silence-errors vorbisenc)
-  DCADEC_ALL_LIBS=$(${PKG_CONFIG} --static --libs-only-l --silence-errors dcadec)
 
   # check if static libs are available
   for ff_lib in ${ff_libs}; do
@@ -1778,11 +1776,9 @@ if test "$build_vendor" != "apple" ; then
   fi
 fi
 
-if test "$use_arch" != "arm" ; then
-  AC_CHECK_PROG(HAVE_CMAKE,cmake,"yes","no",)
-  if test "$HAVE_CMAKE" = "no" ; then
-    AC_MSG_ERROR($missing_program)
-  fi
+AC_CHECK_PROG(HAVE_CMAKE,cmake,"yes","no",)
+if test "$HAVE_CMAKE" = "no" ; then
+  AC_MSG_ERROR("cmake not found")
 fi
 
 AC_CHECK_PROG(HAVE_GPERF,gperf,"yes","no",)
@@ -2091,7 +2087,7 @@ else
 fi
 
 if test "x$use_airtunes" != "xno"; then
-  final_message="$final_message\n  AirTunes support (libshairplay):\tYes"  
+  final_message="$final_message\n  AirTunes support (libshairplay):\tYes"
 else
   final_message="$final_message\n  AirTunes support:\tNo"
 fi
@@ -2409,7 +2405,7 @@ XB_CONFIG_MODULE([lib/cpluff], [
     --build=$build_alias \
     --disable-shared --disable-rpath \
     --target=$target_alias CFLAGS="$CFLAGS" CC="$CC" CXX="$CXX" LDFLAGS="$LDFLAGS" LIBS=""
-    #LDFLAGS="$LDFLAGS -Wl,-read_only_relocs,suppress"    
+    #LDFLAGS="$LDFLAGS -Wl,-read_only_relocs,suppress"
 ], [0])
 
 XB_CONFIG_MODULE([lib/gtest], [

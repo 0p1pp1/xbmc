@@ -20,6 +20,7 @@
 
 #include "AddonManager.h"
 
+#include <iterator>
 #include <memory>
 #include <utility>
 
@@ -53,6 +54,7 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
+#include "ServiceBroker.h"
 
 #ifdef HAS_VISUALISATION
 #include "Visualisation.h"
@@ -60,9 +62,8 @@
 #ifdef HAS_SCREENSAVER
 #include "ScreenSaver.h"
 #endif
-#ifdef HAS_PVRCLIENTS
-#include "pvr/addons/PVRClient.h"
-#endif
+
+#include "addons/PVRClient.h"
 #include "games/controllers/Controller.h"
 #include "peripherals/addons/PeripheralAddon.h"
 
@@ -238,8 +239,7 @@ CAddonMgr::~CAddonMgr()
 
 CAddonMgr &CAddonMgr::GetInstance()
 {
-  static CAddonMgr sAddonMgr;
-  return sAddonMgr;
+  return CServiceBroker::GetAddonMgr();
 }
 
 IAddonMgrCallback* CAddonMgr::GetCallbackForType(TYPE type)
@@ -314,7 +314,7 @@ bool CAddonMgr::Init()
   }
 
   status = m_cpluff->register_logger(m_cp_context, cp_logger,
-      &CAddonMgr::GetInstance(), clog_to_cp(g_advancedSettings.m_logLevel));
+      this, clog_to_cp(g_advancedSettings.m_logLevel));
   if (status != CP_OK)
   {
     CLog::Log(LOGERROR, "ADDONS: Fatal Error, cp_register_logger() returned status: %i", status);
@@ -327,21 +327,18 @@ bool CAddonMgr::Init()
     return false;
   }
 
-  m_database.Open();
+ if (!m_database.Open())
+   CLog::Log(LOGFATAL, "ADDONS: Failed to open database");
+
   FindAddonsAndNotify();
 
-  //Ensure critical add-ons are installed and enabled
+  //Ensure required add-ons are installed and enabled
   for (const auto& id : m_systemAddons)
   {
     AddonPtr addon;
-    if (!GetAddon(id, addon, ADDON_UNKNOWN, false))
+    if (!GetAddon(id, addon, ADDON_UNKNOWN))
     {
-      CLog::Log(LOGFATAL, "addon '%s' is missing.", id.c_str());
-      return false;
-    }
-    if (!EnableAddon(id))
-    {
-      CLog::Log(LOGFATAL, "addon '%s' could not be enabled.", id.c_str());
+      CLog::Log(LOGFATAL, "addon '%s' not installed or not enabled.", id.c_str());
       return false;
     }
   }
@@ -359,9 +356,9 @@ bool CAddonMgr::Init()
 
 void CAddonMgr::DeInit()
 {
+  m_cpluff->destroy_context(m_cp_context);
   m_cpluff.reset();
   m_database.Close();
-  m_disabled.clear();
 }
 
 bool CAddonMgr::HasAddons(const TYPE &type)
@@ -386,21 +383,21 @@ void CAddonMgr::RemoveFromUpdateableAddons(AddonPtr &pAddon)
 {
   CSingleLock lock(m_critSection);
   VECADDONS::iterator it = std::find(m_updateableAddons.begin(), m_updateableAddons.end(), pAddon);
-  
+
   if(it != m_updateableAddons.end())
   {
     m_updateableAddons.erase(it);
   }
 }
 
-struct AddonIdFinder 
-{ 
+struct AddonIdFinder
+{
     AddonIdFinder(const std::string& id)
       : m_id(id)
     {}
-    
-    bool operator()(const AddonPtr& addon) 
-    { 
+
+    bool operator()(const AddonPtr& addon)
+    {
       return m_id == addon->ID();
     }
     private:
@@ -411,7 +408,7 @@ bool CAddonMgr::ReloadSettings(const std::string &id)
 {
   CSingleLock lock(m_critSection);
   VECADDONS::iterator it = std::find_if(m_updateableAddons.begin(), m_updateableAddons.end(), AddonIdFinder(id));
-  
+
   if( it != m_updateableAddons.end())
   {
     return (*it)->ReloadSettings();
@@ -470,7 +467,7 @@ bool CAddonMgr::GetDisabledAddons(VECADDONS& addons)
 bool CAddonMgr::GetDisabledAddons(VECADDONS& addons, const TYPE& type)
 {
   VECADDONS all;
-  if (CAddonMgr::GetInstance().GetInstalledAddons(all, type))
+  if (GetInstalledAddons(all, type))
   {
     std::copy_if(all.begin(), all.end(), std::back_inserter(addons),
         [this](const AddonPtr& addon){ return IsAddonDisabled(addon->ID()); });
@@ -685,7 +682,7 @@ bool CAddonMgr::FindAddons()
       for (int i = 0; i < n; ++i)
         installed.insert(cp_addons[i]->identifier);
       m_cpluff->release_info(m_cp_context, cp_addons);
-      m_database.SyncInstalled(installed);
+      m_database.SyncInstalled(installed, m_systemAddons);
     }
 
     // Reload caches
@@ -754,14 +751,30 @@ bool CAddonMgr::IsBlacklisted(const std::string& id) const
   return m_updateBlacklist.find(id) != m_updateBlacklist.end();
 }
 
+static void ResolveDependencies(const std::string& addonId, std::vector<std::string>& needed, std::vector<std::string>& missing)
+{
+  if (std::find(needed.begin(), needed.end(), addonId) != needed.end())
+    return;
+
+  AddonPtr addon;
+  if (!CAddonMgr::GetInstance().GetAddon(addonId, addon, ADDON_UNKNOWN, false))
+    missing.push_back(addonId);
+  else
+  {
+    needed.push_back(addonId);
+    for (const auto& dep : addon->GetDeps())
+      if (!dep.second.second) // ignore 'optional'
+        ResolveDependencies(dep.first, needed, missing);
+  }
+}
+
 bool CAddonMgr::DisableAddon(const std::string& id)
 {
   CSingleLock lock(m_critSection);
-  if (m_disabled.find(id) != m_disabled.end())
-    return true; //already disabled
-
   if (!CanAddonBeDisabled(id))
     return false;
+  if (m_disabled.find(id) != m_disabled.end())
+    return true; //already disabled
   if (!m_database.DisableAddon(id))
     return false;
   if (!m_disabled.insert(id).second)
@@ -776,23 +789,34 @@ bool CAddonMgr::DisableAddon(const std::string& id)
   return true;
 }
 
-bool CAddonMgr::EnableAddon(const std::string& id)
+bool CAddonMgr::EnableSingle(const std::string& id)
 {
   CSingleLock lock(m_critSection);
   if (m_disabled.find(id) == m_disabled.end())
     return true; //already enabled
-
   if (!m_database.DisableAddon(id, false))
     return false;
-  if (m_disabled.erase(id) == 0)
-    return false;
+  m_disabled.erase(id);
+  ADDON::OnEnabled(id);
 
   AddonPtr addon;
   if (GetAddon(id, addon, ADDON_UNKNOWN, false) && addon != NULL)
     CEventLog::GetInstance().Add(EventPtr(new CAddonManagementEvent(addon, 24064)));
 
-  //success
-  ADDON::OnEnabled(id);
+  CLog::Log(LOGDEBUG, "CAddonMgr: enabled %s", addon->ID().c_str());
+  return true;
+}
+
+bool CAddonMgr::EnableAddon(const std::string& id)
+{
+  std::vector<std::string> needed;
+  std::vector<std::string> missing;
+  ResolveDependencies(id, needed, missing);
+  for (const auto& dep : missing)
+    CLog::Log(LOGWARNING, "CAddonMgr: '%s' required by '%s' is missing. Add-on may not function "
+        "correctly", dep.c_str(), id.c_str());
+  for (auto it = needed.rbegin(); it != needed.rend(); ++it)
+    EnableSingle(*it);
   return true;
 }
 
@@ -848,7 +872,7 @@ bool CAddonMgr::CanAddonBeInstalled(const AddonPtr& addon)
 
 bool CAddonMgr::CanUninstall(const AddonPtr& addon)
 {
-  return addon && !IsSystemAddon(addon->ID()) &&
+  return addon && CanAddonBeDisabled(addon->ID()) &&
       !StringUtils::StartsWith(addon->Path(), CSpecialProtocol::TranslatePath("special://xbmc/addons"));
 }
 

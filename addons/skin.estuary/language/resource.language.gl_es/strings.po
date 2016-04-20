@@ -21,8 +21,16 @@ msgid "Now playing"
 msgstr "Reproducindo"
 
 msgctxt "#31001"
-msgid "Search"
-msgstr "Buscar"
+msgid "Search..."
+msgstr "Buscar..."
+
+msgctxt "#31004"
+msgid "Change mode"
+msgstr "Trocar o modo"
+
+msgctxt "#31005"
+msgid "Watch as 2D"
+msgstr "Ver como 2D"
 
 msgctxt "#31019"
 msgid "Forecast"

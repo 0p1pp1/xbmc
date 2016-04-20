@@ -28,6 +28,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "pvr/addons/PVRClients.h"
 #include "pvr/PVRManager.h"
+#include "pvr/timers/PVRTimers.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
@@ -320,6 +321,7 @@ void CEpg::AddEntry(const CEpgInfoTag &tag)
     newTag->Update(tag);
     newTag->SetPVRChannel(m_pvrChannel);
     newTag->SetEpg(this);
+    newTag->SetTimer(g_PVRTimers->GetTimerForEpgTag(newTag));
   }
 }
 
@@ -332,17 +334,20 @@ bool CEpg::UpdateEntry(const EPG_TAG *data, bool bUpdateDatabase /* = false */)
   return UpdateEntry(tag, false, bUpdateDatabase);
 }
 
-bool CEpg::UpdateEntry(const CEpgInfoTagPtr &tag, bool bNotifyObeservers, bool bUpdateDatabase /* = false */)
+bool CEpg::UpdateEntry(const CEpgInfoTagPtr &tag, bool bNotifyObservers, bool bUpdateDatabase /* = false */)
 {
   CSingleLock lock(m_critSection);
   auto it = m_tags.find(tag->StartAsUTC());
   EPG_EVENT_STATE state = (it == m_tags.end()) ? EPG_EVENT_CREATED : EPG_EVENT_UPDATED;
 
-  if (UpdateEntry(tag, state, it, bUpdateDatabase) && bNotifyObeservers)
+  if (UpdateEntry(tag, state, it, bUpdateDatabase))
   {
-    SetChanged();
-    lock.Leave();
-    NotifyObservers(ObservableMessageEpg);
+    if (bNotifyObservers)
+    {
+      SetChanged();
+      lock.Leave();
+      NotifyObservers(ObservableMessageEpg);
+    }
     return true;
   }
   return false;
@@ -430,6 +435,7 @@ bool CEpg::UpdateEntry(const CEpgInfoTagPtr &tag, EPG_EVENT_STATE newState, std:
   infoTag->Update(*tag, bNewTag);
   infoTag->SetEpg(this);
   infoTag->SetPVRChannel(m_pvrChannel);
+  infoTag->SetTimer(g_PVRTimers->GetTimerForEpgTag(infoTag));
 
   if (bUpdateDatabase)
     m_changedTags.insert(std::make_pair(infoTag->UniqueBroadcastID(), infoTag));

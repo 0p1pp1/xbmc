@@ -32,7 +32,7 @@
 				<onleft>5000</onleft>
 				<onright>620</onright>
 				<control type="radiobutton" id="600">
-					<include name="OSDButton">
+					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/previous.png"/>
 					</include>
 					<onclick>PlayerControl(Previous)</onclick>
@@ -54,17 +54,17 @@
 					<onclick>PlayerControl(Play)</onclick>
 				</control>
 				<control type="radiobutton" id="603">
-					<include name="OSDButton">
+					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/stop.png"/>
 					</include>
 					<onclick>PlayerControl(Stop)</onclick>
 				</control>
 				<control type="radiobutton" id="605">
-					<include name="OSDButton">
+					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/next.png"/>
 					</include>
 					<onclick>PlayerControl(Next)</onclick>
-					<visible>IntegerGreaterThan(Playlist.Length(music),1)</visible>
+					<visible>Integer.IsGreater(Playlist.Length(music),1)</visible>
 				</control>
 			</control>
 			<control type="grouplist" id="202">
@@ -81,7 +81,7 @@
 				<onleft>605</onleft>
 				<onright>600</onright>
 				<control type="radiobutton" id="620">
-					<include name="OSDButton">
+					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/rating.png"/>
 					</include>
 					<onclick>SetRating</onclick>
@@ -137,17 +137,17 @@
 					<onclick>PlayerControl(Random)</onclick>
 				</control>
 				<control type="radiobutton" id="703">
-					<include name="OSDButton">
+					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/settings-subtitle.png"/>
 					</include>
 					<onclick>Close</onclick>
-					<onclick condition="!IsEmpty(Skin.String(LyricScript_Path))">RunScript($INFO[Skin.String(LyricScript_Path)])</onclick>
-					<onclick condition="IsEmpty(Skin.String(LyricScript_Path))">Skin.SetAddon(LyricScript_Path,xbmc.python.lyrics)</onclick>
-					<onclick condition="IsEmpty(Skin.String(LyricScript_Path))">Close</onclick>
-					<onclick condition="IsEmpty(Skin.String(LyricScript_Path))">RunScript($INFO[Skin.String(LyricScript_Path)])</onclick>
+					<onclick condition="!String.IsEmpty(Skin.String(LyricScript_Path))">RunScript($INFO[Skin.String(LyricScript_Path)])</onclick>
+					<onclick condition="String.IsEmpty(Skin.String(LyricScript_Path))">Skin.SetAddon(LyricScript_Path,xbmc.python.lyrics)</onclick>
+					<onclick condition="String.IsEmpty(Skin.String(LyricScript_Path))">Close</onclick>
+					<onclick condition="String.IsEmpty(Skin.String(LyricScript_Path))">RunScript($INFO[Skin.String(LyricScript_Path)])</onclick>
 				</control>
 				<control type="radiobutton" id="5000">
-					<include name="OSDButton">
+					<include content="OSDButton">
 						<param name="texture" value="osd/fullscreen/buttons/settings.png"/>
 					</include>
 					<onclick>ActivateWindow(1105)</onclick>
@@ -181,8 +181,8 @@
 				<onup>201</onup>
 				<ondown condition="Player.Forwarding | Player.Rewinding">PlayerControl(Play)</ondown>
 				<ondown>201</ondown>
-				<onright>PlayerControl(Forward)</onright>
-				<onleft>PlayerControl(Rewind)</onleft>
+				<onright condition="!Player.Forwarding32x">PlayerControl(Forward)</onright>
+				<onleft condition="!Player.Rewinding32x">PlayerControl(Rewind)</onleft>
 				<visible>Player.SeekEnabled</visible>
 				<onclick condition="Player.Forwarding | Player.Rewinding">PlayerControl(Play)</onclick>
 			</control>

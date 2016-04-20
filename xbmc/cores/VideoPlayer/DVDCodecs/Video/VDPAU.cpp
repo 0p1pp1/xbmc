@@ -1471,7 +1471,20 @@ void CMixer::StateMachine(int signal, Protocol *port, Message *msg)
       break;
 
     case M_TOP_CONFIGURED:
-      if (port == &m_dataPort)
+      if (port == &m_controlPort)
+      {
+        switch (signal)
+        {
+        case CMixerControlProtocol::FLUSH:
+          Flush();
+          msg->Reply(CMixerControlProtocol::ACC);
+          m_state = M_TOP_CONFIGURED_WAIT1;
+          return;
+        default:
+          break;
+        }
+      }
+      else if (port == &m_dataPort)
       {
         switch (signal)
         {
@@ -2447,7 +2460,7 @@ void CMixer::FiniCycle()
   // Keep video surfaces for one 2 cycles longer than used
   // by mixer. This avoids blocking in decoder.
   // NVidia recommends num_ref + 5
-  int surfToKeep = 5;
+  size_t surfToKeep = 5;
 
   if (m_mixerInput.size() > 0 &&
       (m_mixerInput[0].videoSurface == VDP_INVALID_HANDLE))

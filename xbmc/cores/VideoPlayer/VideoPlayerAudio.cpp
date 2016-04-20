@@ -22,8 +22,8 @@
 #include "VideoPlayerAudio.h"
 #include "DVDCodecs/Audio/DVDAudioCodec.h"
 #include "DVDCodecs/DVDFactoryCodec.h"
+#include "DVDDemuxers/DVDDemuxPacket.h"
 #include "settings/Settings.h"
-#include "video/VideoReferenceClock.h"
 #include "utils/log.h"
 #include "utils/MathUtils.h"
 #include "cores/AudioEngine/AEFactory.h"
@@ -87,22 +87,13 @@ CVideoPlayerAudio::~CVideoPlayerAudio()
   // CloseStream(true);
 }
 
-bool CVideoPlayerAudio::AllowDTSHDDecode()
-{
-#ifdef TARGET_RASPBERRY_PI
-  if (g_RBP.RasberryPiVersion() == 1)
-    return false;
-#endif
-  return true;
-}
-
 bool CVideoPlayerAudio::OpenStream(CDVDStreamInfo &hints)
 {
   CLog::Log(LOGNOTICE, "Finding audio codec for: %i", hints.codec);
   bool allowpassthrough = !CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEDISPLAYASCLOCK);
   if (hints.realtime)
     allowpassthrough = false;
-  CDVDAudioCodec* codec = CDVDFactoryCodec::CreateAudioCodec(hints, allowpassthrough, AllowDTSHDDecode());
+  CDVDAudioCodec* codec = CDVDFactoryCodec::CreateAudioCodec(hints, allowpassthrough, m_processInfo.AllowDTSHDDecode());
   if(!codec)
   {
     CLog::Log(LOGERROR, "Unsupported audio codec");
@@ -539,14 +530,12 @@ bool CVideoPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
   if (m_synctype == SYNC_DISCON)
   {
     double limit, error;
-    limit = DVD_MSEC_TO_TIME(10);
     error = syncerror;
 
-    double absolute;
-    double clock = m_pClock->GetClock(absolute);
-    if (m_pClock->Update(clock + error, absolute, limit - 0.001, "CVideoPlayerAudio::OutputPacket"))
+    double correction = m_pClock->ErrorAdjust(error, "CVideoPlayerAudio::OutputPacket");
+    if (correction != 0)
     {
-      m_dvdAudio.SetSyncErrorCorrection(-error);
+      m_dvdAudio.SetSyncErrorCorrection(-correction);
     }
   }
   m_dvdAudio.AddPackets(audioframe);
@@ -585,18 +574,6 @@ void CVideoPlayerAudio::Flush(bool sync)
   m_dvdAudio.AbortAddPackets();
 }
 
-void CVideoPlayerAudio::WaitForBuffers()
-{
-  // make sure there are no more packets available
-  m_messageQueue.WaitUntilEmpty();
-
-  // make sure almost all has been rendered
-  // leave 500ms to avound buffer underruns
-  double delay = m_dvdAudio.GetCacheTime();
-  if(delay > 0.5)
-    Sleep((int)(1000 * (delay - 0.5)));
-}
-
 bool CVideoPlayerAudio::AcceptsData() const
 {
   bool full = m_messageQueue.IsFull();
@@ -609,7 +586,7 @@ bool CVideoPlayerAudio::SwitchCodecIfNeeded()
   bool allowpassthrough = !CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEDISPLAYASCLOCK);
   if (m_streaminfo.realtime)
     allowpassthrough = false;
-  CDVDAudioCodec *codec = CDVDFactoryCodec::CreateAudioCodec(m_streaminfo, allowpassthrough, AllowDTSHDDecode());
+  CDVDAudioCodec *codec = CDVDFactoryCodec::CreateAudioCodec(m_streaminfo, allowpassthrough, m_processInfo.AllowDTSHDDecode());
   if (!codec || codec->NeedPassthrough() == m_pAudioCodec->NeedPassthrough()) {
     // passthrough state has not changed
     delete codec;

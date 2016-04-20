@@ -23,12 +23,12 @@
 #include "Util.h"
 #include "addons/GUIDialogAddonInfo.h"
 #include "Autorun.h"
+#include "dialogs/GUIDialogMediaSource.h"
 #include "guilib/GUIWindowManager.h"
 #include "FileItem.h"
 #include "settings/MediaSourceSettings.h"
 #include "input/Key.h"
 #include "utils/StringUtils.h"
-#include "ContextMenuManager.h"
 
 #define CONTROL_BTNVIEWASICONS 2
 #define CONTROL_BTNSORTBY      3
@@ -100,25 +100,14 @@ void CGUIWindowPrograms::GetContextButtons(int itemNumber, CContextButtons &butt
   if (itemNumber < 0 || itemNumber >= m_vecItems->Size())
     return;
   CFileItemPtr item = m_vecItems->Get(itemNumber);
-  if (item && !item->GetProperty("pluginreplacecontextitems").asBoolean())
+  if (item)
   {
     if ( m_vecItems->IsVirtualDirectoryRoot() || m_vecItems->GetPath() == "sources://programs/" )
     {
       CGUIDialogContextMenu::GetContextButtons("programs", item, buttons);
     }
-    else
-    {
-      if (!m_vecItems->IsPlugin() && (item->IsPlugin() || item->IsScript()))
-        buttons.Add(CONTEXT_BUTTON_INFO, 24003); // Add-on info
-      if (item->IsPlugin() || item->IsScript() || m_vecItems->IsPlugin())
-        buttons.Add(CONTEXT_BUTTON_PLUGIN_SETTINGS, 1045);
-
-      buttons.Add(CONTEXT_BUTTON_GOTO_ROOT, 20128); // Go to Root
-    }
   }
   CGUIMediaWindow::GetContextButtons(itemNumber, buttons);
-
-  CContextMenuManager::GetInstance().AddVisibleItems(item, buttons);
 }
 
 bool CGUIWindowPrograms::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
@@ -130,20 +119,12 @@ bool CGUIWindowPrograms::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     Update("");
     return true;
   }
-  switch (button)
-  {
-  case CONTEXT_BUTTON_GOTO_ROOT:
-    Update("");
-    return true;
-
-  case CONTEXT_BUTTON_INFO:
-    OnItemInfo(itemNumber);
-    return true;
-
-  default:
-    break;
-  }
   return CGUIMediaWindow::OnContextButton(itemNumber, button);
+}
+
+bool CGUIWindowPrograms::OnAddMediaSource()
+{
+  return CGUIDialogMediaSource::ShowAndAddMediaSource("programs");
 }
 
 bool CGUIWindowPrograms::Update(const std::string &strDirectory, bool updateFilterPath /* = true */)

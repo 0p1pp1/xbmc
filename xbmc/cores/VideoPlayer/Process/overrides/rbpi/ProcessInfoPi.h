@@ -26,7 +26,8 @@ class CProcessInfoPi : public CProcessInfo
 {
 public:
   virtual ~CProcessInfoPi();
-  EINTERLACEMETHOD GetFallbackDeintMethod();
+  EINTERLACEMETHOD GetFallbackDeintMethod() override;
+  bool AllowDTSHDDecode() override;
 
 //protected:
   CProcessInfoPi();

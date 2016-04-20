@@ -36,7 +36,7 @@ namespace XFILE
 {
   class CCurlFile : public IFile
   {
-    public:
+    private:
       typedef enum
       {
         PROXY_HTTP = 0,
@@ -46,6 +46,7 @@ namespace XFILE
         PROXY_SOCKS5_REMOTE,
       } ProxyType;
     
+    public:
       CCurlFile();
       virtual ~CCurlFile();
       virtual bool Open(const CURL& url);
@@ -73,9 +74,8 @@ namespace XFILE
       void Cancel();
       void Reset();
       void SetUserAgent(const std::string& sUserAgent)           { m_userAgent = sUserAgent; }
-      void SetProxy(const std::string &proxy)                    { m_proxy = proxy; }
-      void SetProxyUserPass(const std::string &proxyuserpass)    { m_proxyuserpass = proxyuserpass; }
-      void SetProxyType(ProxyType proxytype)                     { m_proxytype = proxytype; }
+      void SetProxy(const std::string &type, const std::string &host, uint16_t port,
+                    const std::string &user, const std::string &password);
       void SetCustomRequest(const std::string &request)          { m_customrequest = request; }
       void UseOldHttpVersion(bool bUse)                          { m_useOldHttpVersion = bUse; }
       void SetAcceptEncoding(const std::string& encoding)        { m_acceptencoding = encoding; }
@@ -123,6 +123,8 @@ namespace XFILE
           bool            m_bFirstLoop;
           bool            m_isPaused;
           bool            m_sendRange;
+          bool            m_bLastError;
+          bool            m_bRetry;
 
           char*           m_readBuffer;
 
@@ -139,9 +141,9 @@ namespace XFILE
           size_t HeaderCallback(void *ptr, size_t size, size_t nmemb);
 
           bool         Seek(int64_t pos);
-          unsigned int Read(void* lpBuf, size_t uiBufSize);
+          ssize_t      Read(void* lpBuf, size_t uiBufSize);
           bool         ReadString(char *szLine, int iLineLength);
-          bool         FillBuffer(unsigned int want);
+          int8_t       FillBuffer(unsigned int want);
           void         SetReadBuffer(const void* lpBuf, int64_t uiBufSize);
 
           void         SetResume(void);
@@ -164,9 +166,11 @@ namespace XFILE
 
       std::string     m_url;
       std::string     m_userAgent;
-      std::string     m_proxy;
-      std::string     m_proxyuserpass;
       ProxyType       m_proxytype;
+      std::string     m_proxyhost;
+      uint16_t        m_proxyport;
+      std::string     m_proxyuser;
+      std::string     m_proxypassword;
       std::string     m_customrequest;
       std::string     m_acceptencoding;
       std::string     m_acceptCharset;
@@ -191,6 +195,7 @@ namespace XFILE
       bool            m_multisession;
       bool            m_skipshout;
       bool            m_postdataset;
+      bool            m_allowRetry;
 
       CRingBuffer     m_buffer;           // our ringhold buffer
       char *          m_overflowBuffer;   // in the rare case we would overflow the above buffer

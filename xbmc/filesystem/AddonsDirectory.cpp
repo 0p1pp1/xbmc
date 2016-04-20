@@ -24,6 +24,7 @@
 #include <set>
 #include "AddonsDirectory.h"
 #include "addons/AddonDatabase.h"
+#include "addons/AddonSystemSettings.h"
 #include "interfaces/generic/ScriptInvocationManager.h"
 #include "FileItem.h"
 #include "addons/AddonInstaller.h"
@@ -32,6 +33,7 @@
 #include "dialogs/GUIDialogOK.h"
 #include "guilib/TextureManager.h"
 #include "File.h"
+#include "settings/Settings.h"
 #include "SpecialProtocol.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
@@ -387,6 +389,22 @@ static bool Browse(const CURL& path, CFileItemList &items)
   return true;
 }
 
+static bool GetRecentlyUpdatedAddons(VECADDONS& addons)
+{
+  if (!CAddonMgr::GetInstance().GetInstalledAddons(addons))
+    return false;
+
+  auto limit = CDateTime::GetCurrentDateTime() - CDateTimeSpan(14, 0, 0, 0);
+  auto isOld = [limit](const AddonPtr& addon){ return addon->LastUpdated() < limit; };
+  addons.erase(std::remove_if(addons.begin(), addons.end(), isOld), addons.end());
+  return true;
+}
+
+static bool HasRecentlyUpdatedAddons()
+{
+  VECADDONS addons;
+  return GetRecentlyUpdatedAddons(addons) && !addons.empty();
+}
 
 static bool Repos(const CURL& path, CFileItemList &items)
 {
@@ -411,16 +429,75 @@ static bool Repos(const CURL& path, CFileItemList &items)
   return true;
 }
 
+static void RootDirectory(CFileItemList& items)
+{
+  items.SetLabel(g_localizeStrings.Get(24033));
+  {
+    CFileItemPtr item(new CFileItem("addons://user/", true));
+    item->SetLabel(g_localizeStrings.Get(24998));
+    item->SetIconImage("DefaultAddonsInstalled.png");
+    items.Add(item);
+  }
+  if (CAddonMgr::GetInstance().HasAvailableUpdates())
+  {
+    CFileItemPtr item(new CFileItem("addons://outdated/", true));
+    item->SetLabel(g_localizeStrings.Get(24043));
+    item->SetIconImage("DefaultAddonsUpdates.png");
+    items.Add(item);
+  }
+  if (CAddonInstaller::GetInstance().IsDownloading())
+  {
+    CFileItemPtr item(new CFileItem("addons://downloading/", true));
+    item->SetLabel(g_localizeStrings.Get(24067));
+    item->SetIconImage("DefaultNetwork.png");
+    items.Add(item);
+  }
+  if (CSettings::GetInstance().GetInt(CSettings::SETTING_ADDONS_AUTOUPDATES) == ADDON::AUTO_UPDATES_ON
+      && HasRecentlyUpdatedAddons())
+  {
+    CFileItemPtr item(new CFileItem("addons://recently_updated/", true));
+    item->SetLabel(g_localizeStrings.Get(24004));
+    item->SetIconImage("DefaultAddonsRecentlyUpdated.png");
+    items.Add(item);
+  }
+  if (CAddonMgr::GetInstance().HasAddons(ADDON_REPOSITORY))
+  {
+    CFileItemPtr item(new CFileItem("addons://repos/", true));
+    item->SetLabel(g_localizeStrings.Get(24033));
+    item->SetIconImage("DefaultAddonsRepo.png");
+    items.Add(item);
+  }
+  {
+    CFileItemPtr item(new CFileItem("addons://install/", false));
+    item->SetLabel(g_localizeStrings.Get(24041));
+    item->SetIconImage("DefaultAddonsZip.png");
+    items.Add(item);
+  }
+  {
+    CFileItemPtr item(new CFileItem("addons://search/", true));
+    item->SetLabel(g_localizeStrings.Get(137));
+    item->SetIconImage("DefaultAddonsSearch.png");
+    items.Add(item);
+  }
+}
+
 bool CAddonsDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
   std::string tmp(url.Get());
   URIUtils::RemoveSlashAtEnd(tmp);
   CURL path(tmp);
   const std::string endpoint = path.GetHostName();
+  items.ClearItems();
   items.ClearProperties();
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   items.SetPath(path.Get());
 
-  if (endpoint == "user")
+  if (endpoint.empty())
+  {
+    RootDirectory(items);
+    return true;
+  }
+  else if (endpoint == "user")
   {
     UserInstalledAddons(path, items);
     return true;
@@ -471,6 +548,26 @@ bool CAddonsDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   else if (endpoint == "search")
   {
     return GetSearchResults(path, items);
+  }
+  else if (endpoint == "recently_updated")
+  {
+    VECADDONS addons;
+    if (!GetRecentlyUpdatedAddons(addons))
+      return false;
+
+    std::sort(addons.begin(), addons.end(),
+        [](const AddonPtr& a, const AddonPtr& b){ return a->LastUpdated() > b->LastUpdated(); });
+
+    CAddonsDirectory::GenerateAddonListing(path, addons, items, g_localizeStrings.Get(24004));
+    return true;
+
+  }
+  else if (endpoint == "downloading")
+  {
+    VECADDONS addons;
+    CAddonInstaller::GetInstance().GetInstallList(addons);
+    CAddonsDirectory::GenerateAddonListing(path, addons, items, g_localizeStrings.Get(24067));
+    return true;
   }
   else if (endpoint == "more")
   {
@@ -559,8 +656,6 @@ CFileItemPtr CAddonsDirectory::FileItemFromAddon(const AddonPtr &addon,
   //TODO: fix hacks that depends on these
   item->SetProperty("Addon.ID", addon->ID());
   item->SetProperty("Addon.Name", addon->Name());
-  item->SetProperty("Addon.Version", addon->Version().asString());
-  item->SetProperty("Addon.Summary", addon->Summary());
   const auto it = addon->ExtraInfo().find("language");
   if (it != addon->ExtraInfo().end())
     item->SetProperty("Addon.Language", it->second);

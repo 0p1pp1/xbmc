@@ -71,12 +71,12 @@ OMXPlayerVideo::OMXPlayerVideo(OMXClock *av_clock,
                                CDVDOverlayContainer* pOverlayContainer,
                                CDVDMessageQueue& parent, CRenderManager& renderManager, CProcessInfo &processInfo)
 : CThread("OMXPlayerVideo")
+, IDVDStreamPlayerVideo(processInfo)
 , m_messageQueue("video")
+, m_omxVideo(renderManager)
 , m_codecname("")
 , m_messageParent(parent)
-, m_omxVideo(renderManager)
 , m_renderManager(renderManager)
-, IDVDStreamPlayerVideo(processInfo)
 {
   m_av_clock              = av_clock;
   m_pOverlayContainer     = pOverlayContainer;
@@ -91,7 +91,6 @@ OMXPlayerVideo::OMXPlayerVideo(OMXClock *av_clock,
   m_flags                 = 0;
   m_bAllowFullscreen      = false;
   m_iCurrentPts           = DVD_NOPTS_VALUE;
-  m_iVideoDelay           = 0;
   m_fForcedAspectRatio    = 0.0f;
   bool small_mem = g_RBP.GetArmMem() < 256;
   m_messageQueue.SetMaxDataSize((small_mem ? 10:40) * 1024 * 1024);
@@ -456,12 +455,13 @@ void OMXPlayerVideo::Process()
 
         double dts = pPacket->dts;
         double pts = pPacket->pts;
+        double iVideoDelay = m_renderManager.GetDelay() * (DVD_TIME_BASE / 1000.0);
 
         if (dts != DVD_NOPTS_VALUE)
-          dts += m_iVideoDelay - DVD_SEC_TO_TIME(m_renderManager.GetDisplayLatency());
+          dts += iVideoDelay;
 
         if (pts != DVD_NOPTS_VALUE)
-          pts += m_iVideoDelay - DVD_SEC_TO_TIME(m_renderManager.GetDisplayLatency());
+          pts += iVideoDelay;
 
         m_omxVideo.Decode(pPacket->pData, pPacket->iSize, dts, m_hints.ptsinvalid ? DVD_NOPTS_VALUE : pts, settings_changed);
 

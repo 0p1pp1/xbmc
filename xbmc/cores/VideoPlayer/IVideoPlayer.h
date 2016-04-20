@@ -20,10 +20,7 @@
  *
  */
 
-#include "DVDStreamInfo.h"
-#include "DVDMessageQueue.h"
 #include "DVDClock.h"
-#include "cores/VideoPlayer/Process/ProcessInfo.h"
 
 #define VideoPlayer_AUDIO    1
 #define VideoPlayer_VIDEO    2
@@ -36,6 +33,9 @@ template <typename T> class CRectGen;
 typedef CRectGen<float>  CRect;
 
 class DVDNavResult;
+class CDVDMsg;
+class CDVDStreamInfo;
+class CProcessInfo;
 
 struct SPlayerState
 {
@@ -138,9 +138,7 @@ public:
   ~IDVDStreamPlayerVideo() {}
   virtual bool OpenStream(CDVDStreamInfo &hint) = 0;
   virtual void CloseStream(bool bWaitForBuffers) = 0;
-  virtual bool StepFrame() { return false; };
   virtual void Flush(bool sync) = 0;
-  virtual void WaitForBuffers() = 0;
   virtual bool AcceptsData() const = 0;
   virtual bool HasData() const = 0;
   virtual int  GetLevel() const = 0;
@@ -149,8 +147,6 @@ public:
   virtual void EnableSubtitle(bool bEnable) = 0;
   virtual bool IsSubtitleEnabled() = 0;
   virtual void EnableFullscreen(bool bEnable) = 0;
-  virtual double GetDelay() = 0;
-  virtual void SetDelay(double delay) = 0;
   virtual double GetSubtitleDelay() = 0;
   virtual void SetSubtitleDelay(double delay) = 0;
   virtual bool IsStalled() const = 0;
@@ -162,8 +158,7 @@ public:
   virtual void SetSpeed(int iSpeed) = 0;
   virtual int  GetDecoderBufferSize() { return 0; }
   virtual int  GetDecoderFreeSpace() = 0;
-  virtual bool IsEOS() = 0;
-  virtual bool SubmittedEOS() const = 0;
+  virtual bool IsEOS() { return false; };
 };
 
 class CDVDAudioCodec;
@@ -176,7 +171,6 @@ public:
   virtual void CloseStream(bool bWaitForBuffers) = 0;
   virtual void SetSpeed(int speed) = 0;
   virtual void Flush(bool sync) = 0;
-  virtual void WaitForBuffers() = 0;
   virtual bool AcceptsData() const = 0;
   virtual bool HasData() const = 0;
   virtual int  GetLevel() const = 0;
@@ -193,5 +187,5 @@ public:
   virtual bool IsStalled() const = 0;
   virtual bool IsPassthrough() const = 0;
   virtual float GetDynamicRangeAmplification() const = 0;
-  virtual bool IsEOS() = 0;
+  virtual bool IsEOS() { return false; };
 };

@@ -20,6 +20,7 @@
 
 #include "DVDDemuxFFmpeg.h"
 
+#include <sstream>
 #include <utility>
 
 #include "commons/Exception.h"
@@ -230,9 +231,9 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
   {
     // special stream type that makes avformat handle file opening
     // allows internal ffmpeg protocols to be used
-    CURL url = m_pInput->GetURL();
+    AVDictionary *options = GetFFMpegOptionsFromInput();
 
-    AVDictionary *options = GetFFMpegOptionsFromURL(url);
+    CURL url = m_pInput->GetURL();
 
     int result=-1;
     if (url.IsProtocol("mms"))
@@ -437,7 +438,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
       AVStream *st = m_pFormatContext->streams[i];
       if (st->codec->codec_type == AVMEDIA_TYPE_AUDIO && st->codec->codec_id == AV_CODEC_ID_DTS)
       {
-        AVCodec* pCodec = avcodec_find_decoder_by_name("libdcadec");
+        AVCodec* pCodec = avcodec_find_decoder_by_name("dcadec");
         if (pCodec)
           st->codec->codec = pCodec;
       }
@@ -498,13 +499,16 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
   if (skipCreateStreams && GetNrOfStreams() == 0)
     m_program = 0;
 
+  m_displayTime = 0;
+  m_dtsAtDisplayTime = DVD_NOPTS_VALUE;
+
   return true;
 }
 
 void CDVDDemuxFFmpeg::Dispose()
 {
   m_pkt.result = -1;
-  av_free_packet(&m_pkt.pkt);
+  av_packet_unref(&m_pkt.pkt);
 
   if (m_pFormatContext)
   {
@@ -552,7 +556,10 @@ void CDVDDemuxFFmpeg::Flush()
   m_currentPts = DVD_NOPTS_VALUE;
 
   m_pkt.result = -1;
-  av_free_packet(&m_pkt.pkt);
+  av_packet_unref(&m_pkt.pkt);
+
+  m_displayTime = 0;
+  m_dtsAtDisplayTime = DVD_NOPTS_VALUE;
 }
 
 void CDVDDemuxFFmpeg::Abort()
@@ -599,9 +606,12 @@ void CDVDDemuxFFmpeg::SetSpeed(int iSpeed)
   }
 }
 
-AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromURL(const CURL &url)
+AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromInput()
 {
+  const CDVDInputStreamFFmpeg *const input =
+    dynamic_cast<CDVDInputStreamFFmpeg*>(m_pInput);
 
+  const CURL url = m_pInput->GetURL();
   AVDictionary *options = NULL;
 
   if (url.IsProtocol("http") || url.IsProtocol("https"))
@@ -638,6 +648,33 @@ AVDictionary *CDVDDemuxFFmpeg::GetFFMpegOptionsFromURL(const CURL &url)
       av_dict_set(&options, "cookies", cookies.c_str(), 0);
 
   }
+
+  if (input)
+  {
+    const std::string host = input->GetProxyHost();
+    if (!host.empty() && input->GetProxyType() == "http")
+    {
+      std::ostringstream urlStream;
+
+      const uint16_t port = input->GetProxyPort();
+      const std::string user = input->GetProxyUser();
+      const std::string password = input->GetProxyPassword();
+
+      urlStream << "http://";
+
+      if (!user.empty()) {
+        urlStream << user;
+        if (!password.empty())
+          urlStream << ":" << password;
+        urlStream << "@";
+      }
+
+      urlStream << host << ':' << port;
+
+      av_dict_set(&options, "http_proxy", urlStream.str().c_str(), 0);
+    }
+  }
+
   return options;
 }
 
@@ -726,7 +763,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         CLog::Log(LOGERROR, "CDVDDemuxFFmpeg::Read() returned invalid packet and eof reached");
 
       m_pkt.result = -1;
-      av_free_packet(&m_pkt.pkt);
+      av_packet_unref(&m_pkt.pkt);
     }
     else
     {
@@ -780,10 +817,6 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
             m_pkt.pkt.pts = AV_NOPTS_VALUE;
         }
 
-        // we need to get duration slightly different for matroska embedded text subtitels
-        if(m_bMatroska && stream->codec && stream->codec->codec_id == AV_CODEC_ID_TEXT && m_pkt.pkt.convergence_duration != 0)
-          m_pkt.pkt.duration = m_pkt.pkt.convergence_duration;
-
         if(m_bAVI && stream->codec && stream->codec->codec_type == AVMEDIA_TYPE_VIDEO)
         {
           // AVI's always have borked pts, specially if m_pFormatContext->flags includes
@@ -801,6 +834,25 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         pPacket->pts = ConvertTimestamp(m_pkt.pkt.pts, stream->time_base.den, stream->time_base.num);
         pPacket->dts = ConvertTimestamp(m_pkt.pkt.dts, stream->time_base.den, stream->time_base.num);
         pPacket->duration =  DVD_SEC_TO_TIME((double)m_pkt.pkt.duration * stream->time_base.num / stream->time_base.den);
+
+        CDVDInputStream::IDisplayTime *inputStream = m_pInput->GetIDisplayTime();
+        if (inputStream)
+        {
+          int dispTime = inputStream->GetTime();
+          if (m_displayTime != dispTime)
+          {
+            m_displayTime = dispTime;
+            if (pPacket->dts != DVD_NOPTS_VALUE)
+            {
+              m_dtsAtDisplayTime = pPacket->dts;
+            }
+          }
+          if (m_dtsAtDisplayTime != DVD_NOPTS_VALUE && pPacket->dts != DVD_NOPTS_VALUE)
+          {
+            pPacket->dispTime = m_displayTime;
+            pPacket->dispTime += DVD_TIME_TO_MSEC(pPacket->dts - m_dtsAtDisplayTime);
+          }
+        }
 
         // used to guess streamlength
         if (pPacket->dts != DVD_NOPTS_VALUE && (pPacket->dts > m_currentPts || m_currentPts == DVD_NOPTS_VALUE))
@@ -831,7 +883,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         pPacket->iStreamId = m_pkt.pkt.stream_index;
       }
       m_pkt.result = -1;
-      av_free_packet(&m_pkt.pkt);
+      av_packet_unref(&m_pkt.pkt);
     }
   }
   } // end of lock scope
@@ -912,7 +964,7 @@ bool CDVDDemuxFFmpeg::SeekTime(int time, bool backwords, double *startpts)
     time = 0;
 
   m_pkt.result = -1;
-  av_free_packet(&m_pkt.pkt);
+  av_packet_unref(&m_pkt.pkt);
 
   CDVDInputStream::IPosTime* ist = m_pInput->GetIPosTime();
   if (ist)
@@ -979,7 +1031,7 @@ bool CDVDDemuxFFmpeg::SeekByte(int64_t pos)
     UpdateCurrentPTS();
 
   m_pkt.result = -1;
-  av_free_packet(&m_pkt.pkt);
+  av_packet_unref(&m_pkt.pkt);
 
   return (ret >= 0);
 }

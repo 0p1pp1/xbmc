@@ -402,21 +402,15 @@ public:
    */
   virtual void FrameMove() {};
 
-  virtual void FrameWait(int ms) {};
-
   virtual bool HasFrame() { return false; };
 
   virtual void Render(bool clear, uint32_t alpha = 255, bool gui = true) {};
-
-  virtual void AfterRender() {};
 
   virtual void FlushRenderer() {};
 
   virtual void SetRenderViewMode(int mode) {};
 
   virtual float GetRenderAspectRatio() { return 1.0; };
-
-  virtual RESOLUTION GetRenderResolution() { return RES_INVALID; };
 
   virtual void TriggerUpdateResolution() {};
 

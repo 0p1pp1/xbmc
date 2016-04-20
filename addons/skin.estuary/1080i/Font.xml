@@ -37,11 +37,17 @@
 			<filename>Lato-Regular.ttf</filename>
 			<size>27</size>
 		</font>
+		<font>
+			<name>font_textbox</name>
+			<filename>Lato-Regular.ttf</filename>
+			<size>26</size>
+			<linespacing>1.2</linespacing>
+		</font>
 		<!-- Title Fonts -->
 		<font>
 			<name>font10_title</name>
 			<filename>Lato-Bold.ttf</filename>
-			<size>18</size>
+			<size>20</size>
 		</font>
 		<font>
 			<name>font12_title</name>
@@ -130,6 +136,12 @@
 			<name>fontContextMenu</name>
 			<filename>arial.ttf</filename>
 			<size>24</size>
+		</font>
+		<font>
+			<name>font_textbox</name>
+			<filename>Lato-Regular.ttf</filename>
+			<size>26</size>
+			<linespacing>1.2</linespacing>
 		</font>
 		<!-- Title Fonts -->
 		<font>

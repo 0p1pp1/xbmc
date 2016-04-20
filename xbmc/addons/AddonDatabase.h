@@ -34,8 +34,6 @@ public:
   virtual ~CAddonDatabase();
   virtual bool Open();
 
-  int GetAddonId(const ADDON::AddonPtr& item);
-  int AddAddon(const ADDON::AddonPtr& item, int idRepo);
   bool GetAddon(const std::string& addonID, ADDON::AddonPtr& addon);
 
   /*! \brief Get an addon with a specific version and repository. */
@@ -83,12 +81,6 @@ public:
    \return true on success, false on failure
    \sa IsAddonDisabled, HasDisabledAddons */
   bool DisableAddon(const std::string &addonID, bool disable = true);
-
-  /*! \brief Check whether an addon has been disabled via DisableAddon.
-   \param addonID id of the addon to check
-   \return true if the addon is disabled, false otherwise
-   \sa DisableAddon, HasDisabledAddons */
-  bool IsAddonDisabled(const std::string &addonID);
 
   /*! \brief Mark an addon as broken
    Sets a flag that this addon has been marked as broken in the repository.
@@ -138,7 +130,7 @@ public:
   /*! Clear internal fields that shouldn't be kept around indefinitely */
   void OnPostUnInstall(const std::string& addonId);
 
-  void SyncInstalled(const std::set<std::string>& ids);
+  void SyncInstalled(const std::set<std::string>& ids, const std::set<std::string>& enabled);
 
   void GetInstalled(std::vector<ADDON::CAddonBuilder>& addons);
 
@@ -150,11 +142,12 @@ protected:
   virtual void CreateTables();
   virtual void CreateAnalytics();
   virtual void UpdateTables(int version);
-  virtual int GetMinSchemaVersion() const { return 15; }
-  virtual int GetSchemaVersion() const { return 22; }
+  virtual int GetMinSchemaVersion() const;
+  virtual int GetSchemaVersion() const;
   const char *GetBaseDBName() const { return "Addons"; }
 
   bool GetAddon(int id, ADDON::AddonPtr& addon);
+  int AddAddon(const ADDON::AddonPtr& item, int idRepo);
 
   /* keep in sync with the addon table */
   enum AddonFields
