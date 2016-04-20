@@ -62,12 +62,6 @@ build for the first Raspberry Pi, the commands have to be adapted to use
     $ make -C tools/depends/target/xbmc
 
     $ make
-
-    $ make -C tools/depends/target/binary-addons ADDONS="pvr.hts"
-    $ make # (source is fetched and build fails)
-    $ (cd tools/depends/target/binary-addons/arm-linux-gnueabihf/build/pvr.hts && patch -p0 < ../../../pvr.hts.patch)
-    $ make
-
     $ sudo make install
 
 -----------------------------------------------------------------------------
@@ -94,4 +88,3 @@ Checkout buildroot :
     $ cd /opt/kodi-raspberrypi/buildroot-rbp
 
 Follow the instructions in README.rbp how to build the system and Kodi.
-
