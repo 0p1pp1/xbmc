@@ -42,10 +42,10 @@ build for the first Raspberry Pi, the commands have to be adapted to use
     $ ./configure CFLAGS=-isystem/opt/rpi/rootfs/usr/include \
          CXXFLAGS=-isystem/opt/rpi/rootfs/usr/include \
          CPPFLAGS=-isystem/opt/rpi/rootfs/usr/include \
-         LDFLAGS=--sysroot=/opt/rpi/rootfs \
+         LDFLAGS="--sysroot=/opt/rpi/rootfs \
          -L/opt/rpi/rootfs/lib/arm-linux-gnueabihf \
          -L/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf \
-         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/usr/lib \
+         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/usr/lib" \
          --host=arm-linux-gnueabihf --prefix=/opt/rpi/kodi-bcm \
          --with-toolchain=/opt/rpi/tools-master/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
          --with-firmware=/opt/rpi/rootfs --with-platform=raspberry-pi
