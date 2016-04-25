@@ -1800,9 +1800,8 @@ void CDVDDemuxFFmpeg::ResetVideoStreams()
     st = m_pFormatContext->streams[i];
     if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
     {
-      if (st->codec->extradata)
-        av_free(st->codec->extradata);
-      st->codec->extradata = NULL;
+      av_freep(&st->codec->extradata);
+      st->codec->extradata_size = 0;
       st->codec->width = 0;
     }
   }
