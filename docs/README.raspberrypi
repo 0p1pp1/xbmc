@@ -23,21 +23,28 @@ The following commands build for newer Rapberry Pi 2 generation. In order to
 build for the first Raspberry Pi, the commands have to be adapted to use
 `--with-platform=raspberry-pi` instead of `--with-platform=raspberry-pi2`.
 
-    $ sudo apt-get install git autoconf curl g++ zlib1g-dev libcurl4-openssl-dev gawk gperf libtool autopoint swig default-jre
+    /* The following commands are modified from the original docuemnt,
+     * to cross-build on my archlinux x86_64 box for rpi, raspbian (Wheezy).
+     */
 
-    $ git clone https://github.com/raspberrypi/tools
-    $ sudo cp -r tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 /opt
+    $ # install dependent libs/-dev packages on rpi (see docs/README.linux)
+    $ # mirror rpi's filesystem to /opt/rpi/rootfs on the host. \
+        (/opt/vc, /lib, /usr/{lib,include} should be enough)
+    $ mkdir -p /opt/rpi/rootfs/opt /opt/rpi/rootfs/usr
+    $ rsync -avzh pi@192.168.xx.xx:/opt/vc /opt/rpi/rootfs/opt
+    $ rsync -avzh pi@192.168.xx.xx:/lib /opt/rpi/rootfs
+    $ rsync -avzh pi@192.168.xx.xx:/usr/lib /opt/rpi/rootfs/usr
+    $ # fix the library symlinks to absolute paths, by the following command.
+    $ find /opt/rpi/rootfs -type l -lname /\* -execdir bash -c 'ln -sf /opt/rpi/rootfs$(readlink {}) {}' \;
+    $ # ugly hack for hardcoded Libdir's in *.pc files under /opt/rpi/rootfs
+    $ ln -s ../.. /opt/rpi/rootfs/opt
 
-    $ git clone https://github.com/raspberrypi/firmware
-    $ sudo mkdir -p /opt/bcm-rootfs/opt
-    $ sudo cp -r firmware/opt/vc /opt/bcm-rootfs/opt
+    $ git clone --depth 1 https://github.com/raspberrypi/tools
+    $ cp -r tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 /opt/rpi/
 
-    $ sudo mkdir -p /opt/xbmc-bcm
-    $ sudo chmod 777 /opt/xbmc-bcm
+    $ git clone https://github.com/0p1pp1/xbmc kodi
+    $ cd kodi/tools/depends
 
-    $ git clone https://github.com/xbmc/xbmc
-
-    $ cd xbmc/tools/depends
     $ ./bootstrap
     $ ./configure CFLAGS=-isystem/opt/rpi/rootfs/usr/include \
          CXXFLAGS=-isystem/opt/rpi/rootfs/usr/include \
@@ -47,7 +54,7 @@ build for the first Raspberry Pi, the commands have to be adapted to use
          -L/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf \
          -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/usr/lib" \
          --host=arm-linux-gnueabihf --prefix=/opt/rpi/kodi-bcm \
-         --with-toolchain=/opt/rpi/tools-master/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
+         --with-toolchain=/opt/rpi/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
          --with-firmware=/opt/rpi/rootfs --with-platform=raspberry-pi
 
     $ make
