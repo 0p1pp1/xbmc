@@ -213,7 +213,7 @@ bool CRendererVAAPI::UploadTexture(int index)
   m_vaapiTextures[index]->Map(pic);
 
   YuvImage &im = buf.image;
-  CYuvPlane (&planes)[3] = buf.fields[0];
+  CYuvPlane (&planes)[YuvImage::MAX_PLANES] = buf.fields[0];
 
   auto size = m_vaapiTextures[index]->GetTextureSize();
   planes[0].texwidth  = size.Width();
