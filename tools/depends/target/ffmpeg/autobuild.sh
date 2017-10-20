@@ -127,11 +127,6 @@ mkdir -p "ffmpeg-${VERSION}"
 cd "ffmpeg-${VERSION}" || exit 2
 tar --strip-components=1 -xf $MYDIR/${ARCHIVE}
 
-for p in ${MYDIR}/patches/*.patch
-do
-  patch -p1 < $p || { echo "error applying patch:\"${p}\"." ; exit 4; }
-done
-
 CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" \
 ./configure --prefix=$FFMPEG_PREFIX \
 	--extra-version="kodi-${VERSION}" \
@@ -158,6 +153,7 @@ CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" \
 	--enable-encoder=wmav2 \
 	--enable-protocol=http \
 	--enable-libvorbis \
+	--enable-libdemulti2 \
 	--enable-muxer=ogg \
 	--enable-encoder=libvorbis \
 	--enable-encoder=png \
