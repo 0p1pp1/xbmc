@@ -1040,12 +1040,12 @@ fi
 AC_MSG_CHECKING("for libcrossguid")
 AC_LANG_PUSH([C++])
 SAVED_LIBS="$LIBS"
-LIBS="$LIBS -lcrossguid $UUID_LIBS"
+LIBS="$LIBS -lxg $UUID_LIBS"
 AC_LINK_IFELSE(
   [AC_LANG_PROGRAM(
-    [#include <guid.h>],
-    [Guid dummy])],
-  [AC_MSG_RESULT(yes); SAVED_LIBS="$SAVED_LIBS $LDFLAGS -lcrossguid $UUID_LIBS"],
+    [#include <Guid.hpp>],
+    [xg::Guid dummy])],
+  [AC_MSG_RESULT(yes); SAVED_LIBS="$SAVED_LIBS $LDFLAGS -lxg $UUID_LIBS"],
   [AC_MSG_ERROR(crossguid not found)])
 LIBS="$SAVED_LIBS"
 AC_LANG_POP([C++])

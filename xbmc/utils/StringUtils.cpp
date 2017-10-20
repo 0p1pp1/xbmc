@@ -28,7 +28,7 @@
 //
 //------------------------------------------------------------------------
 
-#include <guid.h>
+#include <Guid.hpp>
 
 #include "StringUtils.h"
 #include "CharsetConverter.h"
@@ -1145,8 +1145,7 @@ void StringUtils::WordToDigits(std::string &word)
 
 std::string StringUtils::CreateUUID()
 {
-  static GuidGenerator guidGenerator;
-  auto guid = guidGenerator.newGuid();
+  auto guid = xg::newGuid();
 
   std::stringstream strGuid; strGuid << guid;
   return strGuid.str();
