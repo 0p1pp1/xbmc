@@ -30,8 +30,8 @@
 #include "video/jobs/VideoLibraryJob.h"
 #include "video/jobs/VideoLibraryMarkWatchedJob.h"
 #include "video/jobs/VideoLibraryRefreshingJob.h"
+#include "video/jobs/VideoLibraryResetResumePointJob.h"
 #include "video/jobs/VideoLibraryScanningJob.h"
-#include "video/VideoDatabase.h"
 
 CVideoLibraryQueue::CVideoLibraryQueue()
   : CJobQueue(false, 1, CJob::PRIORITY_LOW),
@@ -152,6 +152,14 @@ void CVideoLibraryQueue::MarkAsWatched(const CFileItemPtr &item, bool watched)
     return;
 
   AddJob(new CVideoLibraryMarkWatchedJob(item, watched));
+}
+
+void CVideoLibraryQueue::ResetResumePoint(const CFileItemPtr item)
+{
+  if (item == nullptr)
+    return;
+
+  AddJob(new CVideoLibraryResetResumePointJob(item));
 }
 
 void CVideoLibraryQueue::AddJob(CVideoLibraryJob *job)

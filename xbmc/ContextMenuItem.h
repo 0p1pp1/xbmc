@@ -26,8 +26,8 @@
 #include "addons/Repository.h"
 #include "addons/RepositoryUpdater.h"
 #include "addons/GUIDialogAddonInfo.h"
-#include "addons/GUIDialogAddonSettings.h"
-
+#include "addons/settings/GUIDialogAddonSettings.h"
+#include "guilib/LocalizeStrings.h"
 
 namespace ADDON
 {
@@ -37,6 +37,7 @@ namespace ADDON
 class IContextMenuItem
 {
 public:
+  virtual ~IContextMenuItem() = default;
   virtual bool IsVisible(const CFileItem& item) const = 0;
   virtual bool Execute(const CFileItemPtr& item) const = 0;
   virtual std::string GetLabel(const CFileItem& item) const = 0;
@@ -48,11 +49,11 @@ class CStaticContextMenuAction : public IContextMenuItem
 {
 public:
   explicit CStaticContextMenuAction(uint32_t label) : m_label(label) {}
-  std::string GetLabel(const CFileItem& item) const override final
+  std::string GetLabel(const CFileItem& item) const final
   {
     return g_localizeStrings.Get(m_label);
   }
-  bool IsGroup() const override final { return false; }
+  bool IsGroup() const final { return false; }
 private:
   const uint32_t m_label;
 };
@@ -61,7 +62,9 @@ private:
 class CContextMenuItem : public IContextMenuItem
 {
 public:
-  std::string GetLabel(const CFileItem& item) const { return m_label; }
+  CContextMenuItem() = default;
+
+  std::string GetLabel(const CFileItem& item) const  override { return m_label; }
   bool IsVisible(const CFileItem& item) const override ;
   bool IsParentOf(const CContextMenuItem& menuItem) const;
   bool IsGroup() const override ;
@@ -79,7 +82,7 @@ public:
     const std::string& label,
     const std::string& parent,
     const std::string& library,
-    const INFO::InfoPtr& condition,
+    const std::string& condition,
     const std::string& addonId);
 
   friend class ADDON::CContextMenuAddon;
@@ -89,6 +92,9 @@ private:
   std::string m_parent;
   std::string m_groupId;
   std::string m_library;
-  INFO::InfoPtr m_condition;
   std::string m_addonId; // The owner of this menu item
+
+  std::string m_visibilityCondition;
+  mutable INFO::InfoPtr m_infoBool;
+  mutable bool m_infoBoolRegistered{false};
 };

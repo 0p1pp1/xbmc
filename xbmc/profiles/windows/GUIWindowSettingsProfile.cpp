@@ -33,6 +33,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "filesystem/Directory.h"
 #include "FileItem.h"
+#include "ServiceBroker.h"
 #include "input/Key.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/Variant.h"
@@ -40,7 +41,6 @@
 using namespace XFILE;
 
 #define CONTROL_PROFILES 2
-#define CONTROL_LASTLOADED_PROFILE 3
 #define CONTROL_LOGINSCREEN 4
 #define CONTROL_AUTOLOGIN 5
 
@@ -82,7 +82,7 @@ void CGUIWindowSettingsProfile::OnPopupMenu(int iItem)
     g_application.StopPlaying();
     CGUIMessage msg2(GUI_MSG_ITEM_SELECTED, g_windowManager.GetActiveWindow(), iCtrlID);
     g_windowManager.SendMessage(msg2);
-    g_application.getNetwork().NetworkMessage(CNetwork::SERVICES_DOWN,1);
+    CServiceBroker::GetNetwork().NetworkMessage(CNetwork::SERVICES_DOWN,1);
     CProfilesManager::GetInstance().LoadMasterProfileForLogin();
     CGUIWindowLoginScreen::LoadProfile(iItem);
     return;
@@ -234,7 +234,7 @@ void CGUIWindowSettingsProfile::OnInitWindow()
 
 bool CGUIWindowSettingsProfile::GetAutoLoginProfileChoice(int &iProfile)
 {
-  CGUIDialogSelect *dialog = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
+  CGUIDialogSelect *dialog = g_windowManager.GetWindow<CGUIDialogSelect>(WINDOW_DIALOG_SELECT);
   if (!dialog) return false;
 
   // add items

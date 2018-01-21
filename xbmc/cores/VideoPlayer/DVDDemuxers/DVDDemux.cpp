@@ -74,5 +74,5 @@ int CDVDDemux::GetNrOfSubtitleStreams()
 
 std::string CDemuxStream::GetStreamName()
 {
-  return "";
+  return name;
 }

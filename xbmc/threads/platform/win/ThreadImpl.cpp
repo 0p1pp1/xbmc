@@ -20,8 +20,7 @@
 
 #include <windows.h>
 #include <process.h>
-#include "threads/platform/win/Win32Exception.h"
-#include "../../win32/WIN32Util.h"
+#include "platform/win32/WIN32Util.h"
 
 void CThread::SpawnThread(unsigned stacksize)
 {
@@ -75,8 +74,6 @@ void CThread::SetThreadInfo()
   }
 
   CWIN32Util::SetThreadLocalLocale(true); // avoid crashing with setlocale(), see https://connect.microsoft.com/VisualStudio/feedback/details/794122
-
-    win32_exception::install_handler();
 }
 
 ThreadIdentifier CThread::GetCurrentThreadId()
@@ -160,6 +157,10 @@ bool CThread::WaitForThreadExit(unsigned int milliseconds)
 
 int64_t CThread::GetAbsoluteUsage()
 {
+#ifdef TARGET_WINDOWS_STORE
+  // GetThreadTimes is available since 10.0.15063 only
+  return 0;
+#else
   CSingleLock lock(m_CriticalSection);
 
   if (!m_ThreadOpaque.handle)
@@ -173,6 +174,7 @@ int64_t CThread::GetAbsoluteUsage()
     time += (((uint64_t)KernelTime.dwHighDateTime) << 32) + ((uint64_t)KernelTime.dwLowDateTime);
   }
   return time;
+#endif
 }
 
 float CThread::GetRelativeUsage()
@@ -196,6 +198,4 @@ float CThread::GetRelativeUsage()
 
 void CThread::SetSignalHandlers()
 {
-  // install win32 exception translator
-  win32_exception::install_handler();
 }

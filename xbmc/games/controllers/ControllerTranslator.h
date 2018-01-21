@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2015-2016 Team Kodi
+ *      Copyright (C) 2015-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,11 +19,12 @@
  */
 #pragma once
 
-#include "ControllerTypes.h"
 #include "input/joysticks/JoystickTypes.h"
 
 #include <string>
 
+namespace KODI
+{
 namespace GAME
 {
 
@@ -33,8 +34,12 @@ public:
   static const char* TranslateFeatureType(JOYSTICK::FEATURE_TYPE type);
   static JOYSTICK::FEATURE_TYPE TranslateFeatureType(const std::string& strType);
 
+  static const char* TranslateFeatureCategory(JOYSTICK::FEATURE_CATEGORY category);
+  static JOYSTICK::FEATURE_CATEGORY TranslateFeatureCategory(const std::string& strCategory);
+
   static const char* TranslateInputType(JOYSTICK::INPUT_TYPE type);
   static JOYSTICK::INPUT_TYPE TranslateInputType(const std::string& strType);
 };
 
+}
 }

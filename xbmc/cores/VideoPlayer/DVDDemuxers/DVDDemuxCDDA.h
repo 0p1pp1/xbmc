@@ -26,10 +26,6 @@
 #define __attribute__(dummy_val)
 #endif
 
-#if defined(HAVE_CONFIG_H)
-  #include "config.h"
-#endif
-
 class CDemuxStreamAudioCDDA;
 
 class CDVDDemuxCDDA : public CDVDDemux
@@ -37,26 +33,25 @@ class CDVDDemuxCDDA : public CDVDDemux
 public:
 
   CDVDDemuxCDDA();
-  ~CDVDDemuxCDDA();
+  ~CDVDDemuxCDDA() override;
 
-  bool Open(CDVDInputStream* pInput);
+  bool Open(std::shared_ptr<CDVDInputStream> pInput);
   void Dispose();
-  void Reset();
-  void Abort();
-  void Flush();
-  DemuxPacket* Read();
-  bool SeekTime(int time, bool backwords = false, double* startpts = NULL);
-  void SetSpeed(int iSpeed) {};
-  int GetStreamLength() ;
+  bool Reset() override;
+  void Abort() override;
+  void Flush() override;
+  DemuxPacket* Read() override;
+  bool SeekTime(double time, bool backwards = false, double* startpts = NULL) override;
+  int GetStreamLength() override;
   CDemuxStream* GetStream(int iStreamId) const override;
   std::vector<CDemuxStream*> GetStreams() const override;
   int GetNrOfStreams() const override;
-  std::string GetFileName();
-  virtual std::string GetStreamCodecName(int iStreamId) override;
+  std::string GetFileName() override;
+  std::string GetStreamCodecName(int iStreamId) override;
 
 protected:
   friend class CDemuxStreamAudioCDDA;
-  CDVDInputStream* m_pInput;
+  std::shared_ptr<CDVDInputStream> m_pInput;
   int64_t m_bytes;
 
   CDemuxStreamAudioCDDA *m_stream;

@@ -25,6 +25,9 @@
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogNumeric.h"
 #include "filesystem/Directory.h"
+#include "input/ActionTranslator.h"
+#include "input/Key.h"
+#include "input/WindowTranslator.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/StereoscopicsManager.h"
@@ -50,10 +53,10 @@ using namespace KODI::MESSAGING;
 static int Action(const std::vector<std::string>& params)
 {
   // try translating the action from our ButtonTranslator
-  int actionID;
-  if (CButtonTranslator::TranslateActionString(params[0].c_str(), actionID))
+  unsigned int actionID;
+  if (CActionTranslator::TranslateString(params[0], actionID))
   {
-    int windowID = params.size() == 2 ? CButtonTranslator::TranslateWindow(params[1]) : WINDOW_INVALID;
+    int windowID = params.size() == 2 ? CWindowTranslator::TranslateWindow(params[1]) : WINDOW_INVALID;
     CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, windowID, -1, static_cast<void*>(new CAction(actionID)));
   }
 
@@ -81,16 +84,16 @@ static int ActivateWindow(const std::vector<std::string>& params2)
   }
 
   // confirm the window destination is valid prior to switching
-  int iWindow = CButtonTranslator::TranslateWindow(strWindow);
+  int iWindow = CWindowTranslator::TranslateWindow(strWindow);
   if (iWindow != WINDOW_INVALID)
   {
-    // compate the given directory param with the current active directory
+    // compare the given directory param with the current active directory
     bool bIsSameStartFolder = true;
     if (!params.empty())
     {
       CGUIWindow *activeWindow = g_windowManager.GetWindow(g_windowManager.GetActiveWindow());
       if (activeWindow && activeWindow->IsMediaWindow())
-        bIsSameStartFolder = ((CGUIMediaWindow*) activeWindow)->IsSameStartFolder(params[0]);
+        bIsSameStartFolder = static_cast<CGUIMediaWindow*>(activeWindow)->IsSameStartFolder(params[0]);
     }
 
     // activate window only if window and path differ from the current active window
@@ -124,7 +127,7 @@ static int ActivateAndFocus(const std::vector<std::string>& params)
   std::string strWindow = params[0];
 
   // confirm the window destination is valid prior to switching
-  int iWindow = CButtonTranslator::TranslateWindow(strWindow);
+  int iWindow = CWindowTranslator::TranslateWindow(strWindow);
   if (iWindow != WINDOW_INVALID)
   {
     if (iWindow != g_windowManager.GetActiveWindow())
@@ -226,7 +229,7 @@ static int CancelAlarm(const std::vector<std::string>& params)
  */
 static int ClearProperty(const std::vector<std::string>& params)
 {
-  CGUIWindow *window = g_windowManager.GetWindow(params.size() > 1 ? CButtonTranslator::TranslateWindow(params[1]) : g_windowManager.GetFocusedWindow());
+  CGUIWindow *window = g_windowManager.GetWindow(params.size() > 1 ? CWindowTranslator::TranslateWindow(params[1]) : g_windowManager.GetFocusedWindow());
   if (window)
     window->SetProperty(params[0],"");
 
@@ -249,10 +252,10 @@ static int CloseDialog(const std::vector<std::string>& params)
   }
   else
   {
-    int id = CButtonTranslator::TranslateWindow(params[0]);
-    CGUIWindow *window = (CGUIWindow *)g_windowManager.GetWindow(id);
+    int id = CWindowTranslator::TranslateWindow(params[0]);
+    CGUIWindow *window = g_windowManager.GetWindow(id);
     if (window && window->IsDialog())
-      ((CGUIDialog *)window)->Close(bForce);
+      static_cast<CGUIDialog*>(window)->Close(bForce);
   }
 
   return 0;
@@ -376,7 +379,7 @@ static int SetResolution(const std::vector<std::string>& params)
  */
 static int SetProperty(const std::vector<std::string>& params)
 {
-  CGUIWindow *window = g_windowManager.GetWindow(params.size() > 2 ? CButtonTranslator::TranslateWindow(params[2]) : g_windowManager.GetFocusedWindow());
+  CGUIWindow *window = g_windowManager.GetWindow(params.size() > 2 ? CWindowTranslator::TranslateWindow(params[2]) : g_windowManager.GetFocusedWindow());
   if (window)
     window->SetProperty(params[0],params[1]);
 

@@ -40,6 +40,10 @@ msgctxt "#31016"
 msgid "Albums"
 msgstr "Album"
 
+msgctxt "#31018"
+msgid "Player process info"
+msgstr "Gwybodaeth ar gynnydd chwaraewr"
+
 msgctxt "#31024"
 msgid "Page"
 msgstr "Tudalen"
@@ -116,10 +120,6 @@ msgctxt "#31303"
 msgid "Data provider"
 msgstr "Darparwr data"
 
-msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "Defnydd Cof:"
-
 msgctxt "#31320"
 msgid "Last Logged In"
 msgstr "Mewngofnodwyd Ddiwethaf"
@@ -136,6 +136,10 @@ msgctxt "#31356"
 msgid "Download Subtitles"
 msgstr "Llwytho Isdeitlau i Lawr"
 
+msgctxt "#31358"
+msgid "Teletext"
+msgstr "Teludestun"
+
 msgctxt "#31390"
 msgid "Skin default"
 msgstr "Croen rhagosodedig"
@@ -148,29 +152,13 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "Newid y croen · Gosod iaith ac ardal · Newid dewisiadau rhestru ffeiliau · Gosod yr arbedwr sgrin"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "Rheoli eich llyfrgell fideo · Gosod dewisiadau chwarae fideo · Newid dewisiadau rhestru fideo · Gosod ffontiau isdeitlau"
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "Gosod dewisiadau rhestru lluniau · Ffurfweddu sioeau sleidiau"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "Gosod tair dinas i gasglu gwybodaeth tywydd"
-
-msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "Gosod a chalibro dangosyddion · Ffurfweddu allbwn sain · Gosod rheolyddion pell · Gosod dewisiadau pŵer · Galluogi dadfygio · Gosod prif glo"
-
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
 msgstr "Dewiswch eich Proffil[CR] defnyddiwr Kodi i fewngofnodi a pharhau"
 
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "Dewisiadau Amrywiol"
+msgctxt "#31550"
+msgid "Backgrounds"
+msgstr "Cefndiroedd"
 
 msgctxt "#31556"
 msgid "Live TV"

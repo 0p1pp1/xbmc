@@ -4,17 +4,18 @@ set(SOURCES GUIDialogBoxBase.cpp
             GUIDialogCache.cpp
             GUIDialogContextMenu.cpp
             GUIDialogExtendedProgressBar.cpp
-            GUIDialogFavourites.cpp
             GUIDialogFileBrowser.cpp
             GUIDialogGamepad.cpp
             GUIDialogKaiToast.cpp
             GUIDialogKeyboardGeneric.cpp
+            GUIDialogKeyboardTouch.cpp
             GUIDialogMediaFilter.cpp
             GUIDialogMediaSource.cpp
             GUIDialogNumeric.cpp
             GUIDialogOK.cpp
             GUIDialogPlayEject.cpp
             GUIDialogPlayerControls.cpp
+            GUIDialogPlayerProcessInfo.cpp
             GUIDialogProgress.cpp
             GUIDialogSeekBar.cpp
             GUIDialogSelect.cpp
@@ -33,17 +34,18 @@ set(HEADERS GUIDialogBoxBase.h
             GUIDialogCache.h
             GUIDialogContextMenu.h
             GUIDialogExtendedProgressBar.h
-            GUIDialogFavourites.h
             GUIDialogFileBrowser.h
             GUIDialogGamepad.h
             GUIDialogKaiToast.h
             GUIDialogKeyboardGeneric.h
+            GUIDialogKeyboardTouch.h
             GUIDialogMediaFilter.h
             GUIDialogMediaSource.h
             GUIDialogNumeric.h
             GUIDialogOK.h
             GUIDialogPlayEject.h
             GUIDialogPlayerControls.h
+            GUIDialogPlayerProcessInfo.h
             GUIDialogProgress.h
             GUIDialogSeekBar.h
             GUIDialogSelect.h
@@ -54,11 +56,7 @@ set(HEADERS GUIDialogBoxBase.h
             GUIDialogSubMenu.h
             GUIDialogTextViewer.h
             GUIDialogVolumeBar.h
-            GUIDialogYesNo.h)
+            GUIDialogYesNo.h
+            IGUIVolumeBarCallback.h)
 
 core_add_library(dialogs)
-add_dependencies(dialogs libcpluff)
-
-if(ENABLE_INTERNAL_FFMPEG)
-  add_dependencies(dialogs ffmpeg)
-endif()

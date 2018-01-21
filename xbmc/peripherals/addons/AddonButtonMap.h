@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,93 +20,143 @@
 #pragma once
 
 #include "PeripheralAddon.h" // for FeatureMap
-#include "addons/kodi-addon-dev-kit/include/kodi/kodi_peripheral_utils.hpp"
+#include "addons/kodi-addon-dev-kit/include/kodi/addon-instance/PeripheralUtils.h"
+#include "input/joysticks/interfaces/IButtonMap.h"
 #include "input/joysticks/DriverPrimitive.h"
-#include "input/joysticks/IButtonMap.h"
 #include "input/joysticks/JoystickTypes.h"
 #include "peripherals/PeripheralTypes.h"
+#include "threads/CriticalSection.h"
 
 namespace PERIPHERALS
 {
   class CPeripheral;
 
-  class CAddonButtonMap : public JOYSTICK::IButtonMap
+  class CAddonButtonMap : public KODI::JOYSTICK::IButtonMap
   {
   public:
     CAddonButtonMap(CPeripheral* device, const std::weak_ptr<CPeripheralAddon>& addon, const std::string& strControllerId);
 
-    virtual ~CAddonButtonMap(void);
+    ~CAddonButtonMap(void) override;
 
     // Implementation of IButtonMap
-    virtual std::string ControllerID(void) const override { return m_strControllerId; }
+    std::string ControllerID(void) const override { return m_strControllerId; }
 
-    virtual bool Load(void) override;
+    std::string DeviceName(void) const override;
 
-    virtual void Reset(void) override;
+    bool Load(void) override;
 
-    virtual bool GetFeature(
-      const JOYSTICK::CDriverPrimitive& primitive,
-      JOYSTICK::FeatureName& feature
+    void Reset(void) override;
+
+    bool IsEmpty(void) const override;
+
+    bool GetFeature(
+      const KODI::JOYSTICK::CDriverPrimitive& primitive,
+      KODI::JOYSTICK::FeatureName& feature
     ) override;
 
-    virtual JOYSTICK::FEATURE_TYPE GetFeatureType(
-      const JOYSTICK::FeatureName& feature
+    KODI::JOYSTICK::FEATURE_TYPE GetFeatureType(
+      const KODI::JOYSTICK::FeatureName& feature
     ) override;
 
-    virtual bool GetScalar(
-      const JOYSTICK::FeatureName& feature,
-      JOYSTICK::CDriverPrimitive& primitive
+    bool GetScalar(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::CDriverPrimitive& primitive
     ) override;
 
-    virtual bool AddScalar(
-      const JOYSTICK::FeatureName& feature,
-      const JOYSTICK::CDriverPrimitive& primitive
+    void AddScalar(
+      const KODI::JOYSTICK::FeatureName& feature,
+      const KODI::JOYSTICK::CDriverPrimitive& primitive
     ) override;
 
-    virtual bool GetAnalogStick(
-      const JOYSTICK::FeatureName& feature,
-      JOYSTICK::CDriverPrimitive& up,
-      JOYSTICK::CDriverPrimitive& down,
-      JOYSTICK::CDriverPrimitive& right,
-      JOYSTICK::CDriverPrimitive& left
+    bool GetAnalogStick(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::ANALOG_STICK_DIRECTION direction,
+      KODI::JOYSTICK::CDriverPrimitive& primitive
     ) override;
 
-    virtual bool AddAnalogStick(
-      const JOYSTICK::FeatureName& feature,
-      const JOYSTICK::CDriverPrimitive& up,
-      const JOYSTICK::CDriverPrimitive& down,
-      const JOYSTICK::CDriverPrimitive& right,
-      const JOYSTICK::CDriverPrimitive& left
+    void AddAnalogStick(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::ANALOG_STICK_DIRECTION direction,
+      const KODI::JOYSTICK::CDriverPrimitive& primitive
     ) override;
 
-    virtual bool GetAccelerometer(
-      const JOYSTICK::FeatureName& feature,
-      JOYSTICK::CDriverPrimitive& positiveX,
-      JOYSTICK::CDriverPrimitive& positiveY,
-      JOYSTICK::CDriverPrimitive& positiveZ
+    bool GetRelativePointer(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::ANALOG_STICK_DIRECTION direction,
+      KODI::JOYSTICK::CDriverPrimitive& primitive
     ) override;
 
-    virtual bool AddAccelerometer(
-      const JOYSTICK::FeatureName& feature,
-      const JOYSTICK::CDriverPrimitive& positiveX,
-      const JOYSTICK::CDriverPrimitive& positiveY,
-      const JOYSTICK::CDriverPrimitive& positiveZ
+    void AddRelativePointer(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::ANALOG_STICK_DIRECTION direction,
+      const KODI::JOYSTICK::CDriverPrimitive& primitive
     ) override;
+
+    bool GetAccelerometer(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::CDriverPrimitive& positiveX,
+      KODI::JOYSTICK::CDriverPrimitive& positiveY,
+      KODI::JOYSTICK::CDriverPrimitive& positiveZ
+    ) override;
+
+    void AddAccelerometer(
+      const KODI::JOYSTICK::FeatureName& feature,
+      const KODI::JOYSTICK::CDriverPrimitive& positiveX,
+      const KODI::JOYSTICK::CDriverPrimitive& positiveY,
+      const KODI::JOYSTICK::CDriverPrimitive& positiveZ
+    ) override;
+
+    bool GetWheel(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::WHEEL_DIRECTION direction,
+      KODI::JOYSTICK::CDriverPrimitive& primitive
+    ) override;
+
+    void AddWheel(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::WHEEL_DIRECTION direction,
+      const KODI::JOYSTICK::CDriverPrimitive& primitive
+    ) override;
+
+    bool GetThrottle(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::THROTTLE_DIRECTION direction,
+      KODI::JOYSTICK::CDriverPrimitive& primitive
+    ) override;
+
+    void AddThrottle(
+      const KODI::JOYSTICK::FeatureName& feature,
+      KODI::JOYSTICK::THROTTLE_DIRECTION direction,
+      const KODI::JOYSTICK::CDriverPrimitive& primitive
+    ) override;
+
+    void SetIgnoredPrimitives(const std::vector<KODI::JOYSTICK::CDriverPrimitive>& primitives) override;
+
+    bool IsIgnored(const KODI::JOYSTICK::CDriverPrimitive& primitive) override;
+
+    bool GetAxisProperties(unsigned int axisIndex, int& center, unsigned int& range) override;
+
+    void SaveButtonMap() override;
+
+    void RevertButtonMap() override;
 
   private:
-    typedef std::map<JOYSTICK::CDriverPrimitive, JOYSTICK::FeatureName> DriverMap;
+    typedef std::map<KODI::JOYSTICK::CDriverPrimitive, KODI::JOYSTICK::FeatureName> DriverMap;
+    typedef std::vector<KODI::JOYSTICK::CDriverPrimitive> JoystickPrimitiveVector;
 
     // Utility functions
     static DriverMap CreateLookupTable(const FeatureMap& features);
 
-    bool UnmapPrimitive(const JOYSTICK::CDriverPrimitive& primitive);
-
-    static bool ResetPrimitive(ADDON::JoystickFeature& feature, const ADDON::DriverPrimitive& primitive);
+    static JOYSTICK_FEATURE_PRIMITIVE GetPrimitiveIndex(KODI::JOYSTICK::ANALOG_STICK_DIRECTION dir);
+    static JOYSTICK_FEATURE_PRIMITIVE GetPrimitiveIndex(KODI::JOYSTICK::WHEEL_DIRECTION dir);
+    static JOYSTICK_FEATURE_PRIMITIVE GetPrimitiveIndex(KODI::JOYSTICK::THROTTLE_DIRECTION dir);
 
     CPeripheral* const  m_device;
     std::weak_ptr<CPeripheralAddon>  m_addon;
     const std::string   m_strControllerId;
     FeatureMap          m_features;
     DriverMap           m_driverMap;
+    JoystickPrimitiveVector m_ignoredPrimitives;
+    CCriticalSection    m_mutex;
   };
 }

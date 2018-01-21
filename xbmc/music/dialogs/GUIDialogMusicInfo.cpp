@@ -80,7 +80,7 @@ bool CGUIDialogMusicInfo::OnMessage(CGUIMessage& message)
         if (db.Open())
         {
           m_needsUpdate = true;
-          db.SetAlbumUserrating(m_albumItem->GetPath(), m_albumItem->GetMusicInfoTag()->GetUserrating());
+          db.SetAlbumUserrating(m_albumItem->GetMusicInfoTag()->GetAlbumId(), m_albumItem->GetMusicInfoTag()->GetUserrating());
           db.Close();
         }
       }
@@ -169,18 +169,9 @@ bool CGUIDialogMusicInfo::OnAction(const CAction &action)
 void CGUIDialogMusicInfo::SetAlbum(const CAlbum& album, const std::string &path)
 {
   m_album = album;
-  SetSongs(m_album.infoSongs);
+  SetSongs(m_album.songs);
   *m_albumItem = CFileItem(path, true);
-  m_albumItem->GetMusicInfoTag()->SetAlbum(m_album.strAlbum);
-  m_albumItem->GetMusicInfoTag()->SetAlbumArtist(m_album.GetAlbumArtist());
-  m_albumItem->GetMusicInfoTag()->SetArtist(m_album.GetAlbumArtist());
-  m_albumItem->GetMusicInfoTag()->SetYear(m_album.iYear);
-  m_albumItem->GetMusicInfoTag()->SetLoaded(true);
-  m_albumItem->GetMusicInfoTag()->SetRating(m_album.fRating);
-  m_albumItem->GetMusicInfoTag()->SetVotes(m_album.iVotes);
-  m_albumItem->GetMusicInfoTag()->SetUserrating(m_album.iUserrating);
-  m_albumItem->GetMusicInfoTag()->SetGenre(m_album.genre);
-  m_albumItem->GetMusicInfoTag()->SetDatabaseId(m_album.idAlbum, MediaTypeAlbum);
+  m_albumItem->GetMusicInfoTag()->SetAlbum(m_album);
   CMusicDatabase::SetPropertiesFromAlbum(*m_albumItem,m_album);
 
   CMusicThumbLoader loader;
@@ -351,8 +342,8 @@ void CGUIDialogMusicInfo::SetUserrating(int userrating) const
 // 3.  Local thumb
 // 4.  No thumb (if no Local thumb is available)
 
-// TODO: Currently no support for "embedded thumb" as there is no easy way to grab it
-//       without sending a file that has this as it's album to this class
+//! @todo Currently no support for "embedded thumb" as there is no easy way to grab it
+//!       without sending a file that has this as it's album to this class
 void CGUIDialogMusicInfo::OnGetThumb()
 {
   CFileItemList items;
@@ -382,24 +373,46 @@ void CGUIDialogMusicInfo::OnGetThumb()
     item->SetIconImage("DefaultPicture.png");
     item->SetLabel(g_localizeStrings.Get(20015));
     
-    // TODO: Do we need to clear the cached image?
+    //! @todo Do we need to clear the cached image?
     //    CTextureCache::GetInstance().ClearCachedImage(thumb);
     items.Add(item);
   }
 
   // local thumb
   std::string localThumb;
+  bool existsThumb = false;
   if (m_bArtistInfo)
   {
     CMusicDatabase database;
     database.Open();
-    std::string strArtistPath;
-    if (database.GetArtistPath(m_artist.idArtist,strArtistPath))
+    // First look for thumb in the artists folder, the primary location
+    std::string strArtistPath = m_artist.strPath;
+    // Get path when don't already have it.
+    bool artistpathfound = !strArtistPath.empty();
+    if (!artistpathfound)
+      artistpathfound = database.GetArtistPath(m_artist, strArtistPath);
+    if (artistpathfound)
+    {
       localThumb = URIUtils::AddFileToFolder(strArtistPath, "folder.jpg");
+      existsThumb = CFile::Exists(localThumb);
+    }
+    // If not there fall back local to music files (historic location for those album artists with a unique folder)
+    if (!existsThumb)
+    {
+      artistpathfound = database.GetOldArtistPath(m_artist.idArtist, strArtistPath);
+      if (artistpathfound)
+      {
+        localThumb = URIUtils::AddFileToFolder(strArtistPath, "folder.jpg");
+        existsThumb = CFile::Exists(localThumb);
+      }
+    }
   }
   else
+  {
     localThumb = m_albumItem->GetUserMusicThumb();
-  if (CFile::Exists(localThumb))
+    existsThumb = CFile::Exists(localThumb);
+  }
+  if (existsThumb)
   {
     CFileItemPtr item(new CFileItem("thumb://Local", false));
     item->SetArt("thumb", localThumb);
@@ -438,8 +451,6 @@ void CGUIDialogMusicInfo::OnGetThumb()
     newThumb = localThumb;
   else if (CFile::Exists(result))
     newThumb = result;
-  else // none
-    newThumb = "-"; // force local thumbs to be ignored
 
   // update thumb in the database
   CMusicDatabase db;
@@ -484,25 +495,44 @@ void CGUIDialogMusicInfo::OnGetFanart()
     item->SetIconImage("DefaultPicture.png");
     item->SetLabel(g_localizeStrings.Get(20441));
 
-    // TODO: Do we need to clear the cached image?
+    //! @todo Do we need to clear the cached image?
     //    CTextureCache::GetInstance().ClearCachedImage(thumb);
     items.Add(item);
   }
 
-  // Grab a local thumb
+  // Grab a local fanart 
+  std::string strLocal;
   CMusicDatabase database;
   database.Open();
-  std::string strArtistPath;
-  database.GetArtistPath(m_artist.idArtist,strArtistPath);
-  CFileItem item(strArtistPath,true);
-  std::string strLocal = item.GetLocalFanart();
+  // First look for fanart in the artists folder, the primary location
+  std::string strArtistPath = m_artist.strPath;
+  // Get path when don't already have it.
+  bool artistpathfound = !strArtistPath.empty();
+  if (!artistpathfound)
+    artistpathfound = database.GetArtistPath(m_artist, strArtistPath);
+  if (artistpathfound)
+  {
+    CFileItem item(strArtistPath, true);
+    strLocal = item.GetLocalFanart();
+  }
+  // If not there fall back local to music files (historic location for those album artists with a unique folder)
+  if (strLocal.empty())
+  {
+    artistpathfound = database.GetOldArtistPath(m_artist.idArtist, strArtistPath);
+    if (artistpathfound)
+    {
+      CFileItem item(strArtistPath, true);
+      strLocal = item.GetLocalFanart();
+    }
+  }
+
   if (!strLocal.empty())
   {
     CFileItemPtr itemLocal(new CFileItem("fanart://Local",false));
     itemLocal->SetArt("thumb", strLocal);
     itemLocal->SetLabel(g_localizeStrings.Get(20438));
 
-    // TODO: Do we need to clear the cached image?
+    //! @todo Do we need to clear the cached image?
     CTextureCache::GetInstance().ClearCachedImage(strLocal);
     items.Add(itemLocal);
   }
@@ -515,9 +545,10 @@ void CGUIDialogMusicInfo::OnGetFanart()
   }
 
   std::string result;
-  VECSOURCES sources = *CMediaSourceSettings::GetInstance().GetSources("music");
+  bool flip = false;
+  VECSOURCES sources(*CMediaSourceSettings::GetInstance().GetSources("music"));
+  AddItemPathToFileBrowserSources(sources, *m_albumItem);
   g_mediaManager.GetLocalDrives(sources);
-  bool flip=false;
   if (!CGUIDialogFileBrowser::ShowAndGetImage(items, sources, g_localizeStrings.Get(20437), result, &flip, 20445))
     return;   // user cancelled
 
@@ -602,7 +633,7 @@ void CGUIDialogMusicInfo::AddItemPathToFileBrowserSources(VECSOURCES &sources, c
 
 void CGUIDialogMusicInfo::OnSetUserrating() const
 {
-  CGUIDialogSelect *dialog = static_cast<CGUIDialogSelect *>(g_windowManager.GetWindow(WINDOW_DIALOG_SELECT));
+  CGUIDialogSelect *dialog = g_windowManager.GetWindow<CGUIDialogSelect>(WINDOW_DIALOG_SELECT);
   if (dialog)
   {
     // If we refresh and then try to set the rating there will be an items already here...
@@ -627,7 +658,7 @@ void CGUIDialogMusicInfo::OnSetUserrating() const
 
 void CGUIDialogMusicInfo::ShowFor(CFileItem item)
 {
-  auto window = static_cast<CGUIWindowMusicNav*>(g_windowManager.GetWindow(WINDOW_MUSIC_NAV));
+  auto window = g_windowManager.GetWindow<CGUIWindowMusicNav>(WINDOW_MUSIC_NAV);
   if (window)
     window->OnItemInfo(&item);
 }

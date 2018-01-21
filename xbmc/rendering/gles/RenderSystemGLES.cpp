@@ -21,13 +21,10 @@
 
 #include "system.h"
 
-#if HAS_GLES == 2
-
 #include "guilib/GraphicContext.h"
 #include "settings/AdvancedSettings.h"
 #include "RenderSystemGLES.h"
 #include "guilib/MatrixGLES.h"
-#include "windowing/WindowingFactory.h"
 #include "utils/log.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
@@ -108,10 +105,7 @@ bool CRenderSystemGLES::InitRenderSystem()
 
   LogGraphicsInfo();
   
-  if (IsExtSupported("GL_TEXTURE_NPOT"))
-  {
-    m_renderCaps |= RENDER_CAPS_NPOT;
-  }
+  m_renderCaps |= RENDER_CAPS_NPOT;
 
   if (IsExtSupported("GL_EXT_texture_format_BGRA8888"))
   {
@@ -137,7 +131,7 @@ bool CRenderSystemGLES::InitRenderSystem()
   return true;
 }
 
-bool CRenderSystemGLES::ResetRenderSystem(int width, int height, bool fullScreen, float refreshRate)
+bool CRenderSystemGLES::ResetRenderSystem(int width, int height)
 {
   m_width = width;
   m_height = height;
@@ -151,7 +145,7 @@ bool CRenderSystemGLES::ResetRenderSystem(int width, int height, bool fullScreen
   glEnable(GL_SCISSOR_TEST); 
 
   glMatrixProject.Clear();
-  glMatrixModview->LoadIdentity();
+  glMatrixProject->LoadIdentity();
   glMatrixProject->Ortho(0.0f, width-1, height-1, 0.0f, -1.0f, 1.0f);
   glMatrixProject.Load();
 
@@ -267,14 +261,7 @@ bool CRenderSystemGLES::IsExtSupported(const char* extension)
   }
 }
 
-static int64_t abs64(int64_t a)
-{
-  if(a < 0)
-    return -a;
-  return a;
-}
-
-void CRenderSystemGLES::PresentRender(bool rendered)
+void CRenderSystemGLES::PresentRender(bool rendered, bool videoLayer)
 {
   SetVSync(true);
 
@@ -283,7 +270,8 @@ void CRenderSystemGLES::PresentRender(bool rendered)
 
   PresentRenderImpl(rendered);
 
-  if (!rendered)
+  // if video is rendered to a separate layer, we should not block this thread
+  if (!rendered && !videoLayer)
     Sleep(40);
 }
 
@@ -327,7 +315,7 @@ void CRenderSystemGLES::CaptureStateBlock()
 
   glDisable(GL_SCISSOR_TEST); // fixes FBO corruption on Macs
   glActiveTexture(GL_TEXTURE0);
-//TODO - NOTE: Only for Screensavers & Visualisations
+//! @todo - NOTE: Only for Screensavers & Visualisations
 //  glColor3f(1.0, 1.0, 1.0);
 }
 
@@ -467,8 +455,7 @@ void CRenderSystemGLES::GetViewPort(CRect& viewPort)
   viewPort.y2 = viewPort.y1 + m_viewPort[3];
 }
 
-// FIXME make me const so that I can accept temporary objects
-void CRenderSystemGLES::SetViewPort(CRect& viewPort)
+void CRenderSystemGLES::SetViewPort(const CRect& viewPort)
 {
   if (!m_bRenderCreated)
     return;
@@ -528,7 +515,7 @@ void CRenderSystemGLES::InitialiseGUIShader()
     {
       if (i == SM_TEXTURE_RGBA_OES || i == SM_TEXTURE_RGBA_BOB_OES)
       {
-        if (!g_Windowing.IsExtSupported("GL_OES_EGL_image_external"))
+        if (!IsExtSupported("GL_OES_EGL_image_external"))
         {
           m_pGUIshader[i] = NULL;
           continue;
@@ -678,5 +665,3 @@ GLint CRenderSystemGLES::GUIShaderGetModel()
 
   return -1;
 }
-
-#endif

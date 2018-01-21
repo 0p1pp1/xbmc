@@ -1,7 +1,7 @@
 # Kodi Media Center language file
 # Addon Name: Estuary
 # Addon id: skin.estuary
-# Addon Provider: phil65, Piers
+# Addon Provider: phil65, Ichabod Fletchman
 msgid ""
 msgstr ""
 "Project-Id-Version: KODI Main\n"
@@ -15,6 +15,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Language: cy_GB\n"
 "Plural-Forms: nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;\n"
+
+msgctxt "#31000"
+msgid "Now playing"
+msgstr "Wrthi'n chwarae"
 
 msgctxt "#31001"
 msgid "Search..."
@@ -36,6 +40,10 @@ msgctxt "#31020"
 msgid "Actions"
 msgstr "Gweithredoedd"
 
+msgctxt "#31021"
+msgid "Misc options"
+msgstr "Dewisiadau eraill"
+
 msgctxt "#31038"
 msgid "Rewind"
 msgstr "Nôl"
@@ -43,6 +51,10 @@ msgstr "Nôl"
 msgctxt "#31053"
 msgid "Arial based"
 msgstr "Seileidig ar Ariel"
+
+msgctxt "#31067"
+msgid "Event log"
+msgstr "Log y digwyddiad"
 
 msgctxt "#31069"
 msgid "Last Updated"
@@ -52,14 +64,6 @@ msgctxt "#31072"
 msgid "Power Options"
 msgstr "Dewisiadau pŵer"
 
-msgctxt "#31081"
-msgid "Album info"
-msgstr "Gwybodaeth albwm"
-
-msgctxt "#31085"
-msgid "Channel Group"
-msgstr "Grŵp Sianel"
-
 msgctxt "#31096"
 msgid "Local subtitle available"
 msgstr "Is deitlau lleol ar gael"
@@ -67,3 +71,11 @@ msgstr "Is deitlau lleol ar gael"
 msgctxt "#31100"
 msgid "Shift"
 msgstr "Shift"
+
+msgctxt "#31106"
+msgid "Teletext"
+msgstr "Teludestun"
+
+msgctxt "#31138"
+msgid "Player process info"
+msgstr "Gwybodaeth ar gynnydd chwaraewr"

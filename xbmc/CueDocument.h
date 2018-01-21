@@ -20,6 +20,9 @@
  *
  */
 
+#include <string>
+#include <vector>
+
 #include "music/Song.h"
 
 #define MAX_PATH_SIZE 1024
@@ -52,7 +55,6 @@ public:
   bool ParseFile(const std::string &strFilePath);
   bool ParseTag(const std::string &strContent);
   void GetSongs(VECSONGS &songs);
-  bool GetSong(int aTrackNumber, CSong& aSong);
   std::string GetMediaPath();
   std::string GetMediaTitle();
   void GetMediaFiles(std::vector<std::string>& mediaFiles);

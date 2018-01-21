@@ -1,11 +1,11 @@
-set(SOURCES GUIWindowTestPatternDX.cpp
+set(SOURCES DeviceResources.cpp
+            GUIWindowTestPatternDX.cpp
             RenderSystemDX.cpp)
 
-set(HEADERS GUIWindowTestPatternDX.h
+set(HEADERS DeviceResources.h
+            DirectXHelper.h
+            GUIWindowTestPatternDX.h
+            RenderContext.h
             RenderSystemDX.h)
 
 core_add_library(rendering_dx)
-
-if(CORE_SYSTEM_NAME STREQUAL windows)
-  add_dependencies(rendering_dx d3dx11effects)
-endif()

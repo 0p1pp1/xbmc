@@ -21,6 +21,7 @@
  */
 
 #include "DVDMessage.h"
+#include <atomic>
 #include <string>
 #include <list>
 #include <algorithm>
@@ -67,7 +68,7 @@ enum MsgQueueReturnCode
 class CDVDMessageQueue
 {
 public:
-  CDVDMessageQueue(const std::string &owner);
+  explicit CDVDMessageQueue(const std::string &owner);
   virtual ~CDVDMessageQueue();
 
   void Init();
@@ -76,6 +77,7 @@ public:
   void End();
 
   MsgQueueReturnCode Put(CDVDMsg* pMsg, int priority = 0);
+  MsgQueueReturnCode PutBack(CDVDMsg* pMsg, int priority = 0);
 
   /**
    * msg,       message type from DVDMessage.h
@@ -108,11 +110,16 @@ public:
 
 private:
 
+  MsgQueueReturnCode Put(CDVDMsg* pMsg, int priority, bool front);
+  void UpdateTimeFront();
+  void UpdateTimeBack();
+
   CEvent m_hEvent;
   mutable CCriticalSection m_section;
 
-  bool m_bAbortRequest;
+  std::atomic<bool> m_bAbortRequest;
   bool m_bInitialized;
+  bool m_drain = false;
 
   int m_iDataSize;
   double m_TimeFront;
@@ -122,7 +129,7 @@ private:
   int m_iMaxDataSize;
   std::string m_owner;
 
-  typedef std::list<DVDMessageListItem> SList;
-  SList m_list;
+  std::list<DVDMessageListItem> m_messages;
+  std::list<DVDMessageListItem> m_prioMessages;
 };
 

@@ -56,6 +56,26 @@ msgctxt "#31016"
 msgid "Albums"
 msgstr "Álbumes"
 
+msgctxt "#31017"
+msgid "PVR info"
+msgstr "Información PVR"
+
+msgctxt "#31018"
+msgid "Player process info"
+msgstr "Info proceso reproductor"
+
+msgctxt "#31019"
+msgid "Video decoder"
+msgstr "Decodificador de video"
+
+msgctxt "#31020"
+msgid "Pixel format"
+msgstr "Formato de píxel"
+
+msgctxt "#31021"
+msgid "System memory usage"
+msgstr "Uso memoria de sistema"
+
 msgctxt "#31024"
 msgid "Page"
 msgstr "Página"
@@ -75,6 +95,10 @@ msgstr "AVANCE RAPIDO"
 msgctxt "#31045"
 msgid "REWIND"
 msgstr "REBOBINAR"
+
+msgctxt "#31046"
+msgid "Play speed"
+msgstr "Velocidad de Reproducción"
 
 msgctxt "#31049"
 msgid "End Time"
@@ -132,10 +156,6 @@ msgctxt "#31303"
 msgid "Data provider"
 msgstr "Proveedor de datos"
 
-msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "Memoria Usada:"
-
 msgctxt "#31320"
 msgid "Last Logged In"
 msgstr "Último ingreso de sesión"
@@ -152,6 +172,10 @@ msgctxt "#31356"
 msgid "Download Subtitles"
 msgstr "Descargar Subtítulos"
 
+msgctxt "#31358"
+msgid "Teletext"
+msgstr "Teletexto"
+
 msgctxt "#31390"
 msgid "Skin default"
 msgstr "Por defecto"
@@ -164,45 +188,13 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "Cambiar el skin · Seleccionar idioma y zona · Cambiar la visualización de los archivos · Elegir un salvapantallas"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "Gestionar la colección de videos · Opciones de la reproducción de video · Cambiar la visualización de la lista de videos · Elegir el tipo de letra para los subtítulos"
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "Cambiar las opciones de la lista de imágenes · Ajustes de las presentaciones"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "Elige tres ciudades para la información climática"
-
-msgctxt "#31405"
-msgid "Setup control of Kodi via UPnP and HTTP · Configure file sharing · Set internet access options"
-msgstr "Ajustes para el control de Kodi por UPnP y HTTP · Ajustes de la compartición de archivos · Ajustes del acceso a internet"
-
-msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "Ajustes y calibrado de la pantalla · Ajustes de la salida de audio · Ajustes de los controles remotos · Ajustes de ahorro de energía · Activar depuración · Ajustes del bloqueo maestro"
-
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
-msgstr "Selecciona tu perfil de usuario de Kodi[CR]para ingresar y continuar"
-
-msgctxt "#31500"
-msgid "Home Menu Catagory Buttons"
-msgstr "Botones de Categorías del Menú Principal"
-
-msgctxt "#31501"
-msgid "Home Page Add-on Quick Links"
-msgstr "Accesos Directos a los Complementos desde el Menú Principal"
-
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "Otros Ajustes"
+msgstr "Seleccione su perfil de usuario de Kodi[CR]para ingresar y continuar"
 
 msgctxt "#31550"
-msgid "Home Screen Weather Info and button"
-msgstr "Información y acceso a Clima desde el Menú Principal"
+msgid "Backgrounds"
+msgstr "Fondos"
 
 msgctxt "#31551"
 msgid "Add-on Shortcut"

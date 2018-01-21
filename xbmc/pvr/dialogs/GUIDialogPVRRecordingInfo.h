@@ -27,15 +27,20 @@ namespace PVR
   {
   public:
     CGUIDialogPVRRecordingInfo(void);
-    virtual ~CGUIDialogPVRRecordingInfo(void) {}
-    virtual bool OnMessage(CGUIMessage& message);
-    virtual bool OnInfo(int actionID) override;
-    virtual bool HasListItems() const { return true; };
-    virtual CFileItemPtr GetCurrentListItem(int offset = 0);
+    ~CGUIDialogPVRRecordingInfo(void) override = default;
+    bool OnMessage(CGUIMessage& message) override;
+    bool OnInfo(int actionID) override;
+    bool HasListItems() const override { return true; }
+    CFileItemPtr GetCurrentListItem(int offset = 0) override;
 
     void SetRecording(const CFileItem *item);
 
-  protected:
+    static void ShowFor(const CFileItemPtr& item);
+
+  private:
+    bool OnClickButtonOK(CGUIMessage &message);
+    bool OnClickButtonPlay(CGUIMessage &message);
+
     CFileItemPtr m_recordItem;
   };
 }

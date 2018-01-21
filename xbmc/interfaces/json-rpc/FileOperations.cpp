@@ -22,6 +22,7 @@
 #include "VideoLibrary.h"
 #include "AudioLibrary.h"
 #include "MediaSource.h"
+#include "ServiceBroker.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "FileItem.h"
@@ -29,6 +30,7 @@
 #include "settings/MediaSourceSettings.h"
 #include "Util.h"
 #include "URL.h"
+#include "utils/FileExtensionProvider.h"
 #include "utils/URIUtils.h"
 #include "utils/FileUtils.h"
 #include "utils/Variant.h"
@@ -90,17 +92,17 @@ JSONRPC_STATUS CFileOperations::GetDirectory(const std::string &method, ITranspo
   if (media == "video")
   {
     regexps = g_advancedSettings.m_videoExcludeFromListingRegExps;
-    extensions = g_advancedSettings.m_videoExtensions;
+    extensions = CServiceBroker::GetFileExtensionProvider().GetVideoExtensions();
   }
   else if (media == "music")
   {
     regexps = g_advancedSettings.m_audioExcludeFromListingRegExps;
-    extensions = g_advancedSettings.GetMusicExtensions();
+    extensions = CServiceBroker::GetFileExtensionProvider().GetMusicExtensions();
   }
   else if (media == "pictures")
   {
     regexps = g_advancedSettings.m_pictureExcludeFromListingRegExps;
-    extensions = g_advancedSettings.m_pictureExtensions;
+    extensions = CServiceBroker::GetFileExtensionProvider().GetPictureExtensions();
   }
 
   if (CDirectory::GetDirectory(strPath, items, extensions))
@@ -240,7 +242,7 @@ JSONRPC_STATUS CFileOperations::SetFileDetails(const std::string &method, ITrans
     return InvalidParams;
 
   CDateTime lastPlayed = infos.m_lastPlayed;
-  int playcount = infos.m_playCount;
+  int playcount = infos.GetPlayCount();
   if (!parameterObject["lastplayed"].isNull())
   {
     lastPlayed.Reset();
@@ -249,7 +251,7 @@ JSONRPC_STATUS CFileOperations::SetFileDetails(const std::string &method, ITrans
   }
   if (!parameterObject["playcount"].isNull())
     playcount = parameterObject["playcount"].asInteger();
-  if (playcount != infos.m_playCount || lastPlayed != infos.m_lastPlayed)
+  if (playcount != infos.GetPlayCount() || lastPlayed != infos.m_lastPlayed)
     videodatabase.SetPlayCount(CFileItem(infos), playcount, lastPlayed);
 
   CVideoLibrary::UpdateResumePoint(parameterObject, infos, videodatabase);
@@ -352,23 +354,27 @@ bool CFileOperations::FillFileItemList(const CVariant &parameterObject, CFileIte
       if (media == "video")
       {
         regexps = g_advancedSettings.m_videoExcludeFromListingRegExps;
-        extensions = g_advancedSettings.m_videoExtensions;
+        extensions = CServiceBroker::GetFileExtensionProvider().GetVideoExtensions();
       }
       else if (media == "music")
       {
         regexps = g_advancedSettings.m_audioExcludeFromListingRegExps;
-        extensions = g_advancedSettings.GetMusicExtensions();
+        extensions = CServiceBroker::GetFileExtensionProvider().GetMusicExtensions();
       }
       else if (media == "pictures")
       {
         regexps = g_advancedSettings.m_pictureExcludeFromListingRegExps;
-        extensions = g_advancedSettings.m_pictureExtensions;
+        extensions = CServiceBroker::GetFileExtensionProvider().GetPictureExtensions();
       }
 
       CDirectory directory;
       if (directory.GetDirectory(strPath, items, extensions))
       {
-        items.Sort(SortByFile, SortOrderAscending);
+        // Sort folders and files by filename to avoid reverse item order bug on some platforms,
+        // but leave items from a playlist, smartplaylist or upnp container in order supplied
+        if (!items.IsPlayList() && !items.IsSmartPlayList() && !URIUtils::IsUPnP(items.GetPath()))
+          items.Sort(SortByFile, SortOrderAscending);
+
         CFileItemList filteredDirectories;
         for (unsigned int i = 0; i < (unsigned int)items.Size(); i++)
         {

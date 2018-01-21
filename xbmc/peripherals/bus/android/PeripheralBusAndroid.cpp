@@ -21,21 +21,21 @@
 #include <android/input.h>
 
 #include "PeripheralBusAndroid.h"
-#include "input/joysticks/JoystickTranslator.h"
 #include "input/joysticks/JoystickTypes.h"
 #include "peripherals/addons/PeripheralAddonTranslator.h"
 #include "peripherals/devices/PeripheralJoystick.h"
 #include "platform/android/activity/XBMCApp.h"
-#include "platform/android/jni/View.h"
+#include "androidjni/View.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
+using namespace KODI;
 using namespace PERIPHERALS;
 
 static const std::string DeviceLocationPrefix = "android/inputdevice/";
 
-CPeripheralBusAndroid::CPeripheralBusAndroid(CPeripherals *manager) :
+CPeripheralBusAndroid::CPeripheralBusAndroid(CPeripherals& manager) :
     CPeripheralBus("PeripBusAndroid", manager, PERIPHERAL_BUS_ANDROID)
 {
   // we don't need polling as we get notified through the IInputDeviceCallbacks interface
@@ -60,18 +60,21 @@ CPeripheralBusAndroid::~CPeripheralBusAndroid()
   CXBMCApp::UnregisterInputDeviceCallbacks();
 }
 
-bool CPeripheralBusAndroid::InitializeProperties(CPeripheral* peripheral) const
+bool CPeripheralBusAndroid::InitializeProperties(CPeripheral& peripheral)
 {
-  if (peripheral == nullptr || peripheral->Type() != PERIPHERAL_JOYSTICK)
+  if (!CPeripheralBus::InitializeProperties(peripheral))
+    return false;
+
+  if (peripheral.Type() != PERIPHERAL_JOYSTICK)
   {
-    CLog::Log(LOGWARNING, "CPeripheralBusAndroid: unknown peripheral");
+    CLog::Log(LOGWARNING, "CPeripheralBusAndroid: invalid peripheral type");
     return false;
   }
 
   int deviceId;
-  if (!GetDeviceId(peripheral->Location(), deviceId))
+  if (!GetDeviceId(peripheral.Location(), deviceId))
   {
-    CLog::Log(LOGWARNING, "CPeripheralBusAndroid: failed to initialize properties for peripheral \"%s\"", peripheral->Location().c_str());
+    CLog::Log(LOGWARNING, "CPeripheralBusAndroid: failed to initialize properties for peripheral \"%s\"", peripheral.Location().c_str());
     return false;
   }
 
@@ -82,35 +85,41 @@ bool CPeripheralBusAndroid::InitializeProperties(CPeripheral* peripheral) const
     return false;
   }
 
-  CPeripheralJoystick* joystick = static_cast<CPeripheralJoystick*>(peripheral);
-  joystick->SetRequestedPort(device.getControllerNumber());
-  joystick->SetProvider("android");
+  CPeripheralJoystick& joystick = static_cast<CPeripheralJoystick&>(peripheral);
+  joystick.SetRequestedPort(device.getControllerNumber());
+  joystick.SetProvider("android");
 
   // prepare the joystick state
   CAndroidJoystickState state;
   if (!state.Initialize(device))
   {
     CLog::Log(LOGWARNING, "CPeripheralBusAndroid: failed to initialize the state for input device \"%s\" with ID %d",
-              joystick->DeviceName().c_str(), deviceId);
+              joystick.DeviceName().c_str(), deviceId);
     return false;
   }
 
   // fill in the number of buttons, hats and axes
-  joystick->SetButtonCount(state.GetButtonCount());
-  joystick->SetHatCount(state.GetHatCount());
-  joystick->SetAxisCount(state.GetAxisCount());
+  joystick.SetButtonCount(state.GetButtonCount());
+  joystick.SetHatCount(state.GetHatCount());
+  joystick.SetAxisCount(state.GetAxisCount());
 
   // remember the joystick state
   m_joystickStates.insert(std::make_pair(deviceId, std::move(state)));
 
   CLog::Log(LOGDEBUG, "CPeripheralBusAndroid: input device \"%s\" with ID %d has %u buttons, %u hats and %u axes",
-            joystick->DeviceName().c_str(), deviceId, joystick->ButtonCount(), joystick->HatCount(), joystick->AxisCount());
+            joystick.DeviceName().c_str(), deviceId, joystick.ButtonCount(), joystick.HatCount(), joystick.AxisCount());
   return true;
+}
+
+void CPeripheralBusAndroid::Initialise(void)
+{
+  CPeripheralBus::Initialise();
+  TriggerDeviceScan();
 }
 
 void CPeripheralBusAndroid::ProcessEvents()
 {
-  std::vector<ADDON::PeripheralEvent> events;
+  std::vector<kodi::addon::PeripheralEvent> events;
   {
     CSingleLock lock(m_critSectionStates);
     for (const auto& joystickState : m_joystickStates)
@@ -119,29 +128,23 @@ void CPeripheralBusAndroid::ProcessEvents()
 
   for (const auto& event : events)
   {
-    CPeripheral* device = GetPeripheral(GetDeviceLocation(event.PeripheralIndex()));
-    if (device == nullptr || device->Type() != PERIPHERAL_JOYSTICK)
+    PeripheralPtr device = GetPeripheral(GetDeviceLocation(event.PeripheralIndex()));
+    if (!device || device->Type() != PERIPHERAL_JOYSTICK)
       continue;
 
-    CPeripheralJoystick* joystick = static_cast<CPeripheralJoystick*>(device);
+    CPeripheralJoystick* joystick = static_cast<CPeripheralJoystick*>(device.get());
     switch (event.Type())
     {
       case PERIPHERAL_EVENT_TYPE_DRIVER_BUTTON:
       {
         const bool bPressed = (event.ButtonState() == JOYSTICK_STATE_BUTTON_PRESSED);
-        CLog::Log(LOGDEBUG, "Button [ %u ] on %s %s", event.DriverIndex(),
-                  joystick->DeviceName().c_str(), bPressed ? "pressed" : "released");
-        if (joystick->OnButtonMotion(event.DriverIndex(), bPressed))
-          CLog::Log(LOGDEBUG, "Joystick button event handled");
+        joystick->OnButtonMotion(event.DriverIndex(), bPressed);
         break;
       }
       case PERIPHERAL_EVENT_TYPE_DRIVER_HAT:
       {
         const JOYSTICK::HAT_STATE state = CPeripheralAddonTranslator::TranslateHatState(event.HatState());
-        CLog::Log(LOGDEBUG, "Hat [ %u ] on %s %s", event.DriverIndex(),
-                  joystick->DeviceName().c_str(), JOYSTICK::CJoystickTranslator::HatStateToString(state));
-        if (joystick->OnHatMotion(event.DriverIndex(), state))
-          CLog::Log(LOGDEBUG, "Joystick hat event handled");
+        joystick->OnHatMotion(event.DriverIndex(), state);
         break;
       }
       case PERIPHERAL_EVENT_TYPE_DRIVER_AXIS:
@@ -158,11 +161,11 @@ void CPeripheralBusAndroid::ProcessEvents()
     CSingleLock lock(m_critSectionStates);
     for (const auto& joystickState : m_joystickStates)
     {
-      CPeripheral* device = GetPeripheral(GetDeviceLocation(joystickState.second.GetDeviceId()));
-      if (device == nullptr || device->Type() != PERIPHERAL_JOYSTICK)
+      PeripheralPtr device = GetPeripheral(GetDeviceLocation(joystickState.second.GetDeviceId()));
+      if (!device || device->Type() != PERIPHERAL_JOYSTICK)
         continue;
 
-      static_cast<CPeripheralJoystick*>(device)->ProcessAxisMotions();
+      static_cast<CPeripheralJoystick*>(device.get())->ProcessAxisMotions();
     }
   }
 }
@@ -339,15 +342,13 @@ bool CPeripheralBusAndroid::GetDeviceId(const std::string& deviceLocation, int& 
 bool CPeripheralBusAndroid::ConvertToPeripheralScanResult(const CJNIViewInputDevice& inputDevice, PeripheralScanResult& peripheralScanResult)
 {
   int deviceId = inputDevice.getId();
-  int sources = inputDevice.getSources();
   std::string deviceName = inputDevice.getName();
   if (inputDevice.isVirtual())
   {
     CLog::Log(LOGDEBUG, "CPeripheralBusAndroid: ignoring virtual input device \"%s\" with ID %d", deviceName.c_str(), deviceId);
     return false;
   }
-  if ((sources & CJNIViewInputDevice::SOURCE_JOYSTICK) != CJNIViewInputDevice::SOURCE_JOYSTICK &&
-      (sources & CJNIViewInputDevice::SOURCE_GAMEPAD) != CJNIViewInputDevice::SOURCE_GAMEPAD)
+  if (!inputDevice.supportsSource(CJNIViewInputDevice::SOURCE_JOYSTICK) && !inputDevice.supportsSource(CJNIViewInputDevice::SOURCE_GAMEPAD))
   {
     CLog::Log(LOGDEBUG, "CPeripheralBusAndroid: ignoring unknown input device \"%s\" with ID %d", deviceName.c_str(), deviceId);
     return false;

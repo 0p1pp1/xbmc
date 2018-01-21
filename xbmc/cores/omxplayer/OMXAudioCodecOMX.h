@@ -30,12 +30,13 @@ extern "C" {
 }
 
 #include "DVDStreamInfo.h"
-#include "linux/PlatformDefs.h"
+#include "platform/linux/PlatformDefs.h"
+#include "cores/VideoPlayer/Process/ProcessInfo.h"
 
 class COMXAudioCodecOMX
 {
 public:
-  COMXAudioCodecOMX();
+  explicit COMXAudioCodecOMX(CProcessInfo &processInfo);
   virtual ~COMXAudioCodecOMX();
   bool Open(CDVDStreamInfo &hints);
   void Dispose();
@@ -53,6 +54,7 @@ public:
   void SetDmonoMode(int mode);
 
 protected:
+  CProcessInfo &m_processInfo;
   AVCodecContext* m_pCodecContext;
   SwrContext*     m_pConvert;
   enum AVSampleFormat m_iSampleFormat;

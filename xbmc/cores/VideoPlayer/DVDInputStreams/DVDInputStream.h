@@ -38,7 +38,6 @@ enum DVDStreamType
   DVDSTREAM_TYPE_MEMORY = 4,
   DVDSTREAM_TYPE_FFMPEG = 5,
   DVDSTREAM_TYPE_TV     = 6,
-  DVDSTREAM_TYPE_RTMP   = 7,
   DVDSTREAM_TYPE_MPLS   = 10,
   DVDSTREAM_TYPE_BLURAY = 11,
   DVDSTREAM_TYPE_PVRMANAGER = 12,
@@ -65,23 +64,37 @@ public:
 
   class IDisplayTime
   {
-    public:
-    virtual ~IDisplayTime() {};
+  public:
+    virtual ~IDisplayTime() = default;
     virtual int GetTotalTime() = 0;
     virtual int GetTime() = 0;
   };
 
+  class ITimes
+  {
+  public:
+    struct Times
+    {
+      time_t startTime;
+      double ptsStart;
+      double ptsBegin;
+      double ptsEnd;
+    };
+    virtual ~ITimes() = default;
+    virtual bool GetTimes(Times &times) = 0;
+  };
+
   class IPosTime
   {
-    public:
-    virtual ~IPosTime() {};
+  public:
+    virtual ~IPosTime() = default;
     virtual bool PosTime(int ms) = 0;
   };
 
   class IChapter
   {
-    public:
-    virtual ~IChapter() {};
+  public:
+    virtual ~IChapter() = default;
     virtual int  GetChapter() = 0;
     virtual int  GetChapterCount() = 0;
     virtual void GetChapterName(std::string& name, int ch=-1) = 0;
@@ -91,8 +104,8 @@ public:
 
   class IMenus
   {
-    public:
-    virtual ~IMenus() {};
+  public:
+    virtual ~IMenus() = default;
     virtual void ActivateButton() = 0;
     virtual void SelectButton(int iButton) = 0;
     virtual int  GetCurrentButton() = 0;
@@ -117,18 +130,17 @@ public:
 
   class IDemux
   {
-    public:
-    virtual ~IDemux() {}
+  public:
+    virtual ~IDemux() = default;
     virtual bool OpenDemux() = 0;
     virtual DemuxPacket* ReadDemux() = 0;
     virtual CDemuxStream* GetStream(int iStreamId) const = 0;
     virtual std::vector<CDemuxStream*> GetStreams() const = 0;
-    virtual bool SupportsEnableAtPTS() const { return false; };
-    virtual void EnableStream(int iStreamId, bool enable) = 0;
-    virtual void EnableStreamAtPTS(int iStreamId, uint64_t pts) {};
+    virtual void EnableStream(int iStreamId, bool enable) {};
+    virtual bool OpenStream(int iStreamId) { return false; };
     virtual int GetNrOfStreams() const = 0;
     virtual void SetSpeed(int iSpeed) = 0;
-    virtual bool SeekTime(int time, bool backward = false, double* startpts = NULL) = 0;
+    virtual bool SeekTime(double time, bool backward = false, double* startpts = NULL) = 0;
     virtual void AbortDemux() = 0;
     virtual void FlushDemux() = 0;
     virtual void SetVideoResolution(int width, int height) {};
@@ -155,7 +167,6 @@ public:
   virtual ENextStream NextStream() { return NEXTSTREAM_NONE; }
   virtual void Abort() {}
   virtual int GetBlockSize() { return 0; }
-  virtual void ResetScanTimeout(unsigned int iTimeoutMs) { }
   virtual bool CanSeek() { return true; }
   virtual bool CanPause() { return true; }
 
@@ -166,7 +177,7 @@ public:
   virtual void SetReadRate(unsigned rate) {}
 
   /*! \brief Get the cache status
-   \return true when cache status was succesfully obtained
+   \return true when cache status was successfully obtained
    */
   virtual bool GetCacheStatus(XFILE::SCacheStatus *status) { return false; }
 
@@ -184,6 +195,9 @@ public:
   virtual IDemux* GetIDemux() { return nullptr; }
   virtual IPosTime* GetIPosTime() { return nullptr; }
   virtual IDisplayTime* GetIDisplayTime() { return nullptr; }
+  virtual ITimes* GetITimes() { return nullptr; }
+
+  const CVariant &GetProperty(const std::string key){ return m_item.GetProperty(key); }
 
 protected:
   DVDStreamType m_streamType;

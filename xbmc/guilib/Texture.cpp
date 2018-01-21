@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2005-2015 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
  */
 
 #include "Texture.h"
-#include "windowing/WindowingFactory.h"
+#include "ServiceBroker.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "DDSImage.h"
@@ -36,14 +36,16 @@
 #include "filesystem/AndroidAppFile.h"
 #endif
 #ifdef TARGET_POSIX
-#include "linux/XMemUtils.h"
+#include "platform/linux/XMemUtils.h"
 #endif
+#include "rendering/RenderSystem.h"
 
 /************************************************************************/
 /*                                                                      */
 /************************************************************************/
 CBaseTexture::CBaseTexture(unsigned int width, unsigned int height, unsigned int format)
- : m_hasAlpha( true )
+ : m_hasAlpha( true ),
+   m_mipmapping( false )
 {
   m_pixels = NULL;
   m_loadedToGPU = false;
@@ -67,10 +69,10 @@ void CBaseTexture::Allocate(unsigned int width, unsigned int height, unsigned in
   m_textureHeight = m_imageHeight;
 
   if (m_format & XB_FMT_DXT_MASK)
-    while (GetPitch() < g_Windowing.GetMinDXTPitch())
+    while (GetPitch() < CServiceBroker::GetRenderSystem().GetMinDXTPitch())
       m_textureWidth += GetBlockSize();
 
-  if (!g_Windowing.SupportsNPOT((m_format & XB_FMT_DXT_MASK) != 0))
+  if (!CServiceBroker::GetRenderSystem().SupportsNPOT((m_format & XB_FMT_DXT_MASK) != 0))
   {
     m_textureWidth = PadPow2(m_textureWidth);
     m_textureHeight = PadPow2(m_textureHeight);
@@ -97,8 +99,8 @@ void CBaseTexture::Allocate(unsigned int width, unsigned int height, unsigned in
 
   // check for max texture size
   #define CLAMP(x, y) { if (x > y) x = y; }
-  CLAMP(m_textureWidth, g_Windowing.GetMaxTextureSize());
-  CLAMP(m_textureHeight, g_Windowing.GetMaxTextureSize());
+  CLAMP(m_textureWidth, CServiceBroker::GetRenderSystem().GetMaxTextureSize());
+  CLAMP(m_textureHeight, CServiceBroker::GetRenderSystem().GetMaxTextureSize());
   CLAMP(m_imageWidth, m_textureWidth);
   CLAMP(m_imageHeight, m_textureHeight);
 
@@ -107,7 +109,12 @@ void CBaseTexture::Allocate(unsigned int width, unsigned int height, unsigned in
   if (GetPitch() * GetRows() > 0)
   {
     size_t size = GetPitch() * GetRows();
-    m_pixels = (unsigned char*) _aligned_malloc(size, 16);
+    m_pixels = (unsigned char*) _aligned_malloc(size, 32);
+
+    if (m_pixels == nullptr)
+    {
+      CLog::Log(LOGERROR, "%s - Could not allocate %zu bytes. Out of memory.", __FUNCTION__, size);
+    }
   }
 }
 
@@ -120,6 +127,9 @@ void CBaseTexture::Update(unsigned int width, unsigned int height, unsigned int 
     return;
 
   Allocate(width, height, format);
+  
+  if (m_pixels == nullptr)
+    return;
 
   unsigned int srcPitch = pitch ? pitch : GetPitch(width);
   unsigned int srcRows = GetRows(height);
@@ -147,6 +157,9 @@ void CBaseTexture::Update(unsigned int width, unsigned int height, unsigned int 
 
 void CBaseTexture::ClampToEdge()
 {
+  if (m_pixels == nullptr)
+    return;
+
   unsigned int imagePitch = GetPitch(m_imageWidth);
   unsigned int imageRows = GetRows(m_imageHeight);
   unsigned int texturePitch = GetPitch(m_textureWidth);
@@ -228,8 +241,10 @@ bool CBaseTexture::LoadFromFileInternal(const std::string& texturePath, unsigned
     return false;
   }
 
-  unsigned int width = maxWidth ? std::min(maxWidth, g_Windowing.GetMaxTextureSize()) : g_Windowing.GetMaxTextureSize();
-  unsigned int height = maxHeight ? std::min(maxHeight, g_Windowing.GetMaxTextureSize()) : g_Windowing.GetMaxTextureSize();
+  unsigned int width = maxWidth ? std::min(maxWidth, CServiceBroker::GetRenderSystem().GetMaxTextureSize()) :
+                                  CServiceBroker::GetRenderSystem().GetMaxTextureSize();
+  unsigned int height = maxHeight ? std::min(maxHeight, CServiceBroker::GetRenderSystem().GetMaxTextureSize()) :
+                                    CServiceBroker::GetRenderSystem().GetMaxTextureSize();
 
   // Read image into memory to use our vfs
   XFILE::CFile file;
@@ -255,7 +270,7 @@ bool CBaseTexture::LoadFromFileInternal(const std::string& texturePath, unsigned
       return false;
 
     return LoadFromMemory(xbtFile.GetImageWidth(), xbtFile.GetImageHeight(), 0, xbtFile.GetImageFormat(),
-                          xbtFile.HasImageAlpha(), reinterpret_cast<unsigned char*>(buf.get()));
+                          xbtFile.HasImageAlpha(), reinterpret_cast<const unsigned char*>(buf.get()));
   }
 
   IImage* pImage;
@@ -281,8 +296,10 @@ bool CBaseTexture::LoadFromFileInMem(unsigned char* buffer, size_t size, const s
   if (!buffer || !size)
     return false;
 
-  unsigned int width = maxWidth ? std::min(maxWidth, g_Windowing.GetMaxTextureSize()) : g_Windowing.GetMaxTextureSize();
-  unsigned int height = maxHeight ? std::min(maxHeight, g_Windowing.GetMaxTextureSize()) : g_Windowing.GetMaxTextureSize();
+  unsigned int width = maxWidth ? std::min(maxWidth, CServiceBroker::GetRenderSystem().GetMaxTextureSize()) :
+                                  CServiceBroker::GetRenderSystem().GetMaxTextureSize();
+  unsigned int height = maxHeight ? std::min(maxHeight, CServiceBroker::GetRenderSystem().GetMaxTextureSize()) :
+                                    CServiceBroker::GetRenderSystem().GetMaxTextureSize();
 
   IImage* pImage = ImageFactory::CreateLoaderFromMimeType(mimeType);
   if(!LoadIImage(pImage, buffer, size, width, height))
@@ -301,7 +318,7 @@ bool CBaseTexture::LoadIImage(IImage *pImage, unsigned char* buffer, unsigned in
     if (pImage->Width() > 0 && pImage->Height() > 0)
     {
       Allocate(pImage->Width(), pImage->Height(), XB_FMT_A8R8G8B8);
-      if (pImage->Decode(m_pixels, GetTextureWidth(), GetRows(), GetPitch(), XB_FMT_A8R8G8B8))
+      if (m_pixels != nullptr && pImage->Decode(m_pixels, GetTextureWidth(), GetRows(), GetPitch(), XB_FMT_A8R8G8B8))
       {
         if (pImage->Orientation())
           m_orientation = pImage->Orientation() - 1;
@@ -318,7 +335,7 @@ bool CBaseTexture::LoadIImage(IImage *pImage, unsigned char* buffer, unsigned in
   return false;
 }
 
-bool CBaseTexture::LoadFromMemory(unsigned int width, unsigned int height, unsigned int pitch, unsigned int format, bool hasAlpha, unsigned char* pixels)
+bool CBaseTexture::LoadFromMemory(unsigned int width, unsigned int height, unsigned int pitch, unsigned int format, bool hasAlpha, const unsigned char* pixels)
 {
   m_imageWidth = m_originalWidth = width;
   m_imageHeight = m_originalHeight = height;
@@ -432,4 +449,14 @@ unsigned int CBaseTexture::GetBlockSize() const
 bool CBaseTexture::HasAlpha() const
 {
   return m_hasAlpha;
+}
+
+void CBaseTexture::SetMipmapping()
+{
+  m_mipmapping = true;
+}
+
+bool CBaseTexture::IsMipmapped() const
+{
+  return m_mipmapping;
 }

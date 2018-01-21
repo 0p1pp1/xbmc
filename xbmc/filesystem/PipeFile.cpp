@@ -163,7 +163,7 @@ bool CPipeFile::Rename(const CURL& url, const CURL& urlnew)
   return false;
 }
 
-int CPipeFile::IoControl(int request, void* param)
+int CPipeFile::IoControl(EIoControl, void* param)
 {
   return -1;
 }
@@ -217,8 +217,8 @@ void CPipeFile::RemoveListener(IPipeListener *l)
   }
 }
 
-void CPipeFile::SetOpenThreashold(int threashold)
+void CPipeFile::SetOpenThreshold(int threshold)
 {
-  m_pipe->SetOpenThreashold(threashold);
+  m_pipe->SetOpenThreshold(threshold);
 }
 

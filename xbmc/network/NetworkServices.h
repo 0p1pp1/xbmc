@@ -27,9 +27,7 @@ class CWebServer;
 class CHTTPImageHandler;
 class CHTTPImageTransformationHandler;
 class CHTTPVfsHandler;
-#ifdef HAS_JSONRPC
 class CHTTPJsonRpcHandler;
-#endif // HAS_JSONRPC
 #ifdef HAS_WEB_INTERFACE
 #ifdef HAS_PYTHON
 class CHTTPPythonHandler;
@@ -44,9 +42,9 @@ class CNetworkServices : public ISettingCallback
 public:
   static CNetworkServices& GetInstance();
   
-  virtual bool OnSettingChanging(const CSetting *setting) override;
-  virtual void OnSettingChanged(const CSetting *setting) override;
-  virtual bool OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode) override;
+  bool OnSettingChanging(std::shared_ptr<const CSetting> setting) override;
+  void OnSettingChanged(std::shared_ptr<const CSetting> setting) override;
+  bool OnSettingUpdate(std::shared_ptr<CSetting> setting, const char *oldSettingId, const TiXmlNode *oldSettingNode) override;
 
   void Start();
   void Stop(bool bWait);
@@ -98,7 +96,7 @@ private:
   CNetworkServices();
   CNetworkServices(const CNetworkServices&);
   CNetworkServices const& operator=(CNetworkServices const&);
-  virtual ~CNetworkServices();
+  ~CNetworkServices() override;
 
   bool ValidatePort(int port);
 
@@ -107,9 +105,7 @@ private:
   CHTTPImageHandler& m_httpImageHandler;
   CHTTPImageTransformationHandler& m_httpImageTransformationHandler;
   CHTTPVfsHandler& m_httpVfsHandler;
-#ifdef HAS_JSONRPC
   CHTTPJsonRpcHandler& m_httpJsonRpcHandler;
-#endif
 #ifdef HAS_WEB_INTERFACE
 #ifdef HAS_PYTHON
   CHTTPPythonHandler& m_httpPythonHandler;

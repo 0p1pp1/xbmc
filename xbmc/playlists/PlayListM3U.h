@@ -31,15 +31,17 @@ public:
   static const char *InfoMarker;
   static const char *ArtistMarker;
   static const char *AlbumMarker;
+  static const char *PropertyMarker;
+  static const char *VLCOptMarker;
   static const char *StreamMarker;
   static const char *BandwidthMarker;
   static const char *OffsetMarker;
 
 public:
   CPlayListM3U(void);
-  virtual ~CPlayListM3U(void);
-  virtual bool Load(const std::string& strFileName);
-  virtual void Save(const std::string& strFileName) const;
+  ~CPlayListM3U(void) override;
+  bool Load(const std::string& strFileName) override;
+  void Save(const std::string& strFileName) const override;
 
   static std::map<std::string,std::string> ParseStreamLine(const std::string &streamLine);
 };

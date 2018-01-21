@@ -27,19 +27,16 @@
 #include "DVDCodecs/Video/DVDVideoCodec.h"
 #include "DVDClock.h"
 #include "DVDOverlayContainer.h"
-#include "DVDTSCorrection.h"
+#include "PTSTracker.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderManager.h"
 #include "utils/BitstreamStats.h"
 #include <atomic>
 
+#define DROP_DROPPED 1
+#define DROP_VERYLATE 2
+#define DROP_BUFFER_LEVEL 4
+
 class CDemuxStreamVideo;
-
-#define VIDEO_PICTURE_QUEUE_SIZE 1
-
-#define EOS_ABORT 1
-#define EOS_DROPPED 2
-#define EOS_VERYLATE 4
-#define EOS_BUFFER_LEVEL 8
 
 class CDroppingStats
 {
@@ -52,7 +49,7 @@ public:
     double pts;
   };
   std::deque<CGain> m_gain;
-  double m_totalGain;
+  int m_totalGain;
   double m_lastPts;
 };
 
@@ -64,32 +61,29 @@ public:
                  ,CDVDMessageQueue& parent
                  ,CRenderManager& renderManager,
                  CProcessInfo &processInfo);
-  virtual ~CVideoPlayerVideo();
+  ~CVideoPlayerVideo() override;
 
-  bool OpenStream(CDVDStreamInfo &hint);
-  void CloseStream(bool bWaitForBuffers);
+  bool OpenStream(CDVDStreamInfo hint) override;
+  void CloseStream(bool bWaitForBuffers) override;
+  void Flush(bool sync) override;
+  bool AcceptsData() const override;
+  bool HasData() const override;
+  bool IsInited() const override;
+  void SendMessage(CDVDMsg* pMsg, int priority = 0) override;
+  void FlushMessages() override;
 
-  void Flush(bool sync);
-  bool AcceptsData() const;
-  bool HasData() const { return m_messageQueue.GetDataSize() > 0; }
-  int  GetLevel() const { return m_messageQueue.GetLevel(); }
-  bool IsInited() const { return m_messageQueue.IsInited(); }
-  void SendMessage(CDVDMsg* pMsg, int priority = 0) { m_messageQueue.Put(pMsg, priority); }
-  void FlushMessages() { m_messageQueue.Flush(); }
-
-  void EnableSubtitle(bool bEnable) { m_bRenderSubs = bEnable; }
-  bool IsSubtitleEnabled() { return m_bRenderSubs; }
-  void EnableFullscreen(bool bEnable) { m_bAllowFullscreen = bEnable; }
-  double GetSubtitleDelay() { return m_iSubtitleDelay; }
-  void SetSubtitleDelay(double delay) { m_iSubtitleDelay = delay; }
-  bool IsStalled() const { return m_stalled; }
-  double GetCurrentPts();
-  double GetOutputDelay(); /* returns the expected delay, from that a packet is put in queue */
-  int GetDecoderFreeSpace() { return 0; }
-  std::string GetPlayerInfo();
-  int GetVideoBitrate();
-  std::string GetStereoMode();
-  void SetSpeed(int iSpeed);
+  void EnableSubtitle(bool bEnable) override { m_bRenderSubs = bEnable; }
+  bool IsSubtitleEnabled() override { return m_bRenderSubs; }
+  void EnableFullscreen(bool bEnable) override { m_bAllowFullscreen = bEnable; }
+  double GetSubtitleDelay() override { return m_iSubtitleDelay; }
+  void SetSubtitleDelay(double delay) override { m_iSubtitleDelay = delay; }
+  bool IsStalled() const override { return m_stalled; }
+  bool IsRewindStalled() const override { return m_rewindStalled; }
+  double GetCurrentPts() override;
+  double GetOutputDelay() override; /* returns the expected delay, from that a packet is put in queue */
+  std::string GetPlayerInfo() override;
+  int GetVideoBitrate() override;
+  void SetSpeed(int iSpeed) override;
 
   // classes
   CDVDOverlayContainer* m_pOverlayContainer;
@@ -97,17 +91,29 @@ public:
 
 protected:
 
-  virtual void OnExit();
-  virtual void Process();
-  bool ProcessDecoderOutput(int &decoderState, double &frametime, double &pts);
+  enum EOutputState
+  {
+    OUTPUT_NORMAL,
+    OUTPUT_ABORT,
+    OUTPUT_DROPPED,
+    OUTPUT_AGAIN
+  };
 
-  int OutputPicture(const DVDVideoPicture* src, double pts);
-  void ProcessOverlays(DVDVideoPicture* pSource, double pts);
+  void OnExit() override;
+  void Process() override;
+
+  bool ProcessDecoderOutput(double &frametime, double &pts);
+  void SendMessageBack(CDVDMsg* pMsg, int priority = 0);
+  MsgQueueReturnCode GetMessage(CDVDMsg** pMsg, unsigned int iTimeoutInMilliSeconds, int &priority);
+
+  EOutputState OutputPicture(const VideoPicture* src);
+  void ProcessOverlays(const VideoPicture* pSource, double pts);
   void OpenStream(CDVDStreamInfo &hint, CDVDVideoCodec* codec);
 
   void ResetFrameRateCalc();
   void CalcFrameRate();
   int CalcDropRequirement(double pts);
+  std::string GetStereoMode();
 
   double m_iSubtitleDelay;
 
@@ -116,7 +122,6 @@ protected:
   int m_iDroppedRequest;
 
   double m_fFrameRate;       //framerate of the video currently playing
-  bool m_bCalcFrameRate;     //if we should calculate the framerate from the timestamps
   double m_fStableFrameRate; //place to store calculated framerates
   int m_iFrameRateCount;     //how many calculated framerates we stored in m_fStableFrameRate
   bool m_bAllowDrop;         //we can't drop frames until we've calculated the framerate
@@ -129,7 +134,9 @@ protected:
   bool m_bRenderSubs;
   float m_fForcedAspectRatio;
   int m_speed;
-  bool m_stalled;
+  std::atomic_bool m_stalled;
+  std::atomic_bool m_rewindStalled;
+  bool m_paused;
   IDVDStreamPlayer::ESyncState m_syncState;
   std::atomic_bool m_bAbortOutput;
 
@@ -139,11 +146,11 @@ protected:
   CDVDMessageQueue& m_messageParent;
   CDVDStreamInfo m_hints;
   CDVDVideoCodec* m_pVideoCodec;
-  DVDVideoPicture* m_pTempOverlayPicture;
-  CPullupCorrection m_pullupCorrection;
+  CPtsTracker m_ptsTracker;
   std::list<DVDMessageListItem> m_packets;
   CDroppingStats m_droppingStats;
   CRenderManager& m_renderManager;
-  DVDVideoPicture m_picture;
-};
+  VideoPicture m_picture;
 
+  EOutputState m_outputSate;
+};

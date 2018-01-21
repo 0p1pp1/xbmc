@@ -62,7 +62,7 @@
 					<posy>0</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -79,7 +79,7 @@
 					<posy>0</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -96,7 +96,7 @@
 					<posy>0</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -113,13 +113,13 @@
 					<posy>0</posy>
 					<width>91</width>
 					<height>156</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey3">white.png</texturenofocus>
 					<texturefocus>list_focus.png</texturefocus>
 					<textwidth>120</textwidth>
-					<label>-</label>
+					<label></label>
 					<textcolor>white</textcolor>
 					<onleft>13</onleft>
 					<onright>11</onright>
@@ -140,7 +140,7 @@
 					<posy>80</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -157,7 +157,7 @@
 					<posy>80</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -174,7 +174,7 @@
 					<posy>80</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -191,7 +191,7 @@
 					<posy>160</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -208,7 +208,7 @@
 					<posy>160</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -225,7 +225,7 @@
 					<posy>160</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -242,13 +242,13 @@
 					<posy>160</posy>
 					<width>91</width>
 					<height>156</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey3">white.png</texturenofocus>
 					<texturefocus>list_focus.png</texturefocus>
 					<textwidth>120</textwidth>
-					<label>-</label>
+					<label></label>
 					<textcolor>white</textcolor>
 					<onleft>19</onleft>
 					<onright>17</onright>
@@ -271,7 +271,7 @@
 					<width>91</width>
 					<height>76</height>
 					<font>font30</font>
-					<label>-</label>
+					<label></label>
 					<textcolor>white</textcolor>
 					<align>center</align>
 					<aligny>center</aligny>
@@ -297,7 +297,7 @@
 					<posy>240</posy>
 					<width>91</width>
 					<height>76</height>
-					<font>font25</font>
+					<font>font30</font>
 					<align>center</align>
 					<aligny>center</aligny>
 					<texturenofocus colordiffuse="grey2">white.png</texturenofocus>
@@ -315,7 +315,7 @@
 					<width>91</width>
 					<height>76</height>
 					<font>font30</font>
-					<label>-</label>
+					<label></label>
 					<textcolor>white</textcolor>
 					<align>center</align>
 					<aligny>center</aligny>

@@ -132,10 +132,6 @@ msgctxt "#31303"
 msgid "Data provider"
 msgstr "Teenusepakkuja"
 
-msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "Mälukasutus:"
-
 msgctxt "#31320"
 msgid "Last Logged In"
 msgstr "Viimane sisselogimine"
@@ -152,6 +148,10 @@ msgctxt "#31356"
 msgid "Download Subtitles"
 msgstr "Lae subtiitrid alla"
 
+msgctxt "#31358"
+msgid "Teletext"
+msgstr "Teletekst"
+
 msgctxt "#31390"
 msgid "Skin default"
 msgstr "Rüü vaikeväärtus"
@@ -164,41 +164,13 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "Muuda rüüd · Määra keel ja regioon · Muuda faililoendi valikuid · Seadista ekraanisäästja"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "Halda oma videokogu · Määra video esituse valikud · Muuda videoloendi valikuid · Määra subtiitrite font"
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "Määra piltide loendi valikud · Konfigureeri slaidiesitlusi"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "Määra kolm linna, mille ilmaandmeid koguda"
-
-msgctxt "#31405"
-msgid "Setup control of Kodi via UPnP and HTTP · Configure file sharing · Set internet access options"
-msgstr "Seadista Kodi juhtimine läbi UPnP ja HTTP · Konfigureeri failide ühiskasutust · Määra internetiühenduse valikud"
-
-msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "Seadista ja kalibreeri ekraane · Konfigureeri heliväljundit · Seadista pulte · Määra energiasäästu seaded · Luba silumine · Seadista pealukk"
-
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
 msgstr "Vali enda Kodi profiil[CR]ja jätka"
 
-msgctxt "#31501"
-msgid "Home Page Add-on Quick Links"
-msgstr "Peamenüü lisamooduli kiirlingid"
-
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "Mitmesugused seaded"
-
 msgctxt "#31550"
-msgid "Home Screen Weather Info and button"
-msgstr "Ilma andmed ja nupp peamenüüs"
+msgid "Backgrounds"
+msgstr "Taustad"
 
 msgctxt "#31551"
 msgid "Add-on Shortcut"

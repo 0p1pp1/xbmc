@@ -17,15 +17,12 @@
 *  <http://www.gnu.org/licenses/>.
 *
 */
-#ifdef HAS_DX
 
 #include <d3dcompiler.h>
 #include "GUIShaderDX.h"
 #include "guilib/GraphicContext.h"
-#include "settings/lib/Setting.h"
-#include "settings/Settings.h"
 #include "utils/log.h"
-#include "windowing/WindowingFactory.h"
+#include "rendering/dx/RenderContext.h"
 
 // shaders bytecode includes
 #include "guishader_vert.h"
@@ -38,8 +35,7 @@
 #include "guishader_multi_texture_blend.h"
 #include "guishader_texture.h"
 #include "guishader_texture_noblend.h"
-#include "guishader_video.h"
-#include "guishader_video_control.h"
+#include "rendering/dx/DeviceResources.h"
 
 // shaders bytecode holder
 static const D3D_SHADER_DATA cbPSShaderCode[SHADER_METHOD_RENDER_COUNT] =
@@ -49,8 +45,6 @@ static const D3D_SHADER_DATA cbPSShaderCode[SHADER_METHOD_RENDER_COUNT] =
   { guishader_fonts,               sizeof(guishader_fonts)                }, // SHADER_METHOD_RENDER_FONT
   { guishader_texture,             sizeof(guishader_texture)              }, // SHADER_METHOD_RENDER_TEXTURE_BLEND
   { guishader_multi_texture_blend, sizeof(guishader_multi_texture_blend)  }, // SHADER_METHOD_RENDER_MULTI_TEXTURE_BLEND
-  { guishader_video,               sizeof(guishader_video)                }, // SHADER_METHOD_RENDER_VIDEO
-  { guishader_video_control,       sizeof(guishader_video_control)        }, // SHADER_METHOD_RENDER_VIDEO_CONTROL
   { guishader_interlaced_left,     sizeof(guishader_interlaced_left)      }, // SHADER_METHOD_RENDER_STEREO_INTERLACED_LEFT
   { guishader_interlaced_right,    sizeof(guishader_interlaced_right)     }, // SHADER_METHOD_RENDER_STEREO_INTERLACED_RIGHT
   { guishader_checkerboard_left,   sizeof(guishader_checkerboard_left)    }, // SHADER_METHOD_RENDER_STEREO_CHECKERBOARD_LEFT
@@ -58,11 +52,10 @@ static const D3D_SHADER_DATA cbPSShaderCode[SHADER_METHOD_RENDER_COUNT] =
 };
 
 CGUIShaderDX::CGUIShaderDX() :
-    m_pSampLinear(NULL),
-    m_pSampPoint(NULL),
-    m_pVPBuffer(NULL),
-    m_pWVPBuffer(NULL),
-    m_pVertexBuffer(NULL),
+    m_pSampLinear(nullptr),
+    m_pVPBuffer(nullptr),
+    m_pWVPBuffer(nullptr),
+    m_pVertexBuffer(nullptr),
     m_clipXFactor(0.0f),
     m_clipXOffset(0.0f),
     m_clipYFactor(0.0f),
@@ -123,7 +116,7 @@ bool CGUIShaderDX::Initialize()
 
 bool CGUIShaderDX::CreateBuffers()
 {
-  ID3D11Device* pDevice = g_Windowing.Get3D11Device();
+  ID3D11Device* pDevice = DX::DeviceResources::Get()->GetD3DDevice();
 
   // create vertex buffer
   CD3D11_BUFFER_DESC bufferDesc(sizeof(Vertex) * 4, D3D11_BIND_VERTEX_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -144,7 +137,7 @@ bool CGUIShaderDX::CreateBuffers()
   m_bIsWVPDirty = true;
 
   CRect viewPort;
-  g_Windowing.GetViewPort(viewPort);
+  DX::Windowing().GetViewPort(viewPort);
 
   // initial data for viewport buffer
   m_cbViewPort.TopLeftX = viewPort.x1;
@@ -174,15 +167,10 @@ bool CGUIShaderDX::CreateSamplers()
   sampDesc.MinLOD = 0;
   sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-  if (FAILED(g_Windowing.Get3D11Device()->CreateSamplerState(&sampDesc, &m_pSampLinear)))
+  if (FAILED(DX::DeviceResources::Get()->GetD3DDevice()->CreateSamplerState(&sampDesc, &m_pSampLinear)))
     return false;
 
-  sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-  if (FAILED(g_Windowing.Get3D11Device()->CreateSamplerState(&sampDesc, &m_pSampPoint)))
-    return false;
-
-  ID3D11SamplerState* samplers[] = { m_pSampLinear, m_pSampPoint };
-  g_Windowing.Get3D11Context()->PSSetSamplers(0, ARRAYSIZE(samplers), samplers);
+  DX::DeviceResources::Get()->GetD3DContext()->PSSetSamplers(0, 1, &m_pSampLinear);
 
   return true;
 }
@@ -192,7 +180,7 @@ void CGUIShaderDX::ApplyStateBlock(void)
   if (!m_bCreated)
     return;
 
-  ID3D11DeviceContext* pContext = g_Windowing.Get3D11Context();
+  ID3D11DeviceContext* pContext = DX::DeviceResources::Get()->GetD3DContext();
 
   m_vertexShader.BindShader();
   pContext->VSSetConstantBuffers(0, 1, &m_pWVPBuffer);
@@ -201,8 +189,7 @@ void CGUIShaderDX::ApplyStateBlock(void)
   pContext->PSSetConstantBuffers(0, 1, &m_pWVPBuffer);
   pContext->PSSetConstantBuffers(1, 1, &m_pVPBuffer);
 
-  ID3D11SamplerState* samplers[] = { m_pSampLinear, m_pSampPoint };
-  pContext->PSSetSamplers(0, ARRAYSIZE(samplers), samplers);
+  pContext->PSSetSamplers(0, 1, &m_pSampLinear);
 
   RestoreBuffers();
 }
@@ -233,15 +220,15 @@ void CGUIShaderDX::DrawQuad(Vertex& v1, Vertex& v2, Vertex& v3, Vertex& v4)
 
   ApplyChanges();
 
-  ID3D11DeviceContext* pContext = g_Windowing.Get3D11Context();
+  ID3D11DeviceContext* pContext = DX::DeviceResources::Get()->GetD3DContext();
 
   // update vertex buffer
   D3D11_MAPPED_SUBRESOURCE resource;
   if (SUCCEEDED(pContext->Map(m_pVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource)))
   {
     // we are using strip topology
-    Vertex verticies[4] = { v2, v3, v1, v4 };
-    memcpy(resource.pData, &verticies, sizeof(Vertex) * 4);
+    Vertex vertices[4] = { v2, v3, v1, v4 };
+    memcpy(resource.pData, &vertices, sizeof(Vertex) * 4);
     pContext->Unmap(m_pVertexBuffer, 0);
     // Draw primitives
     pContext->Draw(4, 0);
@@ -254,7 +241,7 @@ void CGUIShaderDX::DrawIndexed(unsigned int indexCount, unsigned int startIndex,
     return;
 
   ApplyChanges();
-  g_Windowing.Get3D11Context()->DrawIndexed(indexCount, startIndex, startVertex);
+  DX::DeviceResources::Get()->GetD3DContext()->DrawIndexed(indexCount, startIndex, startVertex);
 }
 
 void CGUIShaderDX::Draw(unsigned int vertexCount, unsigned int startVertex)
@@ -263,7 +250,7 @@ void CGUIShaderDX::Draw(unsigned int vertexCount, unsigned int startVertex)
     return;
 
   ApplyChanges();
-  g_Windowing.Get3D11Context()->Draw(vertexCount, startVertex);
+  DX::DeviceResources::Get()->GetD3DContext()->Draw(vertexCount, startVertex);
 }
 
 void CGUIShaderDX::SetShaderViews(unsigned int numViews, ID3D11ShaderResourceView** views)
@@ -271,15 +258,7 @@ void CGUIShaderDX::SetShaderViews(unsigned int numViews, ID3D11ShaderResourceVie
   if (!m_bCreated)
     return;
 
-  g_Windowing.Get3D11Context()->PSSetShaderResources(0, numViews, views);
-}
-
-void CGUIShaderDX::SetSampler(SHADER_SAMPLER sampler)
-{
-  if (!m_bCreated)
-    return;
-
-  g_Windowing.Get3D11Context()->PSSetSamplers(1, 1, sampler == SHADER_SAMPLER_POINT ? &m_pSampPoint : &m_pSampLinear);
+  DX::DeviceResources::Get()->GetD3DContext()->PSSetShaderResources(0, numViews, views);
 }
 
 void CGUIShaderDX::Release()
@@ -288,7 +267,6 @@ void CGUIShaderDX::Release()
   SAFE_RELEASE(m_pWVPBuffer);
   SAFE_RELEASE(m_pVPBuffer);
   SAFE_RELEASE(m_pSampLinear);
-  SAFE_RELEASE(m_pSampPoint);
   m_bCreated = false;
 }
 
@@ -312,13 +290,25 @@ void CGUIShaderDX::SetViewPort(D3D11_VIEWPORT viewPort)
 
 void CGUIShaderDX::Project(float &x, float &y, float &z)
 {
+#if defined(_XM_SSE_INTRINSICS_) && !defined(_XM_NO_INTRINSICS_)
   XMVECTOR vLocation = { x, y, z };
+#elif defined(_XM_ARM_NEON_INTRINSICS_) && !defined(_XM_NO_INTRINSICS_)
+  XMVECTOR vLocation = { x, y };
+#endif
   XMVECTOR vScreenCoord = XMVector3Project(vLocation, m_cbViewPort.TopLeftX, m_cbViewPort.TopLeftY, 
                                            m_cbViewPort.Width, m_cbViewPort.Height, 0, 1, 
                                            m_cbWorldViewProj.projection, m_cbWorldViewProj.view, m_cbWorldViewProj.world);
   x = XMVectorGetX(vScreenCoord);
   y = XMVectorGetY(vScreenCoord);
   z = 0;
+}
+
+void XM_CALLCONV CGUIShaderDX::SetWVP(const XMMATRIX &w, const XMMATRIX &v, const XMMATRIX &p)
+{
+  m_bIsWVPDirty = true;
+  m_cbWorldViewProj.world = w;
+  m_cbWorldViewProj.view = v;
+  m_cbWorldViewProj.projection = p;
 }
 
 void CGUIShaderDX::SetWorld(const XMMATRIX &value)
@@ -341,7 +331,7 @@ void CGUIShaderDX::SetProjection(const XMMATRIX &value)
 
 void CGUIShaderDX::ApplyChanges(void)
 {
-  ID3D11DeviceContext* pContext = g_Windowing.Get3D11Context();
+  ID3D11DeviceContext* pContext = DX::DeviceResources::Get()->GetD3DContext();
   D3D11_MAPPED_SUBRESOURCE res;
 
   if (m_bIsWVPDirty)
@@ -353,8 +343,8 @@ void CGUIShaderDX::ApplyChanges(void)
 
       cbWorld* buffer = (cbWorld*)res.pData;
       buffer->wvp = worldViewProj;
-      buffer->blackLevel = (g_Windowing.UseLimitedColor() ? 16.f / 255.f : 0.f);
-      buffer->colorRange = (g_Windowing.UseLimitedColor() ? (235.f - 16.f) / 255.f : 1.0f);
+      buffer->blackLevel = (DX::Windowing().UseLimitedColor() ? 16.f / 255.f : 0.f);
+      buffer->colorRange = (DX::Windowing().UseLimitedColor() ? (235.f - 16.f) / 255.f : 1.0f);
 
       pContext->Unmap(m_pWVPBuffer, 0);
       m_bIsWVPDirty = false;
@@ -378,7 +368,7 @@ void CGUIShaderDX::RestoreBuffers(void)
   const unsigned stride = sizeof(Vertex);
   const unsigned offset = 0;
 
-  ID3D11DeviceContext* pContext = g_Windowing.Get3D11Context();
+  ID3D11DeviceContext* pContext = DX::DeviceResources::Get()->GetD3DContext();
   // Set the vertex buffer to active in the input assembler so it can be rendered.
   pContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
   // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
@@ -388,7 +378,7 @@ void CGUIShaderDX::RestoreBuffers(void)
 void CGUIShaderDX::ClipToScissorParams(void)
 {
   CRect viewPort; // absolute positions of corners
-  g_Windowing.GetViewPort(viewPort);
+  DX::Windowing().GetViewPort(viewPort);
 
   // get current GUI transform
   const TransformMatrix &guiMatrix = g_graphicsContext.GetGUIMatrix();
@@ -440,5 +430,3 @@ void CGUIShaderDX::ClipToScissorParams(void)
     m_clipYOffset = m_clipYOffset * yMult + (viewPort.y2 + viewPort.y1) / 2;
   }
 }
-
-#endif

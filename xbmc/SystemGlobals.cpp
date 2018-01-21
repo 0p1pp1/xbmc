@@ -19,7 +19,6 @@
  */
 #include "system.h"
 #include "SectionLoader.h"
-#include "cores/DataCacheCore.h"
 #include "GUILargeTextureManager.h"
 #include "guilib/TextureManager.h"
 #include "utils/AlarmClock.h"
@@ -29,23 +28,19 @@
 #include "GUIPassword.h"
 #include "utils/LangCodeExpander.h"
 #include "PartyModeManager.h"
-#include "PlayListPlayer.h"
 #include "guilib/LocalizeStrings.h"
 #ifdef HAS_PYTHON
 #include "interfaces/python/XBPython.h"
 #endif
 
-// Guarantee that CSpecialProtocol is initialized before and uninitialized after RarManager
+// Guarantee that CSpecialProtocol is initialized before and uninitialized after ZipManager
 #include "filesystem/SpecialProtocol.h"
 std::map<std::string, std::string> CSpecialProtocol::m_pathMap;
 
-#if defined(HAS_FILESYSTEM_RAR)
-#include "filesystem/RarManager.h"
-#endif
 #include "filesystem/ZipManager.h"
 
 #ifdef TARGET_RASPBERRY_PI
-#include "linux/RBP.h"
+#include "platform/linux/RBP.h"
 #endif
 
   CLangCodeExpander  g_LangCodeExpander;
@@ -64,16 +59,10 @@ std::map<std::string, std::string> CSpecialProtocol::m_pathMap;
   CPartyModeManager     g_partyModeManager;
 
   CAlarmClock        g_alarmClock;
-  PLAYLIST::CPlayListPlayer g_playlistPlayer;
+  CSectionLoader     g_sectionLoader;
 
 #ifdef TARGET_RASPBERRY_PI
   CRBP               g_RBP;
 #endif
 
-#ifdef HAS_FILESYSTEM_RAR
-  CRarManager g_RarManager;
-#endif
   CZipManager g_ZipManager;
-
-  CDataCacheCore g_dataCacheCore;
-

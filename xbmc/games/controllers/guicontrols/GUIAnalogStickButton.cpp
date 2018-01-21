@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2016 Team Kodi
+ *      Copyright (C) 2016-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 
 #include <string>
 
+using namespace KODI;
 using namespace GAME;
 
 CGUIAnalogStickButton::CGUIAnalogStickButton(const CGUIButtonControl& buttonTemplate,
@@ -84,19 +85,21 @@ bool CGUIAnalogStickButton::IsFinished(void) const
   return m_state >= STATE::FINISHED;
 }
 
-JOYSTICK::CARDINAL_DIRECTION CGUIAnalogStickButton::GetDirection(void) const
+JOYSTICK::ANALOG_STICK_DIRECTION CGUIAnalogStickButton::GetAnalogStickDirection(void) const
 {
+  using namespace JOYSTICK;
+
   switch (m_state)
   {
-    case STATE::ANALOG_STICK_UP:    return JOYSTICK::CARDINAL_DIRECTION::UP;
-    case STATE::ANALOG_STICK_RIGHT: return JOYSTICK::CARDINAL_DIRECTION::RIGHT;
-    case STATE::ANALOG_STICK_DOWN:  return JOYSTICK::CARDINAL_DIRECTION::DOWN;
-    case STATE::ANALOG_STICK_LEFT:  return JOYSTICK::CARDINAL_DIRECTION::LEFT;
+    case STATE::ANALOG_STICK_UP:    return ANALOG_STICK_DIRECTION::UP;
+    case STATE::ANALOG_STICK_RIGHT: return ANALOG_STICK_DIRECTION::RIGHT;
+    case STATE::ANALOG_STICK_DOWN:  return ANALOG_STICK_DIRECTION::DOWN;
+    case STATE::ANALOG_STICK_LEFT:  return ANALOG_STICK_DIRECTION::LEFT;
     default:
       break;
   }
 
-  return JOYSTICK::CARDINAL_DIRECTION::UNKNOWN;
+  return ANALOG_STICK_DIRECTION::UNKNOWN;
 }
 
 void CGUIAnalogStickButton::Reset(void)

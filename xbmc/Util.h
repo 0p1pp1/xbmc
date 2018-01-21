@@ -47,9 +47,8 @@ struct ExternalStreamInfo
 
 class CUtil
 {
+  CUtil() = delete;
 public:
-  CUtil(void);
-  virtual ~CUtil(void);
   static void CleanString(const std::string& strFileName,
                           std::string& strTitle,
                           std::string& strTitleAndYear,
@@ -60,7 +59,7 @@ public:
   static std::string GetTitleFromPath(const std::string& strFileNameAndPath, bool bIsFolder = false);
   static void GetQualifiedFilename(const std::string &strBasePath, std::string &strFilename);
   static void RunShortcut(const char* szPath);
-  static void GetHomePath(std::string& strPath, const std::string& strTarget = ""); // default target is "KODI_HOME"
+  static std::string GetHomePath(std::string strTarget = "KODI_HOME"); // default target is "KODI_HOME"
   static bool IsPVR(const std::string& strFile);
   static bool IsHTSP(const std::string& strFile);
   static bool IsLiveTV(const std::string& strFile);
@@ -70,6 +69,8 @@ public:
   static int GetDVDIfoTitle(const std::string& strPathFile);
 
   static bool IsPicture(const std::string& strFile);
+  /// Get resolved filesystem location of splash image
+  static std::string GetSplashPath();
 
   /*! \brief retrieve MD5sum of a file
    \param strPath - path to the file to MD5sum
@@ -83,7 +84,13 @@ public:
 
   static void ClearSubtitles();
   static void ScanForExternalSubtitles(const std::string& strMovie, std::vector<std::string>& vecSubtitles );
-  static void GetExternalStreamDetailsFromFilename(const std::string& strMovie, const std::string& strSubtitles, ExternalStreamInfo& info); 
+
+  /** \brief Retrieves stream info of external associated files, e.g., subtitles, for a given video.
+  *   \param[in] videoPath The full path of the video file.
+  *   \param[in] associatedFile A file that provides additional streams for the given video file.
+  *   \return stream info for the given associatedFile
+  */
+  static ExternalStreamInfo GetExternalStreamDetailsFromFilename(const std::string& videoPath, const std::string& associatedFile);
   static bool FindVobSubPair( const std::vector<std::string>& vecSubtitles, const std::string& strIdxPath, std::string& strSubPath );
   static bool IsVobSub(const std::vector<std::string>& vecSubtitles, const std::string& strSubPath);
   static std::string GetVobSubSubFromIdx(const std::string& vobSubIdx);
@@ -197,6 +204,11 @@ public:
    * \brief Thread-safe random number generation
    */
   static int GetRandomNumber();
+
+  static int64_t ConvertSecsToMilliSecs(double secs) { return static_cast<int64_t>(secs * 1000); }
+  static double ConvertMilliSecsToSecs(int64_t offset) { return offset / 1000.0; }
+  static int64_t ConvertMilliSecsToSecsInt(int64_t offset) { return offset / 1000; }
+  static int64_t ConvertMilliSecsToSecsIntRounded(int64_t offset) { return ConvertMilliSecsToSecsInt(offset + 499); }
 
 #if !defined(TARGET_WINDOWS)
 private:

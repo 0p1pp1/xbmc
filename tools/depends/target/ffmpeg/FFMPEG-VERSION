@@ -1,5 +1,4 @@
 LIBNAME=ffmpeg
-BASE_URL=https://github.com/0p1pp1/FFmpeg/archive
+BASE_URL=https://github.com/0p1pp1/FFmpeg
 VERSION=isdb-3.3
-ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
-GNUTLS_VER=3.4.9
+GNUTLS_VER=3.4.14

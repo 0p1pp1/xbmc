@@ -15,9 +15,10 @@
 			<posy>2</posy>
 			<width>150</width>
 			<height>75</height>
-			<font>-</font>
-			<texturenofocus>-</texturenofocus>
-			<texturefocus>-</texturefocus>
+			<font></font>
+			<texturenofocus></texturenofocus>
+			<texturefocus></texturefocus>
+			<onclick>Dialog.Close(all)</onclick>
 			<onclick>ActivateWindow(Home)</onclick>
 		</control>
 		<control type="image">
@@ -41,7 +42,7 @@
 				<posy>10</posy>
 				<width>40</width>
 				<height>40</height>
-				<label>-</label>
+				<label></label>
 				<texturenofocus>osd_volume.png</texturenofocus>
 				<texturefocus colordiffuse="blue">osd_volume.png</texturefocus>
 				<onclick>ActivateWindow(1112)</onclick>
@@ -85,9 +86,9 @@
 					<posy>40</posy>
 					<width>552</width>
 					<height>12</height>
-					<info>Player.Cache</info>
+					<info>Player.ProgressCache</info>
 					<midtexture colordiffuse="grey2">white.png</midtexture>
-					<texturebg>-</texturebg>
+					<texturebg colordiffuse="grey3">white.png</texturebg>
 				</control>
 				<control type="progress">
 					<description>Progressbar</description>
@@ -96,6 +97,7 @@
 					<width>552</width>
 					<height>12</height>
 					<info>Player.Progress</info>
+					<texturebg colordiffuse="002C2C2C">white.png</texturebg>
 				</control>
 				<control type="slider" id="87">
 					<description>Seek Slider</description>
@@ -104,9 +106,9 @@
 					<width>552</width>
 					<height>32</height>
 					<action>seek</action>
-					<texturesliderbar>-</texturesliderbar>
-					<textureslidernib>-</textureslidernib>
-					<textureslidernibfocus>-</textureslidernibfocus>
+					<texturesliderbar></texturesliderbar>
+					<textureslidernib></textureslidernib>
+					<textureslidernibfocus></textureslidernibfocus>
 				</control>
 			</control>
 		</control>
@@ -127,7 +129,7 @@
 				<posy>9</posy>
 				<width>60</width>
 				<height>60</height>
-				<font>-</font>
+				<font></font>
 				<onclick>Back</onclick>
 				<texturefocus>icon_dialog_close.png</texturefocus>
 				<texturenofocus>icon_dialog_close.png</texturenofocus>
@@ -339,15 +341,15 @@
 					<alttexturefocus colordiffuse="red">osd_record.png</alttexturefocus>
 					<alttexturenofocus colordiffuse="red">osd_record.png</alttexturenofocus>
 					<usealttexture>Player.Record</usealttexture>
-					<onclick>PlayerControl(Record)</onclick>
-					<visible>Player.CanRecord</visible>
+					<onclick>PVR.ToggleRecordPlayingChannel</onclick>
+					<visible>PVR.CanRecordPlayingChannel</visible>
 				</control>
 			</control>
 		</control>
 		<include>BottomMenu</include>
 		<include content="PopupMenu">
-			<param name="panel-posy">0</param>
-			<param name="panel-height">560</param>
+			<param name="panel-posy">-80</param>
+			<param name="panel-height">640</param>
 		</include>
 	</include>
 </includes>

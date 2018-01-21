@@ -27,7 +27,6 @@
 
 HttpParser::HttpParser() :
     _headerStart(0),
-    _bodyStart(0),
     _parsedTo( 0 ),
     _state( 0 ),
     _keyIndex(0),
@@ -40,10 +39,7 @@ HttpParser::HttpParser() :
 
 }
 
-HttpParser::~HttpParser()
-{
-
-}
+HttpParser::~HttpParser() = default;
 
 void
 HttpParser::parseHeader()

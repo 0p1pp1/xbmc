@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,19 +20,24 @@
 #pragma once
 
 #include "IConfigurationWindow.h"
+#include "addons/AddonEvents.h"
+#include "addons/Addon.h"
 #include "games/controllers/ControllerTypes.h"
-#include "utils/Observer.h"
+
+#include <set>
+#include <string>
 
 class CGUIButtonControl;
 class CGUIControlGroupList;
 class CGUIWindow;
 
+namespace KODI
+{
 namespace GAME
 {
   class CGUIControllerWindow;
 
-  class CGUIControllerList : public IControllerList,
-                             public Observer
+  class CGUIControllerList : public IControllerList
   {
   public:
     CGUIControllerList(CGUIWindow* window, IFeatureList* featureList);
@@ -41,18 +46,17 @@ namespace GAME
     // implementation of IControllerList
     virtual bool Initialize(void) override;
     virtual void Deinitialize(void) override;
-    virtual void Refresh(void) override;
+    virtual bool Refresh(void) override;
     virtual void OnFocus(unsigned int controllerIndex) override;
     virtual void OnSelect(unsigned int controllerIndex) override;
+    virtual int GetFocusedController() const override { return m_focusedController; }
     virtual void ResetController(void) override;
-
-    // implementation of Observer
-    virtual void Notify(const Observable& obs, const ObservableMessage msg) override;
 
   private:
     bool RefreshControllers(void);
 
     void CleanupButtons(void);
+    void OnEvent(const ADDON::AddonEvent& event);
 
     // GUI stuff
     CGUIWindow* const     m_guiWindow;
@@ -64,4 +68,5 @@ namespace GAME
     ControllerVector      m_controllers;
     int                   m_focusedController;
   };
+}
 }

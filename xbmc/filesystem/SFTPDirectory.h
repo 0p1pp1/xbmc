@@ -19,8 +19,6 @@
  *
  */
 
-#include "system.h"
-#ifdef HAS_FILESYSTEM_SFTP
 #include "IDirectory.h"
 
 class CURL;
@@ -32,9 +30,8 @@ namespace XFILE
   {
   public:
     CSFTPDirectory(void);
-    virtual ~CSFTPDirectory(void);
-    virtual bool GetDirectory(const CURL& url, CFileItemList &items);
-    virtual bool Exists(const CURL& url);
+    ~CSFTPDirectory(void) override;
+    bool GetDirectory(const CURL& url, CFileItemList &items) override;
+    bool Exists(const CURL& url) override;
   };
 }
-#endif

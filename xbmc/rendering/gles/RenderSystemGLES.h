@@ -18,9 +18,6 @@
  *
  */
 
-#ifndef RENDER_SYSTEM_GLES_H
-#define RENDER_SYSTEM_GLES_H
-
 #pragma once
 
 #include "system.h"
@@ -52,18 +49,18 @@ public:
 
   bool InitRenderSystem() override;
   bool DestroyRenderSystem() override;
-  bool ResetRenderSystem(int width, int height, bool fullScreen, float refreshRate) override;
+  bool ResetRenderSystem(int width, int height) override;
 
   bool BeginRender() override;
   bool EndRender() override;
-  void PresentRender(bool rendered) override;
+  void PresentRender(bool rendered, bool videoLayer) override;
   bool ClearBuffers(color_t color) override;
   bool IsExtSupported(const char* extension) override;
 
   void SetVSync(bool vsync);
   void ResetVSync() { m_bVsyncInit = false; }
 
-  void SetViewPort(CRect& viewPort) override;
+  void SetViewPort(const CRect& viewPort) override;
   void GetViewPort(CRect& viewPort) override;
 
   bool ScissorsCanEffectClipping() override;
@@ -119,4 +116,3 @@ protected:
   GLint      m_viewPort[4];
 };
 
-#endif // RENDER_SYSTEM_H

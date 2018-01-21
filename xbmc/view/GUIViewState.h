@@ -20,6 +20,8 @@
  *
  */
 
+#include <vector>
+
 #include "utils/LabelFormatter.h"
 #include "utils/SortUtils.h"
 #include "MediaSource.h"
@@ -37,6 +39,7 @@ public:
   void SaveViewAsControl(int viewAsControl);
   int GetViewAsControl() const;
 
+  bool ChooseSortMethod();
   SortDescription SetNextSortMethod(int direction = 1);
   void SetCurrentSortMethod(int method);
   SortDescription GetSortMethod() const;
@@ -63,7 +66,7 @@ public:
   virtual VECSOURCES& GetSources();
 
 protected:
-  CGUIViewState(const CFileItemList& items);  // no direct object creation, use GetViewState()
+  explicit CGUIViewState(const CFileItemList& items);  // no direct object creation, use GetViewState()
 
   virtual void SaveViewState() = 0;
   virtual void SaveViewToDb(const std::string &path, int windowID, CViewState *viewState = NULL);
@@ -106,26 +109,26 @@ protected:
 class CGUIViewStateGeneral : public CGUIViewState
 {
 public:
-  CGUIViewStateGeneral(const CFileItemList& items);
+  explicit CGUIViewStateGeneral(const CFileItemList& items);
 
 protected:
-  virtual void SaveViewState() { }
+  void SaveViewState() override { }
 };
 
 class CGUIViewStateFromItems : public CGUIViewState
 {
 public:
-  CGUIViewStateFromItems(const CFileItemList& items);
+  explicit CGUIViewStateFromItems(const CFileItemList& items);
 
 protected:
-  virtual void SaveViewState();
+  void SaveViewState() override;
 };
 
 class CGUIViewStateLibrary : public CGUIViewState
 {
 public:
-  CGUIViewStateLibrary(const CFileItemList& items);
+  explicit CGUIViewStateLibrary(const CFileItemList& items);
 
 protected:
-  virtual void SaveViewState();
+  void SaveViewState() override;
 };

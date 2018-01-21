@@ -22,18 +22,22 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "system.h"
+#include "Interface/StreamInfo.h"
 
 struct DemuxPacket;
+struct DemuxCryptoSession;
+
 class CDVDInputStream;
+
+namespace ADDON {
+  class IAddonProvider;
+}
 
 #ifndef __GNUC__
 #pragma warning(push)
 #pragma warning(disable:4244)
-#endif
-
-#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
-  #include "config.h"
 #endif
 
 extern "C" {
@@ -91,9 +95,8 @@ public:
     memset(language, 0, sizeof(language));
     disabled = false;
     changes = 0;
-    flags = FLAG_NONE;
+    flags = StreamFlags::FLAG_NONE;
     realtime = false;
-    bandwidth = 0;
   }
 
   virtual ~CDemuxStream()
@@ -113,32 +116,23 @@ public:
   StreamType type;
   int source;
   bool realtime;
-  unsigned int bandwidth;
 
   int iDuration; // in mseconds
   void* pPrivate; // private pointer for the demuxer
   uint8_t*     ExtraData; // extra data for codec to use
   unsigned int ExtraSize; // size of extra data
 
+  StreamFlags flags;
   char language[4]; // ISO 639 3-letter language code (empty string if undefined)
   bool disabled; // set when stream is disabled. (when no decoder exists)
 
+  std::string name;
   std::string codecName;
 
   int  changes; // increment on change which player may need to know about
 
-  enum EFlags
-  { FLAG_NONE             = 0x0000 
-  , FLAG_DEFAULT          = 0x0001
-  , FLAG_DUB              = 0x0002
-  , FLAG_ORIGINAL         = 0x0004
-  , FLAG_COMMENT          = 0x0008
-  , FLAG_LYRICS           = 0x0010
-  , FLAG_KARAOKE          = 0x0020
-  , FLAG_FORCED           = 0x0040
-  , FLAG_HEARING_IMPAIRED = 0x0080
-  , FLAG_VISUAL_IMPAIRED  = 0x0100
-  } flags;
+  std::shared_ptr<DemuxCryptoSession> cryptoSession;
+  std::shared_ptr<ADDON::IAddonProvider> externalInterfaces;
 };
 
 class CDemuxStreamVideo : public CDemuxStream
@@ -148,8 +142,6 @@ public:
   {
     iFpsScale = 0;
     iFpsRate = 0;
-    irFpsScale = 0;
-    irFpsRate = 0;
     iHeight = 0;
     iWidth = 0;
     fAspect = 0.0;
@@ -159,21 +151,21 @@ public:
     type = STREAM_VIDEO;
     iOrientation = 0;
     iBitsPerPixel = 0;
+    iBitRate = 0;
   }
 
-  virtual ~CDemuxStreamVideo() {}
+  ~CDemuxStreamVideo() override = default;
   int iFpsScale; // scale of 1000 and a rate of 29970 will result in 29.97 fps
   int iFpsRate;
-  int irFpsScale;
-  int irFpsRate;
   int iHeight; // height of the stream reported by the demuxer
   int iWidth; // width of the stream reported by the demuxer
-  float fAspect; // display aspect of stream
+  double fAspect; // display aspect of stream
   bool bVFR;  // variable framerate
   bool bPTSInvalid; // pts cannot be trusted (avi's).
   bool bForcedAspect; // aspect is forced from container
-  int iOrientation; // orientation of the video in degress counter clockwise
+  int iOrientation; // orientation of the video in degrees counter clockwise
   int iBitsPerPixel;
+  int iBitRate;
   std::string stereo_mode; // expected stereo mode
 };
 
@@ -194,7 +186,7 @@ public:
     type = STREAM_AUDIO;
   }
 
-  virtual ~CDemuxStreamAudio() {}
+  ~CDemuxStreamAudio() override = default;
 
   std::string GetStreamType();
 
@@ -241,19 +233,19 @@ class CDVDDemux
 public:
 
   CDVDDemux() : m_demuxerId(NewGuid()) {}
-  virtual ~CDVDDemux() {}
+  virtual ~CDVDDemux() = default;
 
 
   /*
    * Reset the entire demuxer (same result as closing and opening it)
    */
-  virtual void Reset() = 0;
+  virtual bool Reset() = 0;
 
   /*
    * Aborts any internal reading that might be stalling main thread
    * NOTICE - this can be called from another thread
    */
-  virtual void Abort() = 0;
+  virtual void Abort() { }
 
   /*
    * Flush the demuxer, if any data is kept in buffers, this should be freed now
@@ -269,7 +261,7 @@ public:
   /*
    * Seek, time in msec calculated from stream start
    */
-  virtual bool SeekTime(int time, bool backwords = false, double* startpts = NULL) = 0;
+  virtual bool SeekTime(double time, bool backwards = false, double* startpts = NULL) = 0;
 
   /*
    * Seek to a specified chapter.
@@ -304,12 +296,12 @@ public:
    * Set the playspeed, if demuxer can handle different
    * speeds of playback
    */
-  virtual void SetSpeed(int iSpeed) = 0;
+  virtual void SetSpeed(int iSpeed) { }
 
   /*
    * returns the total time in msec
    */
-  virtual int GetStreamLength() = 0;
+  virtual int GetStreamLength() { return 0; }
 
   /*
    * returns the stream or NULL on error
@@ -324,9 +316,19 @@ public:
   virtual int GetNrOfStreams() const = 0;
 
   /*
+   * get a list of available programs
+   */
+  virtual int GetPrograms(std::vector<ProgramInfo>& programs) { return 0; }
+
+  /*
+   * select programs
+   */
+  virtual void SetProgram(int progId) {}
+
+  /*
    * returns opened filename
    */
-  virtual std::string GetFileName() = 0;
+  virtual std::string GetFileName() { return ""; }
 
   /*
    * return nr of subtitle streams, 0 if none
@@ -339,19 +341,14 @@ public:
   virtual std::string GetStreamCodecName(int64_t demuxerId, int iStreamId) { return GetStreamCodecName(iStreamId); };
 
   /*
-  * return true if demuxer supports enabling at a specific PTS
-  */
-  virtual bool SupportsEnableAtPTS(int64_t demuxerId) { return SupportsEnableAtPTS(); };
-
-  /*
    * enable / disable demux stream
    */
   virtual void EnableStream(int64_t demuxerId, int id, bool enable) { EnableStream(id, enable); };
 
   /*
-  * enable / disable demux stream at given PTS
+  * implicitly enable and open a demux stream for playback
   */
-  virtual void EnableStreamAtPTS(int64_t demuxerId, int id, uint64_t pts) { EnableStreamAtPTS(id, pts); };
+  virtual void OpenStream(int64_t demuxerId, int id) { OpenStream(id); };
 
   /*
    * sets desired width / height for video stream
@@ -366,8 +363,7 @@ public:
 
 protected:
   virtual void EnableStream(int id, bool enable) {};
-  virtual void EnableStreamAtPTS(int id, uint64_t pts) {};
-  virtual bool SupportsEnableAtPTS() { return false; };
+  virtual void OpenStream(int id) {};
   virtual CDemuxStream* GetStream(int iStreamId) const = 0;
   virtual std::string GetStreamCodecName(int iStreamId) { return ""; };
 

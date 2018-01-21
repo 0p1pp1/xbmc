@@ -47,13 +47,13 @@
 		<control type="button" id="1000">
 			<description>button template</description>
 			<posx>0</posx>
-			<posy>-</posy>
+			<posy></posy>
 			<width>400</width>
 			<height>70</height>
 			<font>font25</font>
 			<align>center</align>
 			<texturefocus>list_focus.png</texturefocus>
-			<texturenofocus border="40,0,40,5">list_nofocus.png</texturenofocus>
+			<texturenofocus></texturenofocus>
 		</control>
 	</controls>
 </window>

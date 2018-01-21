@@ -21,7 +21,6 @@
 
 #include "ContextMenuItem.h"
 #include "guilib/GUIWindowManager.h"
-#include "video/windows/GUIWindowVideoNav.h"
 #include "VideoLibraryQueue.h"
 
 namespace CONTEXTMENU
@@ -55,6 +54,13 @@ struct CMusicVideoInfo : CVideoInfo
 struct CMovieInfo : CVideoInfo
 {
   CMovieInfo() : CVideoInfo(MediaTypeMovie) {}
+};
+
+struct CRemoveResumePoint : CStaticContextMenuAction
+{
+  CRemoveResumePoint() : CStaticContextMenuAction(38209) {}
+  bool IsVisible(const CFileItem& item) const override;
+  bool Execute(const CFileItemPtr& item) const override;
 };
 
 struct CMarkWatched : CStaticContextMenuAction

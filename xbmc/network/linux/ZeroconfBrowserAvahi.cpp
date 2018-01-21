@@ -20,8 +20,6 @@
 
 #include "ZeroconfBrowserAvahi.h"
 
-#ifdef HAS_AVAHI
-
 #include <utils/log.h>
 #include "guilib/GUIWindowManager.h"
 #include "guilib/GUIMessage.h"
@@ -33,7 +31,7 @@ namespace
 ///helper RAII-struct to block event loop for modifications
 struct ScopedEventLoopBlock
 {
-  ScopedEventLoopBlock ( AvahiThreadedPoll* fp_poll ) : mp_poll ( fp_poll )
+  explicit ScopedEventLoopBlock ( AvahiThreadedPoll* fp_poll ) : mp_poll ( fp_poll )
   {
     avahi_threaded_poll_lock ( mp_poll );
   }
@@ -52,7 +50,7 @@ CZeroconfBrowserAvahi::CZeroconfBrowserAvahi() : mp_client ( 0 ), mp_poll ( 0 )
   if ( ! ( mp_poll = avahi_threaded_poll_new() ) )
   {
     CLog::Log ( LOGERROR, "CZeroconfAvahi::CZeroconfAvahi(): Could not create threaded poll object" );
-    //TODO: throw exception? can this even happen?
+    //! @todo throw exception? can this even happen?
     return;
   }
 
@@ -241,7 +239,7 @@ void CZeroconfBrowserAvahi::browseCallback (
   {
     case AVAHI_BROWSER_FAILURE:
       CLog::Log ( LOGERROR, "CZeroconfBrowserAvahi::browseCallback error: %s\n", avahi_strerror ( avahi_client_errno ( avahi_service_browser_get_client ( browser ) ) ) );
-      //TODO
+      //! @todo implement
       return;
     case AVAHI_BROWSER_NEW:
       {
@@ -375,5 +373,3 @@ AvahiServiceBrowser* CZeroconfBrowserAvahi::createServiceBrowser ( const std::st
   }
   return ret;
 }
-
-#endif //HAS_AVAHI

@@ -20,15 +20,18 @@
  *
  */
 
+#include <string>
+#include <vector>
+
 #include "guilib/GUIWindow.h"
 
 class CGUIWindowSystemInfo : public CGUIWindow
 {
 public:
   CGUIWindowSystemInfo(void);
-  virtual ~CGUIWindowSystemInfo(void);
-  virtual bool OnMessage(CGUIMessage& message);
-  virtual void FrameMove();
+  ~CGUIWindowSystemInfo(void) override;
+  bool OnMessage(CGUIMessage& message) override;
+  void FrameMove() override;
 private:
   int  m_section;
   void ResetLabels();

@@ -23,30 +23,31 @@
 #include <utility>
 
 #include "AddonManager.h"
+#include "ServiceBroker.h"
 #include "utils/StringUtils.h"
 
 namespace ADDON
 {
 
-std::unique_ptr<CPluginSource> CPluginSource::FromExtension(AddonProps props, const cp_extension_t* ext)
+std::unique_ptr<CPluginSource> CPluginSource::FromExtension(CAddonInfo addonInfo, const cp_extension_t* ext)
 {
-  std::string provides = CAddonMgr::GetInstance().GetExtValue(ext->configuration, "provides");
+  std::string provides = CServiceBroker::GetAddonMgr().GetExtValue(ext->configuration, "provides");
   if (!provides.empty())
-    props.extrainfo.insert(make_pair("provides", provides));
-  return std::unique_ptr<CPluginSource>(new CPluginSource(std::move(props), provides));
+    addonInfo.AddExtraInfo("provides", provides);
+  return std::unique_ptr<CPluginSource>(new CPluginSource(std::move(addonInfo), provides));
 }
 
-CPluginSource::CPluginSource(AddonProps props) : CAddon(std::move(props))
+CPluginSource::CPluginSource(CAddonInfo addonInfo) : CAddon(std::move(addonInfo))
 {
   std::string provides;
-  InfoMap::const_iterator i = m_props.extrainfo.find("provides");
-  if (i != m_props.extrainfo.end())
+  InfoMap::const_iterator i = m_addonInfo.ExtraInfo().find("provides");
+  if (i != m_addonInfo.ExtraInfo().end())
     provides = i->second;
   SetProvides(provides);
 }
 
-CPluginSource::CPluginSource(AddonProps props, const std::string& provides)
-  : CAddon(std::move(props))
+CPluginSource::CPluginSource(CAddonInfo addonInfo, const std::string& provides)
+  : CAddon(std::move(addonInfo))
 {
   SetProvides(provides);
 }
@@ -77,6 +78,8 @@ CPluginSource::Content CPluginSource::Translate(const std::string &content)
     return CPluginSource::EXECUTABLE;
   else if (content == "video")
     return CPluginSource::VIDEO;
+  else if (content == "game")
+    return CPluginSource::GAME;
   else
     return CPluginSource::UNKNOWN;
 }
@@ -89,6 +92,8 @@ TYPE CPluginSource::FullType() const
     return ADDON_AUDIO;
   if (Provides(IMAGE))
     return ADDON_IMAGE;
+  if (Provides(GAME))
+    return ADDON_GAME;
   if (Provides(EXECUTABLE))
     return ADDON_EXECUTABLE;
 
@@ -100,6 +105,7 @@ bool CPluginSource::IsType(TYPE type) const
   return ((type == ADDON_VIDEO && Provides(VIDEO))
        || (type == ADDON_AUDIO && Provides(AUDIO))
        || (type == ADDON_IMAGE && Provides(IMAGE))
+       || (type == ADDON_GAME && Provides(GAME))
        || (type == ADDON_EXECUTABLE && Provides(EXECUTABLE)));
 }
 

@@ -18,18 +18,6 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
-  #include "config.h"
-#endif
-
-#if defined(TARGET_WINDOWS) && !defined(BUILDING_WITH_CMAKE)
-#define PCRE_STATIC 1
-#ifdef _DEBUG
-#pragma comment(lib, "pcrecppd.lib")
-#else  // ! _DEBUG
-#pragma comment(lib, "pcrecpp.lib")
-#endif // ! _DEBUG
-#endif // defined(TARGET_WINDOWS) && !defined(BUILDING_WITH_CMAKE)
 #include <pcrecpp.h>
 #include <cmath>
 #include "FTPParse.h"

@@ -24,9 +24,8 @@
 #include <queue>
 #include "DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
 #include "libavcodec/avcodec.h"
-#include "MMALCodec.h"
+#include "cores/VideoPlayer/VideoRenderers/HwDecRender/MMALRenderer.h"
 
-class CMMALRenderer;
 struct MMAL_BUFFER_HEADER_T;
 class CGPUMEM;
 
@@ -38,45 +37,46 @@ class CDecoder;
 class CMMALYUVBuffer : public CMMALBuffer
 {
 public:
-  CMMALYUVBuffer(CDecoder *dec, unsigned int width, unsigned int height, unsigned int aligned_width, unsigned int aligned_height);
+  CMMALYUVBuffer(int id);
   virtual ~CMMALYUVBuffer();
-
-  CGPUMEM *gmem;
-private:
-  CDecoder *m_dec;
+  uint8_t* GetMemPtr() override;
+  virtual void GetPlanes(uint8_t*(&planes)[YuvImage::MAX_PLANES]);
+  virtual void GetStrides(int(&strides)[YuvImage::MAX_PLANES]);
+  virtual void SetDimensions(int width, int height, const int (&strides)[YuvImage::MAX_PLANES]);
+  CGPUMEM *Allocate(int size, void *opaque) { m_gmem = new CGPUMEM(size, true); if (m_gmem) m_gmem->m_opaque = opaque; return m_gmem; }
+  CGPUMEM *GetMem() { return m_gmem; }
+protected:
+  CGPUMEM *m_gmem = nullptr;
 };
 
 class CDecoder
-  : public CDVDVideoCodecFFmpeg::IHardwareDecoder
+  : public IHardwareDecoder
 {
 public:
-  CDecoder();
+  CDecoder(CProcessInfo& processInfo, CDVDStreamInfo &hints);
   virtual ~CDecoder();
-  virtual bool Open(AVCodecContext* avctx, AVCodecContext* mainctx, const enum AVPixelFormat, unsigned int surfaces);
-  virtual int Decode(AVCodecContext* avctx, AVFrame* frame);
-  virtual bool GetPicture(AVCodecContext* avctx, AVFrame* frame, DVDVideoPicture* picture);
-  virtual int Check(AVCodecContext* avctx);
-  virtual void Close();
-  virtual const std::string Name() { return "mmal"; }
-  virtual unsigned GetAllowedReferences();
-  virtual long Release();
+  virtual bool Open(AVCodecContext* avctx, AVCodecContext* mainctx, const enum AVPixelFormat) override;
+  virtual CDVDVideoCodec::VCReturn Decode(AVCodecContext* avctx, AVFrame* frame) override;
+  virtual bool GetPicture(AVCodecContext* avctx, VideoPicture* picture) override;
+  virtual CDVDVideoCodec::VCReturn Check(AVCodecContext* avctx) override;
+  virtual const std::string Name() override { return "mmal"; }
+  virtual unsigned GetAllowedReferences() override;
+  virtual long Release() override;
 
+  static void AlignedSize(AVCodecContext *avctx, int &width, int &height);
   static void FFReleaseBuffer(void *opaque, uint8_t *data);
   static int FFGetBuffer(AVCodecContext *avctx, AVFrame *pic, int flags);
+  static IHardwareDecoder* Create(CDVDStreamInfo &hint, CProcessInfo &processInfo, AVPixelFormat fmt);
+  static void Register();
 
-  static void AlignedSize(AVCodecContext *avctx, int &w, int &h);
-  CMMALYUVBuffer *GetBuffer(unsigned int width, unsigned int height, AVCodecContext *avctx);
-  CGPUMEM *AllocateBuffer(unsigned int numbytes);
-  void ReleaseBuffer(CGPUMEM *gmem);
-  unsigned sizeFree() { return m_freeBuffers.size(); }
 protected:
-  MMAL_BUFFER_HEADER_T *GetMmal();
   AVCodecContext *m_avctx;
-  unsigned int m_shared;
+  CProcessInfo &m_processInfo;
   CCriticalSection m_section;
-  CMMALRenderer *m_renderer;
-  std::deque<CGPUMEM *> m_freeBuffers;
-  bool m_closing;
+  std::shared_ptr<CMMALPool> m_pool;
+  enum AVPixelFormat m_fmt;
+  CDVDStreamInfo m_hints;
+  CMMALYUVBuffer *m_renderBuffer = nullptr;
 };
 
 };

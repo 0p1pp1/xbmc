@@ -35,34 +35,30 @@ public:
   static const CContextMenuItem MAIN;
   static const CContextMenuItem MANAGE;
 
+  explicit CContextMenuManager(ADDON::CAddonMgr& addonMgr);
+  ~CContextMenuManager();
   static CContextMenuManager& GetInstance();
+
+  void Init();
+  void Deinit();
 
   ContextMenuView GetItems(const CFileItem& item, const CContextMenuItem& root = MAIN) const;
 
   ContextMenuView GetAddonItems(const CFileItem& item, const CContextMenuItem& root = MAIN) const;
 
-  /*!
-   * \brief Adds a context item to this manager.
-   * NOTE: only 'enabled' context addons should be added.
-   */
-  void Register(const ADDON::ContextItemAddonPtr& cm);
-
-  /*!
-   * \brief Removes a context addon from this manager.
-   */
-  bool Unregister(const ADDON::ContextItemAddonPtr& cm);
-
 private:
-  CContextMenuManager();
-  CContextMenuManager(const CContextMenuManager&);
-  CContextMenuManager const& operator=(CContextMenuManager const&);
-  virtual ~CContextMenuManager() {}
+  CContextMenuManager(const CContextMenuManager&) = delete;
+  CContextMenuManager& operator=(CContextMenuManager const&) = delete;
 
-  void Init();
   bool IsVisible(
     const CContextMenuItem& menuItem,
     const CContextMenuItem& root,
     const CFileItem& fileItem) const;
+
+  void ReloadAddonItems();
+  void OnEvent(const ADDON::AddonEvent& event);
+
+  ADDON::CAddonMgr& m_addonMgr;
 
   CCriticalSection m_criticalSection;
   std::vector<CContextMenuItem> m_addonItems;
@@ -77,7 +73,7 @@ namespace CONTEXTMENU
   bool ShowFor(const CFileItemPtr& fileItem, const CContextMenuItem& root=CContextMenuManager::MAIN);
 
   /*!
-   * Shortcut for continuing the context menu loop from an exisiting menu item.
+   * Shortcut for continuing the context menu loop from an existing menu item.
    */
   bool LoopFrom(const IContextMenuItem& menu, const CFileItemPtr& fileItem);
 }

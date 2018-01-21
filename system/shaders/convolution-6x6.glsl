@@ -18,10 +18,18 @@
  *
  */
 
+#ifdef GL_ES
+  precision highp float;
+#endif
+
 uniform sampler2D img;
 uniform vec2      stepxy;
 uniform float     m_stretch;
 varying vec2      cord;
+
+#ifdef GL_ES
+  uniform float     m_alpha;
+#endif
 
 #if (USE1DTEXTURE)
   uniform sampler1D kernelTex;
@@ -80,7 +88,7 @@ half3 line (float ypos, vec3 xpos1, vec3 xpos2, half3 linetaps1, half3 linetaps2
     pixel(xpos1.b, ypos) * linetaps1.g +
     pixel(xpos2.r, ypos) * linetaps2.g +
     pixel(xpos2.g, ypos) * linetaps1.b +
-    pixel(xpos2.b, ypos) * linetaps2.b; 
+    pixel(xpos2.b, ypos) * linetaps2.b;
 }
 
 vec4 process()
@@ -106,7 +114,7 @@ vec4 process()
   vec3 xpos1 = vec3(xystart.x, xystart.x + stepxy.x, xystart.x + stepxy.x * 2.0);
   vec3 xpos2 = vec3(xystart.x + stepxy.x * 3.0, xystart.x + stepxy.x * 4.0, xystart.x + stepxy.x * 5.0);
 
-  rgb =
+  rgb.rgb =
    line(xystart.y                 , xpos1, xpos2, linetaps1, linetaps2) * columntaps1.r +
    line(xystart.y + stepxy.y      , xpos1, xpos2, linetaps1, linetaps2) * columntaps2.r +
    line(xystart.y + stepxy.y * 2.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps1.g +
@@ -114,7 +122,12 @@ vec4 process()
    line(xystart.y + stepxy.y * 4.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps1.b +
    line(xystart.y + stepxy.y * 5.0, xpos1, xpos2, linetaps1, linetaps2) * columntaps2.b;
 
+#ifdef GL_ES
+  rgb.a = m_alpha;
+#else
   rgb.a = gl_Color.a;
+#endif
+
   return rgb;
 }
 

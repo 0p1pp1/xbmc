@@ -1,12 +1,13 @@
-set(SOURCES GUIDialogMusicInfo.cpp
+set(SOURCES GUIDialogInfoProviderSettings.cpp
+            GUIDialogMusicInfo.cpp
             GUIDialogMusicOSD.cpp
             GUIDialogSongInfo.cpp
             GUIDialogVisualisationPresetList.cpp)
 
-set(HEADERS GUIDialogMusicInfo.h
+set(HEADERS GUIDialogInfoProviderSettings.h
+            GUIDialogMusicInfo.h
             GUIDialogMusicOSD.h
             GUIDialogSongInfo.h
             GUIDialogVisualisationPresetList.h)
 
 core_add_library(music_dialogs)
-add_dependencies(music_dialogs libcpluff)

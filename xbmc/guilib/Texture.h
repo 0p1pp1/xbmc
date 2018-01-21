@@ -24,7 +24,7 @@
 #include "XBTF.h"
 #include "guilib/imagefactory.h"
 #ifdef TARGET_POSIX
-#include "linux/XMemUtils.h"
+#include "platform/linux/XMemUtils.h"
 #endif
 
 #pragma pack(1)
@@ -35,6 +35,12 @@ class CTexture;
 class CGLTexture;
 class CPiTexture;
 class CDXTexture;
+
+enum class TEXTURE_SCALING
+{
+  LINEAR,
+  NEAREST,
+};
 
 /*!
 \ingroup textures
@@ -73,10 +79,17 @@ public:
   static CBaseTexture *LoadFromFileInMemory(unsigned char* buffer, size_t bufferSize, const std::string& mimeType,
                                             unsigned int idealWidth = 0, unsigned int idealHeight = 0);
 
-  bool LoadFromMemory(unsigned int width, unsigned int height, unsigned int pitch, unsigned int format, bool hasAlpha, unsigned char* pixels);
+  bool LoadFromMemory(unsigned int width, unsigned int height, unsigned int pitch, unsigned int format, bool hasAlpha, const unsigned char* pixels);
   bool LoadPaletted(unsigned int width, unsigned int height, unsigned int pitch, unsigned int format, const unsigned char *pixels, const COLOR *palette);
 
   bool HasAlpha() const;
+
+  void SetMipmapping();
+  bool IsMipmapped() const;
+  void SetScalingMethod(TEXTURE_SCALING scalingMethod) { m_scalingMethod = scalingMethod; }
+  TEXTURE_SCALING GetScalingMethod() const { return m_scalingMethod; }
+  void SetCacheMemory(bool bCacheMemory) { m_bCacheMemory = bCacheMemory; }
+  bool GetCacheMemory() const { return m_bCacheMemory; }
 
   virtual void CreateTextureObject() = 0;
   virtual void DestroyTextureObject() = 0;
@@ -107,7 +120,7 @@ public:
 
 private:
   // no copy constructor
-  CBaseTexture(const CBaseTexture &copy);
+  CBaseTexture(const CBaseTexture &copy) = delete;
 
 protected:
   bool LoadFromFileInMem(unsigned char* buffer, size_t size, const std::string& mimeType,
@@ -131,9 +144,12 @@ protected:
   unsigned int m_format;
   int m_orientation;
   bool m_hasAlpha;
+  bool m_mipmapping;
+  TEXTURE_SCALING m_scalingMethod = TEXTURE_SCALING::LINEAR;
+  bool m_bCacheMemory = false;
 };
 
-#if defined(HAS_OMXPLAYER)
+#if defined(TARGET_RASPBERRY_PI)
 #include "TexturePi.h"
 #define CTexture CPiTexture
 #elif defined(HAS_GL) || defined(HAS_GLES)

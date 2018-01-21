@@ -20,29 +20,26 @@
 
 #pragma once
 
-#if defined(HAVE_X11)
 #include "GLContext.h"
 #include "EGL/egl.h"
+#include <X11/Xutil.h>
 
 class CGLContextEGL : public CGLContext
 {
 public:
-  CGLContextEGL(Display *dpy);
-  virtual ~CGLContextEGL();
+  explicit CGLContextEGL(Display *dpy);
+  ~CGLContextEGL() override;
   bool Refresh(bool force, int screen, Window glWindow, bool &newContext) override;
   void Destroy() override;
   void Detach() override;
-  void SetVSync(bool enable, int &mode) override;
-  void SwapBuffers(int &mode) override;
+  void SetVSync(bool enable) override;
+  void SwapBuffers() override;
   void QueryExtensions() override;
-  XVisualInfo* GetVisual();
   EGLDisplay m_eglDisplay;
   EGLSurface m_eglSurface;
   EGLContext m_eglContext;
   EGLConfig m_eglConfig;
 protected:
   bool IsSuitableVisual(XVisualInfo *vInfo);
-  EGLConfig getEGLConfig(EGLDisplay eglDisplay, XVisualInfo *vInfo);
+  EGLConfig GetEGLConfig(EGLDisplay eglDisplay, XVisualInfo *vInfo);
 };
-
-#endif

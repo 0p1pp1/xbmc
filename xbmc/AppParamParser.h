@@ -24,14 +24,20 @@ class CAppParamParser
 {
   public:
     CAppParamParser();
-    void Parse(const char* argv[], int nArgs);
+    void Parse(const char* const* argv, int nArgs);
+
+    const CFileItemList &Playlist() const { return m_playlist; }
+    bool RemoteControlEnabled() const { return m_remoteControlEnabled; }
+    const std::string &RemoteControlName() const { return m_remoteControlName; }
 
   private:
     bool m_testmode;
-    CFileItemList m_playlist;
     void ParseArg(const std::string &arg);
     void DisplayHelp();
     void DisplayVersion();
     void EnableDebugMode();
-    void PlayPlaylist();
+
+    CFileItemList m_playlist;
+    bool m_remoteControlEnabled = true;
+    std::string m_remoteControlName;
 };

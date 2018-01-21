@@ -1,41 +1,43 @@
-set(SOURCES AEFactory.cpp
-            AEResampleFactory.cpp
+set(SOURCES AEResampleFactory.cpp
             AESinkFactory.cpp
-            DSPAddons/ActiveAEDSP.cpp
-            DSPAddons/ActiveAEDSPAddon.cpp
-            DSPAddons/ActiveAEDSPDatabase.cpp
-            DSPAddons/ActiveAEDSPMode.cpp
-            DSPAddons/ActiveAEDSPProcess.cpp
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSP.cpp
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPAddon.cpp
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPDatabase.cpp
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPMode.cpp
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPProcess.cpp
+            Engines/ActiveAE/AudioDSPAddons/AudioDSPSettings.cpp
             Encoders/AEEncoderFFmpeg.cpp
             Engines/ActiveAE/ActiveAE.cpp
             Engines/ActiveAE/ActiveAEBuffer.cpp
+            Engines/ActiveAE/ActiveAEFilter.cpp
             Engines/ActiveAE/ActiveAESink.cpp
             Engines/ActiveAE/ActiveAEStream.cpp
             Engines/ActiveAE/ActiveAESound.cpp
+            Engines/ActiveAE/ActiveAESettings.cpp
             Utils/AEBitstreamPacker.cpp
             Utils/AEChannelInfo.cpp
-            Utils/AEBuffer.cpp
             Utils/AEDeviceInfo.cpp
             Utils/AELimiter.cpp
             Utils/AEPackIEC61937.cpp
             Utils/AEStreamInfo.cpp
-            Utils/AEUtil.cpp
-            Sinks/AESinkNULL.cpp)
+            Utils/AEUtil.cpp)
 
-set(HEADERS AEFactory.h
-            AEResampleFactory.h
+set(HEADERS AEResampleFactory.h
             AESinkFactory.h
-            DSPAddons/ActiveAEDSP.h
-            DSPAddons/ActiveAEDSPAddon.h
-            DSPAddons/ActiveAEDSPDatabase.h
-            DSPAddons/ActiveAEDSPMode.h
-            DSPAddons/ActiveAEDSPProcess.h
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSP.h
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPAddon.h
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPDatabase.h
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPMode.h
+            Engines/ActiveAE/AudioDSPAddons/ActiveAEDSPProcess.h
+            Engines/ActiveAE/AudioDSPAddons/AudioDSPSettings.h
             Encoders/AEEncoderFFmpeg.h
             Engines/ActiveAE/ActiveAE.h
             Engines/ActiveAE/ActiveAEBuffer.h
+            Engines/ActiveAE/ActiveAEFilter.h
             Engines/ActiveAE/ActiveAESink.h
             Engines/ActiveAE/ActiveAESound.h
             Engines/ActiveAE/ActiveAEStream.h
+            Engines/ActiveAE/ActiveAESettings.h
             Interfaces/AE.h
             Interfaces/AEEncoder.h
             Interfaces/AEResample.h
@@ -44,10 +46,8 @@ set(HEADERS AEFactory.h
             Interfaces/AEStream.h
             Interfaces/IAudioCallback.h
             Interfaces/ThreadedAE.h
-            Sinks/AESinkNULL.h
             Utils/AEAudioFormat.h
             Utils/AEBitstreamPacker.h
-            Utils/AEBuffer.h
             Utils/AEChannelData.h
             Utils/AEChannelInfo.h
             Utils/AEDeviceInfo.h
@@ -60,15 +60,16 @@ set(HEADERS AEFactory.h
 
 if(ALSA_FOUND)
   list(APPEND SOURCES Sinks/AESinkALSA.cpp
-                      Sinks/alsa/ALSADeviceMonitor.cpp
                       Sinks/alsa/ALSAHControlMonitor.cpp
-                      Sinks/AESinkOSS.cpp
                       Utils/AEELDParser.cpp)
   list(APPEND HEADERS Sinks/AESinkALSA.h
-                      Sinks/alsa/ALSADeviceMonitor.h
                       Sinks/alsa/ALSAHControlMonitor.h
-                      Sinks/AESinkOSS.h
                       Utils/AEELDParser.h)
+
+  if(UDEV_FOUND)
+    list(APPEND SOURCES Sinks/alsa/ALSADeviceMonitor.cpp)
+    list(APPEND HEADERS Sinks/alsa/ALSADeviceMonitor.h)
+  endif()
 endif()
 
 if(PULSEAUDIO_FOUND)
@@ -76,26 +77,40 @@ if(PULSEAUDIO_FOUND)
   list(APPEND HEADERS Sinks/AESinkPULSE.h)
 endif()
 
+if(SNDIO_FOUND)
+  list(APPEND SOURCES Sinks/AESinkSNDIO.cpp)
+  list(APPEND HEADERS Sinks/AESinkSNDIO.h)
+endif()
+
 if(FFMPEG_FOUND)
   list(APPEND SOURCES Engines/ActiveAE/ActiveAEResampleFFMPEG.cpp)
   list(APPEND HEADERS Engines/ActiveAE/ActiveAEResampleFFMPEG.h)
 endif()
 
-if(CORE_SYSTEM_NAME STREQUAL windows)
-  list(APPEND SOURCES Sinks/AESinkDirectSound.cpp
-                      Sinks/AESinkWASAPI.cpp)
-  list(APPEND HEADERS Sinks/AESinkDirectSound.h
-                      Sinks/AESinkWASAPI.h)
+if(CORE_SYSTEM_NAME MATCHES windows)
+  list(APPEND SOURCES Sinks/AESinkWASAPI.cpp
+                      Sinks/windows/AESinkFactoryWin.cpp)
+  list(APPEND HEADERS Sinks/AESinkWASAPI.h
+                      Sinks/windows/AESinkFactoryWin.h)
+  if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+    list(APPEND SOURCES Sinks/AESinkXAudio.cpp
+                        Sinks/windows/AESinkFactoryWin10.cpp)
+    list(APPEND SOURCES Sinks/AESinkXAudio.h)
+  elseif(CORE_SYSTEM_NAME STREQUAL windows)
+    list(APPEND SOURCES Sinks/AESinkDirectSound.cpp
+                        Sinks/windows/AESinkFactoryWin32.cpp)
+    list(APPEND SOURCES Sinks/AESinkDirectSound.h)
+  endif()
 endif()
 
-if(CORE_SYSTEM_NAME STREQUAL rbpi)
+if(CORE_PLATFORM_NAME_LC STREQUAL rbpi)
   list(APPEND SOURCES Engines/ActiveAE/ActiveAEResamplePi.cpp
                       Sinks/AESinkPi.cpp)
   list(APPEND HEADERS Engines/ActiveAE/ActiveAEResamplePi.h
                       Sinks/AESinkPi.h)
 endif()
 
-if(CORE_SYSTEM_NAME STREQUAL darwin)
+if(CORE_SYSTEM_NAME STREQUAL osx)
   list(APPEND SOURCES Sinks/AESinkDARWINOSX.cpp
                       Sinks/osx/AEDeviceEnumerationOSX.cpp
                       Sinks/osx/CoreAudioChannelLayout.cpp
@@ -124,11 +139,18 @@ if(CORE_SYSTEM_NAME STREQUAL android)
   list(APPEND HEADERS Sinks/AESinkAUDIOTRACK.h)
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+if(CORE_SYSTEM_NAME STREQUAL freebsd)
+  list(APPEND SOURCES Sinks/AESinkOSS.cpp)
+  list(APPEND HEADERS Sinks/AESinkOSS.h)
+endif()
 
 core_add_library(audioengine)
-add_dependencies(audioengine libcpluff)
-
-if(ENABLE_INTERNAL_FFMPEG)
-  add_dependencies(audioengine ffmpeg)
+target_include_directories(${CORE_LIBRARY} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
+  if(HAVE_SSE)
+    target_compile_options(${CORE_LIBRARY} PRIVATE -msse)
+  endif()
+  if(HAVE_SSE2)
+    target_compile_options(${CORE_LIBRARY} PRIVATE -msse2)
+  endif()
 endif()

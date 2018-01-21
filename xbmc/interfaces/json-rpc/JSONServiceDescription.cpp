@@ -123,6 +123,7 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
 
 // Video Library
   { "VideoLibrary.GetGenres",                       CVideoLibrary::GetGenres },
+  { "VideoLibrary.GetTags",                         CVideoLibrary::GetTags },
   { "VideoLibrary.GetMovies",                       CVideoLibrary::GetMovies },
   { "VideoLibrary.GetMovieDetails",                 CVideoLibrary::GetMovieDetails },
   { "VideoLibrary.GetMovieSets",                    CVideoLibrary::GetMovieSets },
@@ -216,6 +217,7 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "Input.Home",                                   CInputOperations::Home },
   { "Input.ShowCodec",                              CInputOperations::ShowCodec },
   { "Input.ShowOSD",                                CInputOperations::ShowOSD },
+  { "Input.ShowPlayerProcessInfo",                  CInputOperations::ShowPlayerProcessInfo },
 
 // Application operations
   { "Application.GetProperties",                    CApplicationOperations::GetProperties },
@@ -767,7 +769,7 @@ JSONRPC_STATUS JSONSchemaTypeDefinition::Check(const CVariant &value, CVariant &
       if (value.size() < items.size() || (value.size() != items.size() && additionalItems.size() == 0))
       {
         CLog::Log(LOGDEBUG, "JSONRPC: One of the array elements does not match in type %s", name.c_str());
-        errorMessage = StringUtils::Format("%" PRIuS" array elements expected but %d received", items.size(), value.size());
+        errorMessage = StringUtils::Format("{0} array elements expected but {1} received", items.size(), value.size());
         errorData["message"] = errorMessage.c_str();
         return InvalidParams;
       }
@@ -1422,14 +1424,10 @@ bool CJSONServiceDescription::prepareDescription(std::string &description, CVari
   }
 
   if (description.at(0) != '{')
-  {
-    description = StringUtils::Format("{%s}", description.c_str());
-  }
-
-  descriptionObject = CJSONVariantParser::Parse((const unsigned char *)description.c_str(), description.size());
+    description = StringUtils::Format("{{{:s}}}", description);
 
   // Make sure the method description actually exists and represents an object
-  if (!descriptionObject.isObject())
+  if (!CJSONVariantParser::Parse(description, descriptionObject) || !descriptionObject.isObject())
   {
     CLog::Log(LOGERROR, "JSONRPC: Unable to parse JSON Schema definition for \"%s\"", name.c_str());
     return false;

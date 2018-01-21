@@ -19,7 +19,8 @@
  */
 
 #include "DVDClock.h"
-#include "video/VideoReferenceClock.h"
+#include "cores/VideoPlayer/Interface/Addon/TimingConstants.h"
+#include "VideoReferenceClock.h"
 #include <math.h>
 #include "utils/MathUtils.h"
 #include "threads/SingleLock.h"
@@ -34,6 +35,8 @@ CDVDClock::CDVDClock()
 
   m_pauseClock = 0;
   m_bReset = true;
+  m_paused = false;
+  m_speedAfterPause = DVD_PLAYSPEED_PAUSE;
   m_iDisc = 0;
   m_maxspeedadjust = 0.0;
   m_systemAdjust = 0;
@@ -49,9 +52,7 @@ CDVDClock::CDVDClock()
   m_systemUsed = m_systemFrequency;
 }
 
-CDVDClock::~CDVDClock()
-{
-}
+CDVDClock::~CDVDClock() = default;
 
 // Returns the current absolute clock in units of DVD_TIME_BASE (usually microseconds).
 double CDVDClock::GetAbsoluteClock(bool interpolated /*= true*/)
@@ -100,14 +101,51 @@ double CDVDClock::GetVsyncAdjust()
   return m_vSyncAdjust;
 }
 
-void CDVDClock::SetSpeed(int iSpeed)
+void CDVDClock::Pause(bool pause)
 {
-  // this will sometimes be a little bit of due to rounding errors, ie clock might jump abit when changing speed
   CSingleLock lock(m_critSection);
 
-  if(iSpeed == DVD_PLAYSPEED_PAUSE)
+  if (pause && !m_paused)
   {
-    if(!m_pauseClock)
+    if (!m_pauseClock)
+      m_speedAfterPause = m_systemFrequency * DVD_PLAYSPEED_NORMAL / m_systemUsed;
+    else
+      m_speedAfterPause = DVD_PLAYSPEED_PAUSE;
+
+    SetSpeed(DVD_PLAYSPEED_PAUSE);
+    m_paused = true;
+  }
+  else if (!pause && m_paused)
+  {
+    m_paused = false;
+    SetSpeed(m_speedAfterPause);
+  }
+}
+
+void CDVDClock::Advance(double time)
+{
+  CSingleLock lock(m_critSection);
+
+  if (m_pauseClock)
+  {
+    m_pauseClock += time / DVD_TIME_BASE * m_systemFrequency;
+  }
+}
+
+void CDVDClock::SetSpeed(int iSpeed)
+{
+  // this will sometimes be a little bit of due to rounding errors, ie clock might jump a bit when changing speed
+  CSingleLock lock(m_critSection);
+
+  if (m_paused)
+  {
+    m_speedAfterPause = iSpeed;
+    return;
+  }
+
+  if (iSpeed == DVD_PLAYSPEED_PAUSE)
+  {
+    if (!m_pauseClock)
       m_pauseClock = m_videoRefClock->GetTime();
     return;
   }
@@ -116,7 +154,7 @@ void CDVDClock::SetSpeed(int iSpeed)
   int64_t newfreq = m_systemFrequency * DVD_PLAYSPEED_NORMAL / iSpeed;
 
   current = m_videoRefClock->GetTime();
-  if( m_pauseClock )
+  if (m_pauseClock)
   {
     m_startClock += current - m_pauseClock;
     m_pauseClock = 0;
@@ -128,6 +166,8 @@ void CDVDClock::SetSpeed(int iSpeed)
 
 void CDVDClock::SetSpeedAdjust(double adjust)
 {
+  CLog::Log(LOGDEBUG, "CDVDClock::SetSpeedAdjust - adjusted:%f", adjust);
+
   CSingleLock lock(m_critSection);
   m_speedAdjust = adjust;
 }
@@ -156,9 +196,13 @@ double CDVDClock::ErrorAdjust(double error, const char* log)
 
   if (m_vSyncAdjust != 0)
   {
-    if (error > 0.5 * m_frameTime)
+    // Audio ahead is more noticeable then audio behind video.
+    // Correct if aufio is more than 20ms ahead or more then
+    // 27ms behind. In a worst case scenario we switch from
+    // 20ms ahead to 21ms behind (for fps of 23.976)
+    if (error > 0.02 * DVD_TIME_BASE)
       adjustment = m_frameTime;
-    else if (error < -0.5 * m_frameTime)
+    else if (error < -0.027 * DVD_TIME_BASE)
       adjustment = -m_frameTime;
     else
       adjustment = 0;
@@ -184,7 +228,6 @@ void CDVDClock::Discontinuity(double clock, double absolute)
   m_bReset = false;
   m_systemAdjust = 0;
   m_speedAdjust = 0;
-  m_vSyncAdjust = 0;
 }
 
 void CDVDClock::SetMaxSpeedAdjust(double speed)
@@ -226,11 +269,6 @@ int CDVDClock::UpdateFramerate(double fps, double* interval /*= NULL*/)
   m_videoRefClock->SetSpeed(speed);
 
   return rate;
-}
-
-double CDVDClock::GetRefreshRate()
-{
-  return m_videoRefClock->GetRefreshRate();
 }
 
 bool CDVDClock::GetClockInfo(int& MissedVblanks, double& ClockSpeed, double& RefreshRate) const
@@ -275,6 +313,8 @@ double CDVDClock::SystemToPlaying(int64_t system)
 
 double CDVDClock::GetClockSpeed()
 {
+  CSingleLock lock(m_critSection);
+
   double speed = (double)m_systemFrequency / m_systemUsed;
-  return m_videoRefClock->GetSpeed() * speed;
+  return m_videoRefClock->GetSpeed() * speed + m_speedAdjust;
 }

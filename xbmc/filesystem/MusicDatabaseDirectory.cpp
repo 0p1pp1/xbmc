@@ -33,13 +33,9 @@
 using namespace XFILE;
 using namespace MUSICDATABASEDIRECTORY;
 
-CMusicDatabaseDirectory::CMusicDatabaseDirectory(void)
-{
-}
+CMusicDatabaseDirectory::CMusicDatabaseDirectory(void) = default;
 
-CMusicDatabaseDirectory::~CMusicDatabaseDirectory(void)
-{
-}
+CMusicDatabaseDirectory::~CMusicDatabaseDirectory(void) = default;
 
 bool CMusicDatabaseDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
@@ -117,16 +113,17 @@ void CMusicDatabaseDirectory::ClearDirectoryCache(const std::string& strDirector
   std::string path = CLegacyPathTranslation::TranslateMusicDbPath(strDirectory);
   URIUtils::RemoveSlashAtEnd(path);
 
-  Crc32 crc;
-  crc.ComputeFromLowerCase(path);
+  uint32_t crc = Crc32::ComputeFromLowerCase(path);
 
-  std::string strFileName = StringUtils::Format("special://temp/%08x.fi", (unsigned __int32) crc);
+  std::string strFileName = StringUtils::Format("special://temp/archive_cache/%08x.fi", crc);
   CFile::Delete(strFileName);
 }
 
 bool CMusicDatabaseDirectory::IsAllItem(const std::string& strDirectory)
 {
-  if (StringUtils::EndsWith(strDirectory, "/-1/"))
+  //Last query parameter, ignoring any appended options, is -1
+  CURL url(strDirectory);
+  if (StringUtils::EndsWith(url.GetWithoutOptions(), "/-1/"))
     return true;
   return false;
 }

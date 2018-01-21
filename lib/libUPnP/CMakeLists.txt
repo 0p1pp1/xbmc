@@ -58,6 +58,7 @@ set(SOURCES Platinum/Source/Core/PltAction.cpp
             Neptune/Source/Core/NptUri.cpp
             Neptune/Source/Core/NptUtils.cpp
             Neptune/Source/Core/NptXml.cpp
+            Neptune/Source/System/Bsd/NptBsdResolver.cpp
             Neptune/Source/System/Bsd/NptBsdSockets.cpp
             Neptune/Source/System/StdC/NptStdcDebug.cpp
             Neptune/Source/System/StdC/NptStdcEnvironment.cpp
@@ -70,27 +71,22 @@ set(SOURCES Platinum/Source/Core/PltAction.cpp
             Platinum/Source/Devices/MediaConnect/PltMediaConnect.cpp
             Neptune/Source/System/Posix/NptPosixEnvironment.cpp)
 
-include_directories(Neptune/Source/Core
-                    Platinum/Source/Core
-                    Platinum/Source/Platinum
-                    Platinum/Source/Devices/MediaConnect
-                    Platinum/Source/Devices/MediaRenderer
-                    Platinum/Source/Devices/MediaServer
-                    Neptune/Source/System/Posix
-                    Platinum/Source/Extras)
-
-if(NOT CORE_SYSTEM_NAME STREQUAL windows)
+if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
   list(APPEND SOURCES Neptune/Source/System/Posix/NptPosixSystem.cpp
                       Neptune/Source/System/Posix/NptSelectableMessageQueue.cpp
                       Neptune/Source/System/Posix/NptPosixQueue.cpp
                       Neptune/Source/System/Posix/NptPosixThreads.cpp
                       Neptune/Source/System/Posix/NptPosixTime.cpp
                       Neptune/Source/System/Bsd/NptBsdNetwork.cpp)
+  if(APPLE)
+    list(APPEND SOURCES Neptune/Source/System/Apple/NptAppleAutoreleasePool.mm)
+  else()
+    list(APPEND SOURCES Neptune/Source/System/Null/NptNullAutoreleasePool.cpp)
+  endif()
 else()
   list(APPEND SOURCES Neptune/Source/System/Win32/NptWin32Console.cpp
                       Neptune/Source/System/Win32/NptWin32Debug.cpp
                       Neptune/Source/System/Win32/NptWin32DynamicLibraries.cpp
-                      Neptune/Source/System/Win32/NptWin32File.cpp
                       Neptune/Source/System/Win32/NptWin32MessageQueue.cpp
                       Neptune/Source/System/Win32/NptWin32Network.cpp
                       Neptune/Source/System/Win32/NptWin32Queue.cpp
@@ -98,14 +94,27 @@ else()
                       Neptune/Source/System/Win32/NptWin32System.cpp
                       Neptune/Source/System/Win32/NptWin32Threads.cpp
                       Neptune/Source/System/Win32/NptWin32Time.cpp)
-  include_directories(Neptune/Source/System/Win32)
 endif()
 
-if(CORE_SYSTEM_NAME STREQUAL darwin OR CORE_SYSTEM_NAME STREQUAL ios)
-  list(APPEND SOURCES Neptune/Source/System/Apple/NptAppleAutoreleasePool.mm
-                      Neptune/Source/System/Apple/NptAppleLogConfig.mm)
+
+add_library(upnp STATIC ${SOURCES} ${HEADERS})
+target_compile_definitions(upnp PUBLIC -DNPT_CONFIG_ENABLE_LOGGING)
+target_include_directories(upnp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                                       Platinum/Source/Core
+                                       Platinum/Source/Platinum
+                                       Platinum/Source/Devices/MediaConnect
+                                       Platinum/Source/Devices/MediaRenderer
+                                       Platinum/Source/Devices/MediaServer
+                                       Platinum/Source/Extras
+                                       Neptune/Source/Core
+                                       Neptune/Source/System/Posix)
+if(CORE_SYSTEM_NAME STREQUAL windows OR CORE_SYSTEM_NAME STREQUAL windowsstore)
+  target_include_directories(upnp PRIVATE Neptune/Source/System/Win32)
 endif()
+set_target_properties(upnp PROPERTIES FOLDER lib)
+source_group_by_folder(upnp)
+set(core_DEPENDS upnp ${core_DEPENDS} CACHE STRING "" FORCE)
 
-add_definitions(-DNPT_CONFIG_ENABLE_LOGGING)
-
-core_add_library(upnp)
+if(CORE_SYSTEM_NAME STREQUAL windowsstore)
+	set_target_properties(upnp PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
+endif()

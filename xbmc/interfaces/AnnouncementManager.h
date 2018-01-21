@@ -35,7 +35,7 @@ namespace ANNOUNCEMENT
   {
   public:
     CAnnouncementManager();
-    virtual ~CAnnouncementManager();
+    ~CAnnouncementManager() override;
 
     static CAnnouncementManager& GetInstance();
 
@@ -47,11 +47,13 @@ namespace ANNOUNCEMENT
 
     void Announce(AnnouncementFlag flag, const char *sender, const char *message);
     void Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
-    void Announce(AnnouncementFlag flag, const char *sender, const char *message, CFileItemPtr item);
-    void Announce(AnnouncementFlag flag, const char *sender, const char *message, CFileItemPtr item, const CVariant &data);
+    void Announce(AnnouncementFlag flag, const char *sender, const char *message,
+        const std::shared_ptr<const CFileItem>& item);
+    void Announce(AnnouncementFlag flag, const char *sender, const char *message,
+        const std::shared_ptr<const CFileItem>& item, const CVariant &data);
 
   protected:
-    void Process();
+    void Process() override;
     void DoAnnounce(AnnouncementFlag flag, const char *sender, const char *message, CFileItemPtr item, const CVariant &data);
     void DoAnnounce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
@@ -67,8 +69,8 @@ namespace ANNOUNCEMENT
     CEvent m_queueEvent;
 
   private:
-    CAnnouncementManager(const CAnnouncementManager&);
-    CAnnouncementManager const& operator=(CAnnouncementManager const&);
+    CAnnouncementManager(const CAnnouncementManager&) = delete;
+    CAnnouncementManager const& operator=(CAnnouncementManager const&) = delete;
 
     CCriticalSection m_critSection;
     std::vector<IAnnouncer *> m_announcers;

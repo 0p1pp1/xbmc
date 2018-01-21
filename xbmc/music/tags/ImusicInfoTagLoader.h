@@ -21,15 +21,16 @@
 
 #include <string>
 
+class EmbeddedArt;
+
 namespace MUSIC_INFO
 {
-  class EmbeddedArt;
   class CMusicInfoTag;
   class IMusicInfoTagLoader
   {
   public:
-    IMusicInfoTagLoader(void){};
-    virtual ~IMusicInfoTagLoader(){};
+    IMusicInfoTagLoader(void) = default;
+    virtual ~IMusicInfoTagLoader() = default;
 
     virtual bool Load(const std::string& strFileName, CMusicInfoTag& tag, EmbeddedArt *art = NULL) = 0;
   };

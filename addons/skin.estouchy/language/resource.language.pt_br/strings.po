@@ -60,6 +60,26 @@ msgctxt "#31016"
 msgid "Albums"
 msgstr "Álbuns"
 
+msgctxt "#31017"
+msgid "PVR info"
+msgstr "PVR info"
+
+msgctxt "#31018"
+msgid "Player process info"
+msgstr "Info Processamento do Player"
+
+msgctxt "#31019"
+msgid "Video decoder"
+msgstr "Decodificador Vídeo"
+
+msgctxt "#31020"
+msgid "Pixel format"
+msgstr "Formato do Pixel"
+
+msgctxt "#31021"
+msgid "System memory usage"
+msgstr "Uso de memória no sistema"
+
 msgctxt "#31024"
 msgid "Page"
 msgstr "Página"
@@ -83,6 +103,10 @@ msgstr "Avanço Rápido"
 msgctxt "#31045"
 msgid "REWIND"
 msgstr "Retroceder"
+
+msgctxt "#31046"
+msgid "Play speed"
+msgstr "Velocidade reprodução"
 
 msgctxt "#31049"
 msgid "End Time"
@@ -141,8 +165,8 @@ msgid "Data provider"
 msgstr "Provedor de dados"
 
 msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "Memória Usada:"
+msgid "System Memory Used:"
+msgstr "Memória usada no sistema:"
 
 msgctxt "#31320"
 msgid "Last Logged In"
@@ -176,53 +200,53 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "Altere a skin · Defina idioma e região · Altere opções de listagem de arquivos · Configure um protetor de tela"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "Gerencie sua coleção de vídeo · Definir opções de reprodução de vídeo · Alterar as opções de listagem Vídeo · Setar fontes para legendas"
-
-msgctxt "#31402"
-msgid "Manage your music library · Set music playback options · Change music listing options · Setup song submission"
-msgstr "Gerencia sua coleção de músicas - Ajustes as opções de reprodução de música - Altere as opções de listar músicas - Submenu ajustes de música"
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "Defina as opções de listagem de imagens · Configure slideshows"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "Definir três cidades para coletar informações sobre o tempo"
-
 msgctxt "#31405"
-msgid "Setup control of Kodi via UPnP and HTTP · Configure file sharing · Set internet access options"
-msgstr "Controle de configuração do Kodi através de UPnP e HTTP · Configure compartilhamento arquivo setar opções de acesso internet"
+msgid "Configure & manage media sharing services · Configure & manage the weather service"
+msgstr "Configurar & gerenciar serviços de compartilhamento de mídias · Configurar e gerenciar o serviço meteorológico"
 
 msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "Configurar e calibrar displays · Configurar saída de áudio · Configurar controles remotos · Setar opções poupar energia · Ligar debugging · Configurar bloqueio Master"
+msgid "Configure display · Configure audio · Configure internet access · Configure power saving· Configure logging"
+msgstr "Configurar a exibição · Configurar áudio · Configurar Acesso à Internet · Configurar economia de energia · Configurar log de depuração"
 
 msgctxt "#31407"
 msgid "Manage your installed add-ons · Browse for and install add-ons from kodi.tv · Modify add-on settings"
 msgstr "Gerencie seus addons instalados. Navegue e instale addons via repositório do kodi.tv - Altere ajustes dos addons"
 
+msgctxt "#31408"
+msgid "Configure actions that can be used during playback · Configure how media content is played"
+msgstr "Configurar as ações que podem ser usadas durante a reprodução · Configurar o modo como o conteúdo de mídia é reproduzido"
+
+msgctxt "#31409"
+msgid "Configure library sources · Show the media lists display content · Configure how library lists are navigated"
+msgstr "Configurar as diferentes fontes de arquivos - Apresentar listas com os conteúdos de mídia · Configurar os modos de navegação na coleção "
+
+msgctxt "#31410"
+msgid "Configure skin · Configure region · Configure control · Configure screensaver · Configure master lock"
+msgstr "Configurar skin - Configurar região - Configurar controle - Configurar proteção de tela - Configurar trava mestre."
+
+msgctxt "#31411"
+msgid "Configure your profiles · Set locking options · Enable login screen"
+msgstr "Configurar seus perfis - Setar opções de travamento - Ativar tela de login"
+
+msgctxt "#31412"
+msgid "Display system information · Hardware statistics · Check storage availability · View network configuration"
+msgstr "Mostrar informações do sistema - Estatísticas de Hardware - Verificar disponibilidade de armazenamento - Verificar configuração de rede"
+
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
 msgstr "Selecione seu perfil de usuário no Kodi[CR] para logar-se e continuar"
 
-msgctxt "#31500"
-msgid "Home Menu Catagory Buttons"
-msgstr "Botões de Categoria do Menu Inicial"
+msgctxt "#31548"
+msgid "Home menu"
+msgstr "Menu principal"
 
-msgctxt "#31501"
-msgid "Home Page Add-on Quick Links"
-msgstr "Atalhos Rápidos de Add-ons da Página Inicial"
-
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "Opções Diversas"
+msgctxt "#31549"
+msgid "Home Add-ons"
+msgstr "Add-ons no menu principal"
 
 msgctxt "#31550"
-msgid "Home Screen Weather Info and button"
-msgstr "Informações de Clima e botão da Tela Inicial"
+msgid "Backgrounds"
+msgstr "Fundos"
 
 msgctxt "#31551"
 msgid "Add-on Shortcut"

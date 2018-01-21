@@ -100,13 +100,13 @@ void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, c
   Announce(flag, sender, message, CFileItemPtr(), data);
 }
 
-void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, const char *message, CFileItemPtr item)
+void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, const char *message, const std::shared_ptr<const CFileItem>& item)
 {
   CVariant data;
   Announce(flag, sender, message, item, data);
 }
 
-void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, const char *message, CFileItemPtr item, const CVariant &data)
+void CAnnouncementManager::Announce(AnnouncementFlag flag, const char *sender, const char *message, const std::shared_ptr<const CFileItem>& item, const CVariant &data)
 {
   CAnnounceData announcement;
   announcement.flag = flag;
@@ -130,7 +130,7 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
 
   CSingleLock lock (m_critSection);
 
-  // Make a copy of announers. They may be removed or even remove themselves during execution of IAnnouncer::Announce()!
+  // Make a copy of announcers. They may be removed or even remove themselves during execution of IAnnouncer::Announce()!
   std::vector<IAnnouncer *> announcers(m_announcers);
   for (unsigned int i = 0; i < announcers.size(); i++)
     announcers[i]->Announce(flag, sender, message, data);
@@ -161,11 +161,11 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
     if (data.isMember("player") && data["player"].isMember("playerid"))
       object["player"]["playerid"] = channel->IsRadio() ? PLAYLIST_MUSIC : PLAYLIST_VIDEO;
   }
-  else if (item->HasVideoInfoTag())
+  else if (item->HasVideoInfoTag() && !item->HasPVRRecordingInfoTag())
   {
     id = item->GetVideoInfoTag()->m_iDbId;
 
-    // TODO: Can be removed once this is properly handled when starting playback of a file
+    //! @todo Can be removed once this is properly handled when starting playback of a file
     if (id <= 0 && !item->GetPath().empty() &&
        (!item->HasProperty(LOOKUP_PROPERTY) || item->GetProperty(LOOKUP_PROPERTY).asBoolean()))
     {
@@ -190,7 +190,7 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
 
     if (id <= 0)
     {
-      // TODO: Can be removed once this is properly handled when starting playback of a file
+      //! @todo Can be removed once this is properly handled when starting playback of a file
       item->SetProperty(LOOKUP_PROPERTY, false);
 
       std::string title = item->GetVideoInfoTag()->m_strTitle;
@@ -201,8 +201,8 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
       switch (item->GetVideoContentType())
       {
       case VIDEODB_CONTENT_MOVIES:
-        if (item->GetVideoInfoTag()->m_iYear > 0)
-          object["item"]["year"] = item->GetVideoInfoTag()->m_iYear;
+        if (item->GetVideoInfoTag()->HasYear())
+          object["item"]["year"] = item->GetVideoInfoTag()->GetYear();
         break;
       case VIDEODB_CONTENT_EPISODES:
         if (item->GetVideoInfoTag()->m_iEpisode >= 0)
@@ -226,7 +226,7 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
     id = item->GetMusicInfoTag()->GetDatabaseId();
     type = MediaTypeSong;
 
-    // TODO: Can be removed once this is properly handled when starting playback of a file
+    //! @todo Can be removed once this is properly handled when starting playback of a file
     if (id <= 0 && !item->GetPath().empty() &&
        (!item->HasProperty(LOOKUP_PROPERTY) || item->GetProperty(LOOKUP_PROPERTY).asBoolean()))
     {
@@ -246,7 +246,7 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
 
     if (id <= 0)
     {
-      // TODO: Can be removed once this is properly handled when starting playback of a file
+      //! @todo Can be removed once this is properly handled when starting playback of a file
       item->SetProperty(LOOKUP_PROPERTY, false);
 
       std::string title = item->GetMusicInfoTag()->GetTitle();
@@ -265,7 +265,7 @@ void CAnnouncementManager::DoAnnounce(AnnouncementFlag flag, const char *sender,
   else if (item->IsVideo())
   {
     // video item but has no video info tag.
-    type = "movies";
+    type = "movie";
     object["item"]["title"] = item->GetLabel();
   }
   else if (item->HasPictureInfoTag())

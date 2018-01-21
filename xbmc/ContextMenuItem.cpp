@@ -23,15 +23,23 @@
 #include "addons/AddonManager.h"
 #include "addons/ContextMenuAddon.h"
 #include "addons/IAddon.h"
+#include "GUIInfoManager.h"
+#ifdef HAS_PYTHON
 #include "interfaces/generic/ScriptInvocationManager.h"
 #include "interfaces/python/ContextItemAddonInvoker.h"
 #include "interfaces/python/XBPython.h"
+#endif
 #include "utils/StringUtils.h"
 
 
 bool CContextMenuItem::IsVisible(const CFileItem& item) const
 {
-  return IsGroup() || (m_condition && m_condition->Get(&item));
+  if (!m_infoBoolRegistered)
+  {
+    m_infoBool = g_infoManager.Register(m_visibilityCondition, 0);
+    m_infoBoolRegistered = true;
+  }
+  return IsGroup() || (m_infoBool && m_infoBool->Get(&item));
 }
 
 bool CContextMenuItem::IsParentOf(const CContextMenuItem& other) const
@@ -50,11 +58,15 @@ bool CContextMenuItem::Execute(const CFileItemPtr& item) const
     return false;
 
   ADDON::AddonPtr addon;
-  if (!ADDON::CAddonMgr::GetInstance().GetAddon(m_addonId, addon))
+  if (!CServiceBroker::GetAddonMgr().GetAddon(m_addonId, addon))
     return false;
 
+#ifdef HAS_PYTHON
   LanguageInvokerPtr invoker(new CContextItemAddonInvoker(&g_pythonParser, item));
   return (CScriptInvocationManager::GetInstance().ExecuteAsync(m_library, invoker, addon) != -1);
+#else
+  return false;
+#endif
 }
 
 bool CContextMenuItem::operator==(const CContextMenuItem& other) const
@@ -90,13 +102,13 @@ CContextMenuItem CContextMenuItem::CreateGroup(const std::string& label, const s
 }
 
 CContextMenuItem CContextMenuItem::CreateItem(const std::string& label, const std::string& parent,
-    const std::string& library, const INFO::InfoPtr& condition, const std::string& addonId)
+    const std::string& library, const std::string& condition, const std::string& addonId)
 {
   CContextMenuItem menuItem;
   menuItem.m_label = label;
   menuItem.m_parent = parent;
   menuItem.m_library = library;
-  menuItem.m_condition = condition;
+  menuItem.m_visibilityCondition = condition;
   menuItem.m_addonId = addonId;
   return menuItem;
 }

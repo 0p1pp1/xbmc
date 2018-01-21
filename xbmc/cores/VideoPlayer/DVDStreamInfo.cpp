@@ -41,7 +41,7 @@ void CDVDStreamInfo::Clear()
   type = STREAM_NONE;
   uniqueId = -1;
   realtime = false;
-  software = false;
+  codecOptions = 0;
   codec_tag  = 0;
   flags = 0;
   filename.clear();
@@ -52,10 +52,11 @@ void CDVDStreamInfo::Clear()
   extradata = NULL;
   extrasize = 0;
 
+  cryptoSession = nullptr;
+  externalInterfaces = nullptr;
+
   fpsscale = 0;
   fpsrate  = 0;
-  rfpsscale= 0;
-  rfpsrate = 0;
   height   = 0;
   width    = 0;
   aspect   = 0.0;
@@ -85,6 +86,7 @@ bool CDVDStreamInfo::Equal(const CDVDStreamInfo& right, bool withextradata)
   if( codec     != right.codec
   ||  type      != right.type
   ||  uniqueId  != right.uniqueId
+  ||  demuxerId != right.demuxerId
   ||  realtime  != right.realtime
   ||  codec_tag != right.codec_tag
   ||  flags     != right.flags)
@@ -102,8 +104,6 @@ bool CDVDStreamInfo::Equal(const CDVDStreamInfo& right, bool withextradata)
   // VIDEO
   if( fpsscale != right.fpsscale
   ||  fpsrate  != right.fpsrate
-  ||  rfpsscale!= right.rfpsscale
-  ||  rfpsrate != right.rfpsrate
   ||  height   != right.height
   ||  width    != right.width
   ||  stills   != right.stills
@@ -144,6 +144,7 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
   codec = right.codec;
   type = right.type;
   uniqueId = right.uniqueId;
+  demuxerId = right.demuxerId;
   realtime = right.realtime;
   codec_tag = right.codec_tag;
   flags = right.flags;
@@ -166,11 +167,12 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
     extradata = 0;
   }
 
+  cryptoSession = right.cryptoSession;
+  externalInterfaces = right.externalInterfaces;
+
   // VIDEO
   fpsscale = right.fpsscale;
   fpsrate  = right.fpsrate;
-  rfpsscale= right.rfpsscale;
-  rfpsrate = right.rfpsrate;
   height   = right.height;
   width    = right.width;
   aspect   = right.aspect;
@@ -182,7 +184,7 @@ void CDVDStreamInfo::Assign(const CDVDStreamInfo& right, bool withextradata)
   orientation = right.orientation;
   bitsperpixel = right.bitsperpixel;
   vfr = right.vfr;
-  software = right.software;
+  codecOptions = right.codecOptions;
   stereo_mode = right.stereo_mode;
 
   // AUDIO
@@ -205,6 +207,7 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
   codec = right.codec;
   type = right.type;
   uniqueId = right.uniqueId;
+  demuxerId = right.demuxerId;
   realtime = right.realtime;
   codec_tag = right.codec_fourcc;
   profile   = right.profile;
@@ -219,6 +222,9 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
       return;
     memcpy(extradata, right.ExtraData, extrasize);
   }
+
+  cryptoSession = right.cryptoSession;
+  externalInterfaces = right.externalInterfaces;
 
   if( right.type == STREAM_AUDIO )
   {
@@ -237,8 +243,6 @@ void CDVDStreamInfo::Assign(const CDemuxStream& right, bool withextradata)
     const CDemuxStreamVideo *stream = static_cast<const CDemuxStreamVideo*>(&right);
     fpsscale  = stream->iFpsScale;
     fpsrate   = stream->iFpsRate;
-    rfpsscale = stream->irFpsScale;
-    rfpsrate  = stream->irFpsRate;
     height    = stream->iHeight;
     width     = stream->iWidth;
     aspect    = stream->fAspect;

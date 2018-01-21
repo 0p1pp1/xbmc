@@ -31,8 +31,8 @@ namespace XFILE { class CCurlFile; }
 class CScraperUrl
 {
 public:
-  CScraperUrl(const std::string&);
-  CScraperUrl(const TiXmlElement*);
+  explicit CScraperUrl(const std::string&);
+  explicit CScraperUrl(const TiXmlElement*);
   CScraperUrl();
   ~CScraperUrl();
 
@@ -58,6 +58,7 @@ public:
   bool ParseString(std::string); // copies by intention
   bool ParseElement(const TiXmlElement*);
   bool ParseEpisodeGuide(std::string strUrls); // copies by intention
+  void AddElement(std::string url, std::string aspect = "", std::string referrer = "", std::string cache = "", bool post = false, bool isgz = false, int season = -1);
 
   const SUrlEntry GetFirstThumb(const std::string &type = "") const;
   const SUrlEntry GetSeasonThumb(int season, const std::string &type = "") const;

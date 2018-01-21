@@ -21,56 +21,55 @@
 
 #include <atomic>
 #include <memory>
-#include "threads/Thread.h"
-#include "GUIWindowPVRBase.h"
 
-class CSetting;
+#include "threads/Event.h"
+#include "threads/Thread.h"
+
+#include "pvr/PVRChannelNumberInputHandler.h"
+#include "pvr/windows/GUIWindowPVRBase.h"
 
 namespace PVR
 {
+  class CGUIEPGGridContainer;
   class CPVRRefreshTimelineItemsThread;
 
-  class CGUIWindowPVRGuide : public CGUIWindowPVRBase
+  class CGUIWindowPVRGuideBase : public CGUIWindowPVRBase, public CPVRChannelNumberInputHandler
   {
   public:
-    CGUIWindowPVRGuide(bool bRadio);
-    virtual ~CGUIWindowPVRGuide(void);
+    CGUIWindowPVRGuideBase(bool bRadio, int id, const std::string &xmlFile);
+    ~CGUIWindowPVRGuideBase() override;
 
-    virtual void OnInitWindow() override;
-    virtual void OnDeinitWindow(int nextWindowID) override;
-    virtual bool OnMessage(CGUIMessage& message) override;
-    virtual bool OnAction(const CAction &action) override;
-    virtual void GetContextButtons(int itemNumber, CContextButtons &buttons) override;
-    virtual bool OnContextButton(int itemNumber, CONTEXT_BUTTON button) override;
-    virtual bool Update(const std::string &strDirectory, bool updateFilterPath = true) override;
-    virtual void UpdateButtons(void) override;
-    virtual void Notify(const Observable &obs, const ObservableMessage msg) override;
+    void OnInitWindow() override;
+    void OnDeinitWindow(int nextWindowID) override;
+    bool OnMessage(CGUIMessage& message) override;
+    bool OnAction(const CAction &action) override;
+    void GetContextButtons(int itemNumber, CContextButtons &buttons) override;
+    bool OnContextButton(int itemNumber, CONTEXT_BUTTON button) override;
+    void UpdateButtons(void) override;
+    void Notify(const Observable &obs, const ObservableMessage msg) override;
+    void SetInvalid() override;
+    bool Update(const std::string &strDirectory, bool updateFilterPath = true) override;
 
     bool RefreshTimelineItems();
 
+    // CPVRChannelNumberInputHandler implementation
+    void OnInputDone() override;
+
   protected:
-    virtual void UpdateSelectedItemPath() override;
-    virtual std::string GetDirectoryPath(void) override { return ""; }
-    virtual bool GetDirectory(const std::string &strDirectory, CFileItemList &items) override;
-    virtual void RegisterObservers(void) override;
-    virtual void UnregisterObservers(void) override;
+    void UpdateSelectedItemPath() override;
+    std::string GetDirectoryPath(void) override { return ""; }
+    bool GetDirectory(const std::string &strDirectory, CFileItemList &items) override;
+
+    void ClearData() override;
 
   private:
-    bool SelectPlayingFile(void);
+    CGUIEPGGridContainer* GetGridControl();
+    void InitEpgGridControl();
 
-    bool OnContextButtonBegin(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonEnd(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonNow(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonInfo(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonPlay(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonStartRecord(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonStopRecord(CFileItem *item, CONTEXT_BUTTON button);
-    bool OnContextButtonDeleteTimer(CFileItem *item, CONTEXT_BUTTON button);
-
-    void GetViewChannelItems(CFileItemList &items);
-    void GetViewNowItems(CFileItemList &items);
-    void GetViewNextItems(CFileItemList &items);
-    void GetViewTimelineItems(CFileItemList &items);
+    bool OnContextButtonBegin();
+    bool OnContextButtonEnd();
+    bool OnContextButtonNow();
+    bool OnContextButtonDate();
 
     void StartRefreshTimelineItemsThread();
     void StopRefreshTimelineItemsThread();
@@ -78,20 +77,38 @@ namespace PVR
     std::unique_ptr<CPVRRefreshTimelineItemsThread> m_refreshTimelineItemsThread;
     std::atomic_bool m_bRefreshTimelineItems;
 
-    std::shared_ptr<CFileItemList> m_cachedTimeline;
     CPVRChannelGroupPtr m_cachedChannelGroup;
-    std::shared_ptr<CFileItemList> m_newTimeline;
+    std::unique_ptr<CFileItemList> m_newTimeline;
+
+    bool m_bChannelSelectionRestored;
+  };
+
+  class CGUIWindowPVRTVGuide : public CGUIWindowPVRGuideBase
+  {
+  public:
+    CGUIWindowPVRTVGuide() : CGUIWindowPVRGuideBase(false, WINDOW_TV_GUIDE, "MyPVRGuide.xml") {}
+  };
+
+  class CGUIWindowPVRRadioGuide : public CGUIWindowPVRGuideBase
+  {
+  public:
+    CGUIWindowPVRRadioGuide() : CGUIWindowPVRGuideBase(true, WINDOW_RADIO_GUIDE, "MyPVRGuide.xml") {}
   };
 
   class CPVRRefreshTimelineItemsThread : public CThread
   {
   public:
-    CPVRRefreshTimelineItemsThread(CGUIWindowPVRGuide *pGuideWindow);
-    virtual ~CPVRRefreshTimelineItemsThread() {}
+    explicit CPVRRefreshTimelineItemsThread(CGUIWindowPVRGuideBase *pGuideWindow);
+    ~CPVRRefreshTimelineItemsThread() override;
 
-    virtual void Process();
+    void Process() override;
+
+    void DoRefresh();
+    void Stop();
 
   private:
-    CGUIWindowPVRGuide *m_pGuideWindow;
+    CGUIWindowPVRGuideBase *m_pGuideWindow;
+    CEvent m_ready;
+    CEvent m_done;
   };
 }

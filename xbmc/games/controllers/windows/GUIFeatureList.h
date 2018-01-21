@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,40 +20,60 @@
 #pragma once
 
 #include "IConfigurationWindow.h"
+#include "games/controllers/ControllerFeature.h"
 #include "games/controllers/ControllerTypes.h"
-#include "threads/Thread.h"
+#include "input/joysticks/JoystickTypes.h"
 
 class CGUIButtonControl;
 class CGUIControlGroupList;
+class CGUIImage;
+class CGUILabelControl;
 class CGUIWindow;
 
+namespace KODI
+{
 namespace GAME
 {
   class CGUIFeatureList : public IFeatureList
   {
   public:
-    CGUIFeatureList(CGUIWindow* window);
+    CGUIFeatureList(CGUIWindow* window, const std::string& windowParam);
     virtual ~CGUIFeatureList(void);
 
     // implementation of IFeatureList
     virtual bool Initialize(void) override;
     virtual void Deinitialize(void) override;
+    virtual bool HasButton(JOYSTICK::FEATURE_TYPE type) const override;
     virtual void Load(const ControllerPtr& controller) override;
-    virtual void OnFocus(unsigned int index) override { }
-    virtual void OnSelect(unsigned int index) override;
+    virtual void OnFocus(unsigned int buttonIndex) override { }
+    virtual void OnSelect(unsigned int buttonIndex) override;
 
   private:
-    IFeatureButton* GetButtonControl(unsigned int featureIndex);
+    IFeatureButton* GetButtonControl(unsigned int buttonIndex);
 
     void CleanupButtons(void);
 
+    // Helper functions
+    struct FeatureGroup
+    {
+      std::string groupName;
+      JOYSTICK::FEATURE_CATEGORY category = JOYSTICK::FEATURE_CATEGORY::UNKNOWN;
+      std::vector<CControllerFeature> features;
+    };
+    static std::vector<FeatureGroup> GetFeatureGroups(const std::vector<CControllerFeature>& features);
+    std::vector<CGUIButtonControl*> GetButtons(const std::vector<CControllerFeature>& features, unsigned int startIndex);
+
     // GUI stuff
     CGUIWindow* const       m_window;
+    unsigned int            m_buttonCount = 0;
     CGUIControlGroupList*   m_guiList;
     CGUIButtonControl*      m_guiButtonTemplate;
+    CGUILabelControl*       m_guiGroupTitle;
+    CGUIImage*              m_guiFeatureSeparator;
 
     // Game window stuff 
     ControllerPtr           m_controller;
     IConfigurationWizard*   m_wizard;
   };
+}
 }

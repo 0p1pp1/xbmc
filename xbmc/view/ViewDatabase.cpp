@@ -33,13 +33,11 @@
 #include "view/ViewState.h"
 
 #ifdef TARGET_POSIX
-#include "linux/ConvUtils.h" // GetLastError()
+#include "platform/linux/ConvUtils.h"
 #endif
-CViewDatabase::CViewDatabase(void)
-{ }
+CViewDatabase::CViewDatabase(void) = default;
 
-CViewDatabase::~CViewDatabase(void)
-{ }
+CViewDatabase::~CViewDatabase(void) = default;
 
 bool CViewDatabase::Open()
 {
@@ -62,7 +60,7 @@ void CViewDatabase::CreateTables()
 
 void CViewDatabase::CreateAnalytics()
 {
-  CLog::Log(LOGINFO, "%s - creating indicies", __FUNCTION__);
+  CLog::Log(LOGINFO, "%s - creating indices", __FUNCTION__);
   m_pDS->exec("CREATE INDEX idxViews ON view(path)");
   m_pDS->exec("CREATE INDEX idxViewsWindow ON view(window)");
 }

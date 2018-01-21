@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,26 +19,25 @@
  */
 #pragma once
 
+#include "addons/RepositoryUpdater.h"
 #include "guilib/GUIDialog.h"
-#include "utils/Observer.h"
 
+namespace KODI
+{
 namespace GAME
 {
   class IControllerList;
   class IFeatureList;
 
-  class CGUIControllerWindow : public CGUIDialog,
-                               public Observer
+  class CGUIControllerWindow : public CGUIDialog
   {
   public:
     CGUIControllerWindow(void);
     virtual ~CGUIControllerWindow(void);
 
     // implementation of CGUIControl via CGUIDialog
+    virtual void DoProcess(unsigned int currentTime, CDirtyRegionList &dirtyregions) override;
     virtual bool OnMessage(CGUIMessage& message) override;
-
-    // implementation of Observer
-    void Notify(const Observable &obs, const ObservableMessage msg) override;
 
   protected:
     // implementation of CGUIWindow via CGUIDialog
@@ -50,15 +49,18 @@ namespace GAME
     void OnControllerSelected(unsigned int controllerIndex);
     void OnFeatureFocused(unsigned int featureIndex);
     void OnFeatureSelected(unsigned int featureIndex);
-
+    void OnEvent(const ADDON::CRepositoryUpdater::RepositoryUpdated& event);
     void UpdateButtons(void);
 
     // Action for the available button
     void GetMoreControllers(void);
     void ResetController(void);
     void ShowHelp(void);
+    void ShowButtonCaptureDialog(void);
 
     IControllerList* m_controllerList;
     IFeatureList*    m_featureList;
+    std::string      m_param; // First auxiliary parameter in call to ActivateWindow()
   };
+}
 }

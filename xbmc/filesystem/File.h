@@ -32,6 +32,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
+#include <vector>
 #include "utils/auto_buffer.h"
 #include "IFileTypes.h"
 #include "PlatformDefs.h"
@@ -49,7 +50,7 @@ class IFileCallback
 {
 public:
   virtual bool OnFileCallback(void* pContext, int ipercent, float avgSpeed) = 0;
-  virtual ~IFileCallback() {};
+  virtual ~IFileCallback() = default;
 };
 
 class CFileStreamBuffer;
@@ -64,12 +65,25 @@ public:
   bool CURLAddOption(XFILE::CURLOPTIONTYPE type, const char* name, const char * value);
   bool CURLOpen(unsigned int flags);
 
+  /**
+  * Attempt to open an IFile instance.
+  * @param file reference to CCurl file description
+  * @param flags see IFileTypes.h
+  * @return true on success, false otherwise
+  *
+  * Remarks: Open can only be called once. Calling
+  * Open() on an already opened file will fail
+  * except if flag READ_REOPEN is set and the underlying
+  * file has an implementation of ReOpen().
+  */
   bool Open(const CURL& file, const unsigned int flags = 0);
+  bool Open(const std::string& strFileName, const unsigned int flags = 0);
+
   bool OpenForWrite(const CURL& file, bool bOverWrite = false);
+  bool OpenForWrite(const std::string& strFileName, bool bOverWrite = false);
+
   ssize_t LoadFile(const CURL &file, auto_buffer& outputBuffer);
 
-  bool Open(const std::string& strFileName, const unsigned int flags = 0);
-  bool OpenForWrite(const std::string& strFileName, bool bOverWrite = false);
   /**
    * Attempt to read bufSize bytes from currently opened file into buffer bufPtr.
    * @param bufPtr  pointer to buffer
@@ -96,8 +110,8 @@ public:
   int64_t GetLength();
   void Close();
   int GetChunkSize();
-  std::string GetContentMimeType(void);
-  std::string GetContentCharset(void);
+  const std::string GetProperty(XFILE::FileProperty type, const std::string &name = "") const;
+  const std::vector<std::string> GetPropertyValues(XFILE::FileProperty type, const std::string &name = "") const;
   ssize_t LoadFile(const std::string &filename, auto_buffer& outputBuffer);
 
 
@@ -111,12 +125,11 @@ public:
       return minimum;
   }
 
-  bool SkipNext();
   BitstreamStats* GetBitstreamStats() { return m_bitStreamStats; }
 
   int IoControl(EIoControl request, void* param);
 
-  IFile *GetImplemenation() { return m_pFile; }
+  IFile *GetImplementation() const { return m_pFile; }
 
   // CURL interface
   static bool Exists(const CURL& file, bool bUseCache = true);
@@ -184,17 +197,17 @@ class CFileStreamBuffer
   : public std::streambuf
 {
 public:
-  ~CFileStreamBuffer();
-  CFileStreamBuffer(int backsize = 0);
+  ~CFileStreamBuffer() override;
+  explicit CFileStreamBuffer(int backsize = 0);
 
   void Attach(IFile *file);
   void Detach();
 
 private:
-  virtual int_type underflow();
-  virtual std::streamsize showmanyc();
-  virtual pos_type seekoff(off_type, std::ios_base::seekdir,std::ios_base::openmode = std::ios_base::in | std::ios_base::out);
-  virtual pos_type seekpos(pos_type, std::ios_base::openmode = std::ios_base::in | std::ios_base::out);
+  int_type underflow() override;
+  std::streamsize showmanyc() override;
+  pos_type seekoff(off_type, std::ios_base::seekdir,std::ios_base::openmode = std::ios_base::in | std::ios_base::out) override;
+  pos_type seekpos(pos_type, std::ios_base::openmode = std::ios_base::in | std::ios_base::out) override;
 
   IFile* m_file;
   char*  m_buffer;
@@ -207,8 +220,8 @@ class CFileStream
   : public std::istream
 {
 public:
-  CFileStream(int backsize = 0);
-  ~CFileStream();
+  explicit CFileStream(int backsize = 0);
+  ~CFileStream() override;
 
   bool Open(const std::string& filename);
   bool Open(const CURL& filename);

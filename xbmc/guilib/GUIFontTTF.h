@@ -42,6 +42,7 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 #endif
 
+constexpr size_t LOOKUPTABLE_SIZE = 256 * 8;
 // forward definition
 class CBaseTexture;
 
@@ -88,7 +89,7 @@ class CGUIFontTTFBase
 
 public:
 
-  CGUIFontTTFBase(const std::string& strFileName);
+  explicit CGUIFontTTFBase(const std::string& strFileName);
   virtual ~CGUIFontTTFBase(void);
 
   void Clear();
@@ -144,7 +145,7 @@ protected:
   CBaseTexture* m_texture;        // texture that holds our rendered characters (8bit alpha only)
 
   unsigned int m_textureWidth;       // width of our texture
-  unsigned int m_textureHeight;      // heigth of our texture
+  unsigned int m_textureHeight;      // height of our texture
   int m_posX;                        // current position in the texture
   int m_posY;
 
@@ -157,7 +158,7 @@ protected:
   color_t m_color;
 
   Character *m_char;                 // our characters
-  Character *m_charquick[256*7];     // ascii chars (7 styles) here
+  Character *m_charquick[LOOKUPTABLE_SIZE];     // ascii chars (7 styles) here
   int m_maxChars;                    // size of character array (can be incremented)
   int m_numChars;                    // the current number of cached characters
 
@@ -201,8 +202,8 @@ protected:
 private:
   virtual bool FirstBegin() = 0;
   virtual void LastEnd() = 0;
-  CGUIFontTTFBase(const CGUIFontTTFBase&);
-  CGUIFontTTFBase& operator=(const CGUIFontTTFBase&);
+  CGUIFontTTFBase(const CGUIFontTTFBase&) = delete;
+  CGUIFontTTFBase& operator=(const CGUIFontTTFBase&) = delete;
   int m_referenceCount;
 };
 

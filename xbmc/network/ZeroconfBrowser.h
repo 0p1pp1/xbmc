@@ -20,6 +20,7 @@
  *
  */
 
+#include <atomic>
 #include <string>
 #include <set>
 #include <vector>
@@ -142,7 +143,8 @@ public:
 protected:
   //singleton: we don't want to get instantiated nor copied or deleted from outside
   CZeroconfBrowser();
-  CZeroconfBrowser(const CZeroconfBrowser&);
+  CZeroconfBrowser(const CZeroconfBrowser&) = delete;
+  CZeroconfBrowser& operator=(const CZeroconfBrowser&) = delete;
   virtual ~CZeroconfBrowser();
 
   // pure virtual methods to implement for OS specific implementations
@@ -164,7 +166,7 @@ private:
   bool m_started;
 
   //protects singleton creation/destruction
-  static long sm_singleton_guard;
+  static std::atomic_flag sm_singleton_guard;
   static CZeroconfBrowser* smp_instance;
 };
 #include <iostream>

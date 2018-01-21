@@ -38,7 +38,7 @@ namespace XbmcThreads
    * DO NOT compare the results from SystemClockMillis() to an expected end time
    *  that was calculated by adding a number of milliseconds to some start time.
    *  The reason is because the SystemClockMillis could wrap. Instead use this
-   *  class which uses differences (which are safe accross a wrap).
+   *  class which uses differences (which are safe across a wrap).
    */
   class EndTime
   {
@@ -47,7 +47,7 @@ namespace XbmcThreads
   public:
     static const unsigned int InfiniteValue;
     inline EndTime() : startTime(0), totalWaitTime(0) {}
-    inline EndTime(unsigned int millisecondsIntoTheFuture) : startTime(SystemClockMillis()), totalWaitTime(millisecondsIntoTheFuture) {}
+    inline explicit EndTime(unsigned int millisecondsIntoTheFuture) : startTime(SystemClockMillis()), totalWaitTime(millisecondsIntoTheFuture) {}
 
     inline void Set(unsigned int millisecondsIntoTheFuture) { startTime = SystemClockMillis(); totalWaitTime = millisecondsIntoTheFuture; }
 

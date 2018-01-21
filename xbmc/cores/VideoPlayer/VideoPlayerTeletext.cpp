@@ -19,9 +19,9 @@
  */
 
 #include "VideoPlayerTeletext.h"
-#include "DVDClock.h"
+#include "cores/VideoPlayer/Interface/Addon/TimingConstants.h"
 #include "DVDStreamInfo.h"
-#include "DVDDemuxers/DVDDemuxPacket.h"
+#include "cores/VideoPlayer/Interface/Addon/DemuxPacket.h"
 #include "utils/log.h"
 #include "threads/SingleLock.h"
 
@@ -118,7 +118,7 @@ bool CDVDTeletextData::CheckStream(CDVDStreamInfo &hints)
   return false;
 }
 
-bool CDVDTeletextData::OpenStream(CDVDStreamInfo &hints)
+bool CDVDTeletextData::OpenStream(CDVDStreamInfo hints)
 {
   CloseStream(true);
 
@@ -136,9 +136,6 @@ bool CDVDTeletextData::OpenStream(CDVDStreamInfo &hints)
 
 void CDVDTeletextData::CloseStream(bool bWaitForBuffers)
 {
-  // wait until buffers are empty
-  if (bWaitForBuffers && m_speed > 0) m_messageQueue.WaitUntilEmpty();
-
   m_messageQueue.Abort();
 
   // wait for decode_video thread to end
@@ -261,7 +258,7 @@ void CDVDTeletextData::Process()
     {
       CSingleLock lock(m_critSection);
 
-      DemuxPacket* pPacket = ((CDVDMsgDemuxerPacket*)pMsg)->GetPacket();
+      DemuxPacket* pPacket = static_cast<CDVDMsgDemuxerPacket*>(pMsg)->GetPacket();
       uint8_t *Datai       = pPacket->pData;
       int rows             = (pPacket->iSize - 1) / 46;
 
@@ -277,7 +274,7 @@ void CDVDTeletextData::Process()
           if ((vtx_rowbyte[0] == 0x02 || vtx_rowbyte[0] == 0x03) && (vtx_rowbyte[1] == 0x2C))
           {
             /* clear rowbuffer */
-            /* convert row from lsb to msb (begin with magazin number) */
+            /* convert row from lsb to msb (begin with magazine number) */
             for (int i = 4; i < 46; i++)
             {
               uint8_t upper = (vtx_rowbyte[i] >> 4) & 0xf;
@@ -609,7 +606,7 @@ void CDVDTeletextData::Process()
                   case 2: /* page key */
                     break; /* ignore */
                   case 3: /* types of PTUs in DRCS */
-                    break; /* TODO */
+                    break; //! @todo implement
                   case 4: /* CLUTs 0/1, only level 3.5 */
                     break; /* ignore */
                   default:

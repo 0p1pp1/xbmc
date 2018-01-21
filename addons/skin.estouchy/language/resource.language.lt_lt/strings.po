@@ -60,6 +60,26 @@ msgctxt "#31016"
 msgid "Albums"
 msgstr "Albumai"
 
+msgctxt "#31017"
+msgid "PVR info"
+msgstr "PVR informacija"
+
+msgctxt "#31018"
+msgid "Player process info"
+msgstr "Grotuvo apdorojimo informacija"
+
+msgctxt "#31019"
+msgid "Video decoder"
+msgstr "Vaizdo dekoderis"
+
+msgctxt "#31020"
+msgid "Pixel format"
+msgstr "Pikselio formatas"
+
+msgctxt "#31021"
+msgid "System memory usage"
+msgstr "Sistemos atminties naudojimas"
+
 msgctxt "#31024"
 msgid "Page"
 msgstr "Puslapis"
@@ -83,6 +103,10 @@ msgstr "PRASUKTI PIRMYN"
 msgctxt "#31045"
 msgid "REWIND"
 msgstr "PRASUKTI ATGAL"
+
+msgctxt "#31046"
+msgid "Play speed"
+msgstr "Atkūrimo greitis"
 
 msgctxt "#31049"
 msgid "End Time"
@@ -141,8 +165,8 @@ msgid "Data provider"
 msgstr "Duomenų tiekėjas"
 
 msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "Naudojama atminties:"
+msgid "System Memory Used:"
+msgstr "Naudojama sistemos atminties"
 
 msgctxt "#31320"
 msgid "Last Logged In"
@@ -176,53 +200,53 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "Keisti išvaizdą · Nustatyti kalbą ir regioną · Keisti failų sąrašo parinktis · Nustatyti ekrano užsklandą"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "Tvarkyti video biblioteką · Nustatyti vaizdo atkūrimo parinktis · Keisti vaizdo sąrašo parinktis · Nustatyti subtitrų šriftus"
-
-msgctxt "#31402"
-msgid "Manage your music library · Set music playback options · Change music listing options · Setup song submission"
-msgstr "Tvarkyti muzikos biblioteką · Nustatyti muzikos atkūrimo parinktis · Keisti muzikos sąrašo atvaizdavimo parinktis · Nustatyti dainų įkėlimą"
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "Nustatyti nuotraukų sąrašo parinktis · Konfigūruoti skaidrių peržiūrą"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "Nustatyti tris miestus, kuriems gauti informaciją apie orus"
-
 msgctxt "#31405"
-msgid "Setup control of Kodi via UPnP and HTTP · Configure file sharing · Set internet access options"
-msgstr "Nustatyti Kodi valdymą per UPnP ir HTTP  · Konfigūruoti failų bendrinimą · Nustatyti interneto prieigos parinktis"
+msgid "Configure & manage media sharing services · Configure & manage the weather service"
+msgstr "Konfigūruoti ir tvarkyti dalinimosi media įrašais paslaugas · Konfigūruoti ir tvarkyti orų paslaugą"
 
 msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "Nustatyti ir kalibruoti ekranus · Konfigūruoti garso išvestį · Nustatyti nuotolinį valdymą · Nustatyti energijos taupymo parinktis · Įjungti derinimą · Nustatyti valdytojo užraktą"
+msgid "Configure display · Configure audio · Configure internet access · Configure power saving· Configure logging"
+msgstr "Konfigūruoti ekraną · Konfigūruoti garsą · Konfigūruoti interneto prieigą · Konfigūruoti energijos taupymą · Konfigūruoti derinimą"
 
 msgctxt "#31407"
 msgid "Manage your installed add-ons · Browse for and install add-ons from kodi.tv · Modify add-on settings"
 msgstr "Tvarkyti įdiegtus priedus · Naršyti ir įdiegti priedus iš kodi.tv · Modifikuoti priedų nustatymus"
 
+msgctxt "#31408"
+msgid "Configure actions that can be used during playback · Configure how media content is played"
+msgstr "Konfigūruoti veiksmus, kurie gali būti naudojami atkūrimo metu · Konfigūruoti kaip atkuriamas media turinys"
+
+msgctxt "#31409"
+msgid "Configure library sources · Show the media lists display content · Configure how library lists are navigated"
+msgstr "Konfigūruoti bibliotekos šaltinius · Parodyti media sąrašų atvaizduojamą turinį · Konfigūruoti bibliotekos sąrašų naršymą"
+
+msgctxt "#31410"
+msgid "Configure skin · Configure region · Configure control · Configure screensaver · Configure master lock"
+msgstr "Konfigūruoti teminę išvaizdą · Konfigūruoti regioną · Konfigūruoti valdymą · Konfigūruoti ekrano užsklandą · Konfigūruoti valdytojo užraktą"
+
+msgctxt "#31411"
+msgid "Configure your profiles · Set locking options · Enable login screen"
+msgstr "Konfigūruoti profilius · Nustatyti užrakinimo parinktis · Įjungti prisijungimo langą"
+
+msgctxt "#31412"
+msgid "Display system information · Hardware statistics · Check storage availability · View network configuration"
+msgstr "Atvaizduoti sistemos informaciją · Aparatinės įrangos statistika · Patikrinti saugyklos prieinamumą · Peržiūrėti tinklo konfigūraciją"
+
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
 msgstr "Pasirinkite Kodi vartotojo profilį[CR]prisijungimui ir tęskite"
 
-msgctxt "#31500"
-msgid "Home Menu Catagory Buttons"
-msgstr "Pagrindinio meniu kategorijų mygtukai"
+msgctxt "#31548"
+msgid "Home menu"
+msgstr "Pagrindinis meniu"
 
-msgctxt "#31501"
-msgid "Home Page Add-on Quick Links"
-msgstr "Pradinio ekrano priedų greitosios nuorodos"
-
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "Įvairios parinktys"
+msgctxt "#31549"
+msgid "Home Add-ons"
+msgstr "Pradinio ekrano priedai"
 
 msgctxt "#31550"
-msgid "Home Screen Weather Info and button"
-msgstr "Pradinio ekrano orų informacija ir mygtukas"
+msgid "Backgrounds"
+msgstr "Fonai"
 
 msgctxt "#31551"
 msgid "Add-on Shortcut"

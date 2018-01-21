@@ -20,8 +20,9 @@
  */
 
 #include <map>
-#include <set>
 #include <memory>
+#include <set>
+#include <vector>
 
 #include "addons/IAddon.h"
 #include "interfaces/generic/ILanguageInvoker.h"
@@ -112,8 +113,8 @@ protected:
 
 private:
   CScriptInvocationManager();
-  CScriptInvocationManager(const CScriptInvocationManager&);
-  CScriptInvocationManager const& operator=(CScriptInvocationManager const&);
+  CScriptInvocationManager(const CScriptInvocationManager&) = delete;
+  CScriptInvocationManager const& operator=(CScriptInvocationManager const&) = delete;
   virtual ~CScriptInvocationManager();
 
   typedef struct {

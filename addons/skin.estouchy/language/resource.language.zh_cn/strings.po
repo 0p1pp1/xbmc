@@ -60,6 +60,26 @@ msgctxt "#31016"
 msgid "Albums"
 msgstr "专辑"
 
+msgctxt "#31017"
+msgid "PVR info"
+msgstr "PVR 信息"
+
+msgctxt "#31018"
+msgid "Player process info"
+msgstr "播放器处理信息"
+
+msgctxt "#31019"
+msgid "Video decoder"
+msgstr "视频解码器"
+
+msgctxt "#31020"
+msgid "Pixel format"
+msgstr "像素格式"
+
+msgctxt "#31021"
+msgid "System memory usage"
+msgstr "系统内存使用"
+
 msgctxt "#31024"
 msgid "Page"
 msgstr "页"
@@ -83,6 +103,10 @@ msgstr "快进"
 msgctxt "#31045"
 msgid "REWIND"
 msgstr "回退"
+
+msgctxt "#31046"
+msgid "Play speed"
+msgstr "播放速度"
 
 msgctxt "#31049"
 msgid "End Time"
@@ -141,8 +165,8 @@ msgid "Data provider"
 msgstr "数据来源"
 
 msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "内存使用："
+msgid "System Memory Used:"
+msgstr "已用系统内存："
 
 msgctxt "#31320"
 msgid "Last Logged In"
@@ -176,53 +200,53 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "变换皮肤 · 设置语言和区域 · 修改文件列表参数 · 设置屏幕保护"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "管理视频资料库 · 设置视频播放参数 · 修改视频列表参数 · 设置字幕字体"
-
-msgctxt "#31402"
-msgid "Manage your music library · Set music playback options · Change music listing options · Setup song submission"
-msgstr "管理音乐资料库 · 设置音乐播放选项 · 修改音乐列表选项 · 设置歌曲提交 "
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "设置图片列表参数 · 设置幻灯片播放"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "设置三个获取天气信息的城市"
-
 msgctxt "#31405"
-msgid "Setup control of Kodi via UPnP and HTTP · Configure file sharing · Set internet access options"
-msgstr "设置通过 UPnP 和 HTTP 控制 Kodi · 设置文件共享 · 设置互联网访问参数"
+msgid "Configure & manage media sharing services · Configure & manage the weather service"
+msgstr "设置和管理媒体共享服务 · 设置和管理天气服务"
 
 msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "设置和校正显示器 · 设置音频输出 · 设置摇控器 · 设置节电参数 · 启用调试 · 设置管理员和锁定"
+msgid "Configure display · Configure audio · Configure internet access · Configure power saving· Configure logging"
+msgstr "设置显示 · 设置音频 · 设置互联网访问 · 设置节电 · 设置日志"
 
 msgctxt "#31407"
 msgid "Manage your installed add-ons · Browse for and install add-ons from kodi.tv · Modify add-on settings"
 msgstr "管理你安装的插件 · 在 kodi.tv 浏览并安装插件 · 修改插件设置"
 
+msgctxt "#31408"
+msgid "Configure actions that can be used during playback · Configure how media content is played"
+msgstr "设置播放时使用的动作 · 设置媒体内容播放方式"
+
+msgctxt "#31409"
+msgid "Configure library sources · Show the media lists display content · Configure how library lists are navigated"
+msgstr "设置资料库源 · 显示媒体列表显示内容 · 设置资料库列表导航方式"
+
+msgctxt "#31410"
+msgid "Configure skin · Configure region · Configure control · Configure screensaver · Configure master lock"
+msgstr "设置皮肤 · 设置区域 · 设置控制 ·设置屏幕保护 · 设置管理员锁定"
+
+msgctxt "#31411"
+msgid "Configure your profiles · Set locking options · Enable login screen"
+msgstr "设置用户配置 · 设置锁定选项 · 启用登录屏"
+
+msgctxt "#31412"
+msgid "Display system information · Hardware statistics · Check storage availability · View network configuration"
+msgstr "显示系统信息 · 硬件统计 · 检查可用存储 · 浏览网络配置"
+
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
 msgstr "选择您的用户配置文件[CR]登录并继续"
 
-msgctxt "#31500"
-msgid "Home Menu Catagory Buttons"
-msgstr "主菜单按钮"
+msgctxt "#31548"
+msgid "Home menu"
+msgstr "主菜单"
 
-msgctxt "#31501"
-msgid "Home Page Add-on Quick Links"
-msgstr "主界面插件快速链接"
-
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "其他选项"
+msgctxt "#31549"
+msgid "Home Add-ons"
+msgstr "主页插件"
 
 msgctxt "#31550"
-msgid "Home Screen Weather Info and button"
-msgstr "主界面天气信息和按钮"
+msgid "Backgrounds"
+msgstr "背景"
 
 msgctxt "#31551"
 msgid "Add-on Shortcut"

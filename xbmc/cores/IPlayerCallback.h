@@ -20,17 +20,28 @@
 
 #pragma once
 
+#include <stdint.h>
+#include "VideoSettings.h"
+
+class CFileItem;
+class CBookmark;
+
 class IPlayerCallback
 {
 public:
-  virtual ~IPlayerCallback() {}
+  virtual ~IPlayerCallback() = default;
   virtual void OnPlayBackEnded() = 0;
-  virtual void OnPlayBackStarted() = 0;
+  virtual void OnPlayBackStarted(const CFileItem &file) = 0;
+  virtual void OnPlayerCloseFile(const CFileItem &file, const CBookmark &bookmark) {};
   virtual void OnPlayBackPaused() {};
   virtual void OnPlayBackResumed() {};
   virtual void OnPlayBackStopped() = 0;
+  virtual void OnPlayBackError() = 0;
   virtual void OnQueueNextItem() = 0;
-  virtual void OnPlayBackSeek(int iTime, int seekOffset) {};
+  virtual void OnPlayBackSeek(int64_t iTime, int64_t seekOffset) {};
   virtual void OnPlayBackSeekChapter(int iChapter) {};
   virtual void OnPlayBackSpeedChanged(int iSpeed) {};
+  virtual void OnAVChange() {};
+  virtual void RequestVideoSettings(const CFileItem &fileItem) {};
+  virtual void StoreVideoSettings(const CFileItem &fileItem, CVideoSettings vs) {};
 };

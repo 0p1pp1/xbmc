@@ -42,7 +42,19 @@ namespace XBMCAddon
     {
       DelayedCallGuard dg;
       CSingleLock gl(g_graphicsContext);
-      return g_windowManager.GetTopMostModalDialogID();
+      return g_windowManager.GetTopmostModalDialog();
+    }
+
+    long getScreenHeight()
+    {
+      XBMC_TRACE;
+      return g_graphicsContext.GetHeight();
+    }
+
+    long getScreenWidth()
+    {
+      XBMC_TRACE;
+      return g_graphicsContext.GetWidth();
     }
 
     const char* getNOTIFICATION_INFO()    { return NOTIFICATION_INFO; }

@@ -18,10 +18,6 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
-  #include "config.h"
-#endif
-
 // python.h should always be included first before any other includes
 #include <Python.h>
 
@@ -39,6 +35,7 @@
 #include "Util.h"
 #ifdef TARGET_WINDOWS
 #include "utils/Environment.h"
+#include "utils/SystemInfo.h"
 #endif
 #include "settings/AdvancedSettings.h"
 
@@ -118,18 +115,20 @@ void XBPython::Announce(AnnouncementFlag flag, const char *sender, const char *m
      OnDPMSActivated();
   }
 
-  OnNotification(sender, std::string(ANNOUNCEMENT::AnnouncementFlagToString(flag)) + "." + std::string(message), CJSONVariantWriter::Write(data, g_advancedSettings.m_jsonOutputCompact));
+  std::string jsonData;
+  if (CJSONVariantWriter::Write(data, jsonData, g_advancedSettings.m_jsonOutputCompact))
+    OnNotification(sender, std::string(ANNOUNCEMENT::AnnouncementFlagToString(flag)) + "." + std::string(message), jsonData);
 }
 
 // message all registered callbacks that we started playing
-void XBPython::OnPlayBackStarted()
+void XBPython::OnPlayBackStarted(const CFileItem &file)
 {
   XBMC_TRACE;
   LOCK_AND_COPY(std::vector<PVOID>,tmp,m_vecPlayerCallbackList);
   for (PlayerCallbackList::iterator it = tmp.begin(); (it != tmp.end()); ++it)
   {
     if (CHECK_FOR_ENTRY(m_vecPlayerCallbackList,(*it)))
-      ((IPlayerCallback*)(*it))->OnPlayBackStarted();
+      ((IPlayerCallback*)(*it))->OnPlayBackStarted(file);
   }
 }
 
@@ -181,6 +180,18 @@ void XBPython::OnPlayBackStopped()
   }
 }
 
+// message all registered callbacks that playback stopped due to error
+void XBPython::OnPlayBackError()
+{
+  XBMC_TRACE;
+  LOCK_AND_COPY(std::vector<PVOID>,tmp,m_vecPlayerCallbackList);
+  for (PlayerCallbackList::iterator it = tmp.begin(); (it != tmp.end()); ++it)
+  {
+    if (CHECK_FOR_ENTRY(m_vecPlayerCallbackList,(*it)))
+      ((IPlayerCallback*)(*it))->OnPlayBackError();
+  }
+}
+
 // message all registered callbacks that playback speed changed (FF/RW)
 void XBPython::OnPlayBackSpeedChanged(int iSpeed)
 {
@@ -194,7 +205,7 @@ void XBPython::OnPlayBackSpeedChanged(int iSpeed)
 }
 
 // message all registered callbacks that player is seeking
-void XBPython::OnPlayBackSeek(int iTime, int seekOffset)
+void XBPython::OnPlayBackSeek(int64_t iTime, int64_t seekOffset)
 {
   XBMC_TRACE;
   LOCK_AND_COPY(std::vector<PVOID>,tmp,m_vecPlayerCallbackList);
@@ -593,9 +604,10 @@ bool XBPython::OnScriptInitialized(ILanguageInvoker *invoker)
     CEnvironment::putenv(buf);
     buf = "OS=win32";
     CEnvironment::putenv(buf);
-
-#elif defined(TARGET_ANDROID)
-   setenv("SSL_CERT_FILE", CSpecialProtocol::TranslatePath("special://xbmc/system/certs/cacert.pem").c_str(), 1);
+#ifdef _DEBUG
+    if (CSysInfo::GetWindowsDeviceFamily() == CSysInfo::Xbox)
+      CEnvironment::putenv("PYTHONCASEOK=1");
+#endif
 #endif
 
     if (PyEval_ThreadsInitialized())
@@ -643,22 +655,16 @@ void XBPython::OnScriptAbortRequested(ILanguageInvoker *invoker)
 {
   XBMC_TRACE;
 
-  std::string addonId;
+  long invokerId(-1);
   if (invoker != NULL)
-  {
-    const ADDON::AddonPtr& addon = invoker->GetAddon();
-    if (addon != NULL)
-      addonId = addon->ID();
-  }
+    invokerId = invoker->GetId();
 
   LOCK_AND_COPY(std::vector<XBMCAddon::xbmc::Monitor*>, tmp, m_vecMonitorCallbackList);
   for (MonitorCallbackList::iterator it = tmp.begin(); (it != tmp.end()); ++it)
   {
     if (CHECK_FOR_ENTRY(m_vecMonitorCallbackList, (*it)))
     {
-      if (addonId.empty())
-        (*it)->OnAbortRequested();
-      else if ((*it)->GetId() == addonId)
+      if (invokerId < 0 || (*it)->GetInvokerId() == invokerId)
         (*it)->OnAbortRequested();
     }
   }
@@ -707,7 +713,7 @@ void XBPython::PulseGlobalEvent()
 bool XBPython::WaitForEvent(CEvent& hEvent, unsigned int milliseconds)
 {
   // wait for either this event our our global event
-  XbmcThreads::CEventGroup eventGroup(&hEvent, &m_globalEvent, NULL);
+  XbmcThreads::CEventGroup eventGroup{&hEvent, &m_globalEvent};
   CEvent* ret = eventGroup.wait(milliseconds);
   if (ret)
     m_globalEvent.Reset();

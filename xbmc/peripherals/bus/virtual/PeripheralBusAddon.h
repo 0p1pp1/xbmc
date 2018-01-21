@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@
 
 #include "addons/AddonManager.h"
 #include "addons/IAddon.h"
+#include "addons/binary-addons/BinaryAddonBase.h"
 #include "guilib/IWindowManagerCallback.h"
 #include "peripherals/PeripheralTypes.h"
 #include "peripherals/bus/PeripheralBus.h"
@@ -29,21 +30,22 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace PERIPHERALS
 {
-  class CPeripheralBusAddon : public CPeripheralBus,
-                              public ADDON::IAddonMgrCallback,
-                              public Observer
+  class CPeripheralBusAddon : public CPeripheralBus
   {
   public:
-    CPeripheralBusAddon(CPeripherals *manager);
-    virtual ~CPeripheralBusAddon(void);
+    explicit CPeripheralBusAddon(CPeripherals& manager);
+    ~CPeripheralBusAddon(void) override;
+
+    void UpdateAddons(void);
 
     /*!
-     * \brief Get peripheral add-on by ID
-     */
-    bool GetAddon(const std::string &strId, ADDON::AddonPtr &addon) const;
+    * \brief Get peripheral add-on that can provide button maps
+    */
+    bool GetAddonWithButtonMap(PeripheralAddonPtr &addon) const;
 
     /*!
      * \brief Get peripheral add-on that can provide button maps for the given device
@@ -51,47 +53,49 @@ namespace PERIPHERALS
     bool GetAddonWithButtonMap(const CPeripheral* device, PeripheralAddonPtr &addon) const;
 
     /*!
-     * \brief Get the number of peripheral add-on libraries
+     * \brief Set the rumble state of a rumble motor
+     *
+     * \param strLocation The location of the peripheral with the motor
+     * \param motorIndex  The index of the motor being rumbled
+     * \param magnitude   The amount of vibration in the closed interval [0.0, 1.0]
+     *
+     * \return true if the rumble motor's state is set, false otherwise
+     *
+     * TODO: Move declaration to parent class
      */
-    unsigned int GetAddonCount(void) const;
-
-    /*!
-     * \brief Initialize the properties of a peripheral with a known location
-     */
-    bool InitializeProperties(CPeripheral* peripheral);
+    bool SendRumbleEvent(const std::string& strLocation, unsigned int motorIndex, float magnitude);
 
     // Inherited from CPeripheralBus
-    virtual void         Register(CPeripheral *peripheral) override;
-    virtual void         GetFeatures(std::vector<PeripheralFeature> &features) const override;
-    virtual bool         HasFeature(const PeripheralFeature feature) const override;
-    virtual CPeripheral* GetPeripheral(const std::string &strLocation) const override;
-    virtual CPeripheral* GetByPath(const std::string &strPath) const override;
-    virtual int          GetPeripheralsWithFeature(std::vector<CPeripheral *> &results, const PeripheralFeature feature) const override;
-    virtual size_t       GetNumberOfPeripherals(void) const override;
-    virtual size_t       GetNumberOfPeripheralsWithId(const int iVendorId, const int iProductId) const override;
-    virtual void         GetDirectory(const std::string &strPath, CFileItemList &items) const override;
-
-    // implementation of IAddonMgrCallback
-    bool RequestRestart(ADDON::AddonPtr addon, bool datachanged) override;
-    bool RequestRemoval(ADDON::AddonPtr addon) override;
-
-    // implementation of Observer
-    void Notify(const Observable &obs, const ObservableMessage msg) override;
+    bool InitializeProperties(CPeripheral& peripheral) override;
+    void Register(const PeripheralPtr& peripheral) override;
+    void GetFeatures(std::vector<PeripheralFeature> &features) const override;
+    bool HasFeature(const PeripheralFeature feature) const override;
+    PeripheralPtr GetPeripheral(const std::string &strLocation) const override;
+    PeripheralPtr GetByPath(const std::string &strPath) const override;
+    bool SupportsFeature(PeripheralFeature feature) const override;
+    int GetPeripheralsWithFeature(PeripheralVector &results, const PeripheralFeature feature) const override;
+    size_t GetNumberOfPeripherals(void) const override;
+    size_t GetNumberOfPeripheralsWithId(const int iVendorId, const int iProductId) const override;
+    void GetDirectory(const std::string &strPath, CFileItemList &items) const override;
+    void ProcessEvents(void) override;
+    void EnableButtonMapping() override;
+    void PowerOff(const std::string& strLocation) override;
 
     bool SplitLocation(const std::string& strLocation, PeripheralAddonPtr& addon, unsigned int& peripheralIndex) const;
 
   protected:
     // Inherited from CPeripheralBus
-    virtual bool PerformDeviceScan(PeripheralScanResults &results) override;
-    virtual void UnregisterRemovedDevices(const PeripheralScanResults &results) override;
-    virtual void ProcessEvents(void) override;
+    bool PerformDeviceScan(PeripheralScanResults &results) override;
+    void UnregisterRemovedDevices(const PeripheralScanResults &results) override;
 
   private:
-    void UpdateAddons(void);
+    void OnEvent(const ADDON::AddonEvent& event);
+    void UnRegisterAddon(const std::string& addonId);
+
+    void PromptEnableAddons(const ADDON::BinaryAddonBaseList& disabledAddons);
 
     PeripheralAddonVector m_addons;
     PeripheralAddonVector m_failedAddons;
-    CCriticalSection      m_critSection;
   };
   using PeripheralBusAddonPtr = std::shared_ptr<CPeripheralBusAddon>;
 }

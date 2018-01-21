@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2015-2016 Team Kodi
+ *      Copyright (C) 2015-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -26,33 +26,47 @@
 
 class TiXmlElement;
 
+namespace KODI
+{
 namespace GAME
 {
 
 class CControllerFeature
 {
 public:
-  CControllerFeature(void) { Reset(); }
+  CControllerFeature() = default;
   CControllerFeature(const CControllerFeature& other) { *this = other; }
 
   void Reset(void);
 
   CControllerFeature& operator=(const CControllerFeature& rhs);
 
-  JOYSTICK::FEATURE_TYPE Type(void) const       { return m_type; }
-  const std::string&     Name(void) const       { return m_strName; }
-  const std::string&     Label(void) const      { return m_strLabel; }
-  unsigned int           LabelID(void) const    { return m_labelId; }
-  JOYSTICK::INPUT_TYPE   InputType(void) const  { return m_inputType; }
+  JOYSTICK::FEATURE_TYPE Type(void) const { return m_type; }
+  JOYSTICK::FEATURE_CATEGORY Category(void) const { return m_category; }
+  const std::string &Name(void) const { return m_strName; }
 
-  bool Deserialize(const TiXmlElement* pElement, const CController* controller);
+  // GUI properties
+  std::string Label(void) const;
+  int LabelID(void) const { return m_labelId; }
+  std::string CategoryLabel(void) const;
+
+  // Input properties
+  JOYSTICK::INPUT_TYPE InputType(void) const { return m_inputType; }
+
+  bool Deserialize(const TiXmlElement* pElement,
+                   const CController* controller,
+                   JOYSTICK::FEATURE_CATEGORY category,
+                   int categoryLabelId);
 
 private:
-  JOYSTICK::FEATURE_TYPE m_type;
-  std::string            m_strName;
-  std::string            m_strLabel;
-  unsigned int           m_labelId;
-  JOYSTICK::INPUT_TYPE   m_inputType;
+  const CController *m_controller = nullptr; // Used for translating addon-specific labels
+  JOYSTICK::FEATURE_TYPE m_type = JOYSTICK::FEATURE_TYPE::UNKNOWN;
+  JOYSTICK::FEATURE_CATEGORY m_category = JOYSTICK::FEATURE_CATEGORY::UNKNOWN;
+  int m_categoryLabelId = -1;
+  std::string m_strName;
+  int m_labelId = -1;
+  JOYSTICK::INPUT_TYPE m_inputType = JOYSTICK::INPUT_TYPE::UNKNOWN;
 };
 
+}
 }

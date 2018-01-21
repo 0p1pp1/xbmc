@@ -18,38 +18,48 @@
  *
  */
 
-#ifndef RENDER_SYSTEM_GL_H
-#define RENDER_SYSTEM_GL_H
-
 #pragma once
 
 #include "system.h"
 #include "system_gl.h"
+#include "GLShader.h"
 #include "rendering/RenderSystem.h"
+
+enum ESHADERMETHOD
+{
+  SM_DEFAULT = 0,
+  SM_TEXTURE,
+  SM_MULTI,
+  SM_FONTS,
+  SM_TEXTURE_NOBLEND,
+  SM_MULTI_BLENDCOLOR,
+  SM_MAX
+};
 
 class CRenderSystemGL : public CRenderSystemBase
 {
 public:
   CRenderSystemGL();
-  virtual ~CRenderSystemGL();
+  ~CRenderSystemGL() override;
   void CheckOpenGLQuirks();
   bool InitRenderSystem() override;
   bool DestroyRenderSystem() override;
-  bool ResetRenderSystem(int width, int height, bool fullScreen, float refreshRate) override;
+  bool ResetRenderSystem(int width, int height) override;
 
   bool BeginRender() override;
   bool EndRender() override;
-  void PresentRender(bool rendered) override;
+  void PresentRender(bool rendered, bool videoLayer) override;
   bool ClearBuffers(color_t color) override;
   bool IsExtSupported(const char* extension) override;
 
   void SetVSync(bool vsync);
   void ResetVSync() { m_bVsyncInit = false; }
-  void FinishPipeline() override;
 
-  void SetViewPort(CRect& viewPort) override;
+  void SetViewPort(const CRect& viewPort) override;
   void GetViewPort(CRect& viewPort) override;
 
+  bool ScissorsCanEffectClipping() override;
+  CRect ClipRectToScissorRect(const CRect &rect) override;
   void SetScissors(const CRect &rect) override;
   void ResetScissors() override;
 
@@ -67,29 +77,41 @@ public:
 
   void Project(float &x, float &y, float &z) override;
 
+  std::string GetShaderPath(const std::string &filename) override;
+
+  void GetGLVersion(int& major, int& minor);
   void GetGLSLVersion(int& major, int& minor);
 
   void ResetGLErrors();
+
+  // shaders
+  void EnableShader(ESHADERMETHOD method);
+  void DisableShader();
+  GLint ShaderGetPos();
+  GLint ShaderGetCol();
+  GLint ShaderGetCoord0();
+  GLint ShaderGetCoord1();
+  GLint ShaderGetUniCol();
+  GLint ShaderGetModel();
 
 protected:
   virtual void SetVSyncImpl(bool enable) = 0;
   virtual void PresentRenderImpl(bool rendered) = 0;
   void CalculateMaxTexturesize();
+  void InitialiseShader();
 
-  int        m_iVSyncMode;
-  int        m_iVSyncErrors;
-  bool       m_bVsyncInit;
-  int        m_width;
-  int        m_height;
+  bool m_bVsyncInit = false;
+  int m_width;
+  int m_height;
 
   std::string m_RenderExtensions;
 
-  int        m_glslMajor = 0;
-  int        m_glslMinor = 0;
+  int m_glslMajor = 0;
+  int m_glslMinor = 0;
   
-  GLint      m_viewPort[4];
+  GLint m_viewPort[4];
 
-  uint8_t m_latencyCounter = 0;
+  std::unique_ptr<CGLShader*[]> m_pShader;
+  ESHADERMETHOD m_method = SM_DEFAULT;
+  GLuint m_vertexArray = GL_NONE;
 };
-
-#endif // RENDER_SYSTEM_H

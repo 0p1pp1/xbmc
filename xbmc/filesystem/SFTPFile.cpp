@@ -20,16 +20,11 @@
 
 #include "threads/SystemClock.h"
 #include "SFTPFile.h"
-#ifdef HAS_FILESYSTEM_SFTP
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "URL.h"
 #include <fcntl.h>
 #include <sstream>
-
-#ifdef TARGET_WINDOWS
-#pragma comment(lib, "ssh.lib")
-#endif
 
 #if defined(TARGET_DARWIN_IOS)
 #include "utils/StringUtils.h"
@@ -115,7 +110,7 @@ CSFTPSession::~CSFTPSession()
   Disconnect();
 }
 
-sftp_file CSFTPSession::CreateFileHande(const std::string &file)
+sftp_file CSFTPSession::CreateFileHandle(const std::string &file)
 {
   if (m_connected)
   {
@@ -335,7 +330,7 @@ bool CSFTPSession::VerifyKnownHost(ssh_session session)
     case SSH_SERVER_FILE_NOT_FOUND:
       CLog::Log(LOGINFO, "SFTPSession: Server file was not found, creating a new one");
     case SSH_SERVER_NOT_KNOWN:
-      CLog::Log(LOGINFO, "SFTPSession: Server unkown, we trust it for now");
+      CLog::Log(LOGINFO, "SFTPSession: Server unknown, we trust it for now");
       if (ssh_write_knownhost(session) < 0)
       {
         CLog::Log(LOGERROR, "CSFTPSession: Failed to save host '%s'", strerror(errno));
@@ -607,7 +602,7 @@ bool CSFTPFile::Open(const CURL& url)
   if (m_session)
   {
     m_file = url.GetFileName().c_str();
-    m_sftp_handle = m_session->CreateFileHande(m_file);
+    m_sftp_handle = m_session->CreateFileHandle(m_file);
 
     return (m_sftp_handle != NULL);
   }
@@ -733,5 +728,3 @@ int CSFTPFile::IoControl(EIoControl request, void* param)
 
   return -1;
 }
-
-#endif

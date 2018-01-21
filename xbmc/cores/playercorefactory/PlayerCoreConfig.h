@@ -24,6 +24,7 @@
 #include "PlayerCoreFactory.h"
 #include "cores/VideoPlayer/VideoPlayer.h"
 #include "cores/paplayer/PAPlayer.h"
+#include "cores/RetroPlayer/RetroPlayer.h"
 #include "cores/ExternalPlayer/ExternalPlayer.h"
 #ifdef HAS_UPNP
 #include "network/upnp/UPnPPlayer.h"
@@ -44,7 +45,7 @@ public:
 
     if (pConfig)
     {
-      m_config = (TiXmlElement*)pConfig->Clone();
+      m_config = static_cast<TiXmlElement*>(pConfig->Clone());
       const char *sAudio = pConfig->Attribute("audio");
       const char *sVideo = pConfig->Attribute("video");
       m_bPlaysAudio = sAudio && stricmp(sAudio, "true") == 0;
@@ -92,6 +93,10 @@ public:
     else if (m_type.compare("music") == 0)
     {
       pPlayer = new PAPlayer(callback);
+    }
+    else if (m_type.compare("game") == 0)
+    {
+      pPlayer = new KODI::RETRO::CRetroPlayer(callback);
     }
     else if (m_type.compare("external") == 0)
     {

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -23,6 +23,8 @@
 
 #include <memory>
 
+namespace KODI
+{
 namespace JOYSTICK
 {
   class CDriverPrimitive;
@@ -30,9 +32,10 @@ namespace JOYSTICK
   class IButtonMap;
 
   class CJoystickFeature;
-  typedef std::shared_ptr<CJoystickFeature> FeaturePtr;
+  using FeaturePtr = std::shared_ptr<CJoystickFeature>;
 
   /*!
+   * \ingroup joystick
    * \brief Base class for joystick features
    *
    * See list of feature types in JoystickTypes.h.
@@ -41,7 +44,7 @@ namespace JOYSTICK
   {
   public:
     CJoystickFeature(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
-    virtual ~CJoystickFeature(void) { }
+    virtual ~CJoystickFeature() = default;
 
     /*!
      * \brief A digital motion has occured
@@ -76,33 +79,77 @@ namespace JOYSTICK
      */
     virtual void ProcessMotions(void) = 0;
 
+    /*!
+     * \brief Check if the input handler is accepting input
+     *
+     * \param bActivation True if the motion is activating (true or positive),
+     *                    false if the motion is deactivating (false or zero)
+     *
+     * \return True if input should be sent to the input handler, false otherwise
+     */
+    bool AcceptsInput(bool bActivation);
+
   protected:
-    const FeatureName            m_name;
+    /*!
+     * \brief Reset motion timer
+     */
+    void ResetMotion();
+
+    /*!
+     * \brief Start the motion timer
+     */
+    void StartMotion();
+
+    /*!
+     * \brief Check if the feature is in motion
+     */
+    bool InMotion() const;
+
+    /*!
+     * \brief Get the time for which the feature has been in motion
+     */
+    unsigned int MotionTimeMs() const;
+
+    const FeatureName    m_name;
     IInputHandler* const m_handler;
     IButtonMap* const    m_buttonMap;
+    const bool           m_bEnabled;
+
+  private:
+    unsigned int m_motionStartTimeMs = 0;
   };
 
   class CScalarFeature : public CJoystickFeature
   {
   public:
     CScalarFeature(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
-    virtual ~CScalarFeature(void) { }
+    virtual ~CScalarFeature() = default;
 
     // implementation of CJoystickFeature
     virtual bool OnDigitalMotion(const CDriverPrimitive& source, bool bPressed) override;
     virtual bool OnAnalogMotion(const CDriverPrimitive& source, float magnitude) override;
-    virtual void ProcessMotions(void) override { } // Actions are dispatched immediately
+    virtual void ProcessMotions(void) override;
 
   private:
     bool OnDigitalMotion(bool bPressed);
     bool OnAnalogMotion(float magnitude);
 
-    const INPUT_TYPE m_inputType;
+    void ProcessDigitalMotion();
+    void ProcessAnalogMotion();
+
+    // State variables
+    INPUT_TYPE       m_inputType = INPUT_TYPE::UNKNOWN;
     bool             m_bDigitalState;
-    float            m_analogState;
+    bool             m_bInitialPressHandled = false;
+
+    // Analog state variables
+    float            m_analogState; // The current magnitude
+    float            m_bActivated; // Set to true when first activated (magnitude > 0.0)
+    bool             m_bDiscrete; // Set to false when a non-discrete axis is detected
   };
 
   /*!
+   * \ingroup joystick
    * \brief Axis of a feature (analog stick, accelerometer, etc)
    *
    * Axes are composed of two driver primitives, one for the positive semiaxis
@@ -166,11 +213,47 @@ namespace JOYSTICK
     float m_negativeDistance;
   };
 
+  class CAxisFeature : public CJoystickFeature
+  {
+  public:
+    CAxisFeature(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
+    virtual ~CAxisFeature() = default;
+
+    // partial implementation of CJoystickFeature
+    virtual bool OnDigitalMotion(const CDriverPrimitive& source, bool bPressed) override;
+    virtual void ProcessMotions(void) override;
+
+  protected:
+    CFeatureAxis m_axis;
+
+    float m_state;
+  };
+
+  class CWheel : public CAxisFeature
+  {
+  public:
+    CWheel(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
+    virtual ~CWheel() = default;
+
+    // partial implementation of CJoystickFeature
+    virtual bool OnAnalogMotion(const CDriverPrimitive& source, float magnitude) override;
+  };
+
+  class CThrottle : public CAxisFeature
+  {
+  public:
+    CThrottle(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
+    virtual ~CThrottle() = default;
+
+    // partial implementation of CJoystickFeature
+    virtual bool OnAnalogMotion(const CDriverPrimitive& source, float magnitude) override;
+  };
+
   class CAnalogStick : public CJoystickFeature
   {
   public:
     CAnalogStick(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
-    virtual ~CAnalogStick(void) { }
+    virtual ~CAnalogStick() = default;
 
     // implementation of CJoystickFeature
     virtual bool OnDigitalMotion(const CDriverPrimitive& source, bool bPressed) override;
@@ -189,7 +272,7 @@ namespace JOYSTICK
   {
   public:
     CAccelerometer(const FeatureName& name, IInputHandler* handler, IButtonMap* buttonMap);
-    virtual ~CAccelerometer(void) { }
+    virtual ~CAccelerometer() = default;
 
     // implementation of CJoystickFeature
     virtual bool OnDigitalMotion(const CDriverPrimitive& source, bool bPressed) override;
@@ -205,4 +288,5 @@ namespace JOYSTICK
     float m_yAxisState;
     float m_zAxisState;
   };
+}
 }

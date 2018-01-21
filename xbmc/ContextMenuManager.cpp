@@ -21,45 +21,56 @@
 #include "ContextMenuManager.h"
 #include "ContextMenuItem.h"
 #include "addons/Addon.h"
-#include "addons/AddonManager.h"
 #include "addons/ContextMenuAddon.h"
 #include "addons/ContextMenus.h"
 #include "addons/IAddon.h"
+#include "favourites/ContextMenus.h"
 #include "music/ContextMenus.h"
+#include "pvr/PVRContextMenus.h"
 #include "video/ContextMenus.h"
 #include "utils/log.h"
+#include "ServiceBroker.h"
 
 #include <iterator>
+#include "ContextMenus.h"
 
 using namespace ADDON;
-
+using namespace PVR;
 
 const CContextMenuItem CContextMenuManager::MAIN = CContextMenuItem::CreateGroup("", "", "kodi.core.main", "");
 const CContextMenuItem CContextMenuManager::MANAGE = CContextMenuItem::CreateGroup("", "", "kodi.core.manage", "");
 
 
-CContextMenuManager::CContextMenuManager()
+CContextMenuManager::CContextMenuManager(CAddonMgr& addonMgr)
+  : m_addonMgr(addonMgr) {}
+
+CContextMenuManager::~CContextMenuManager()
 {
-  Init();
+  Deinit();
+}
+
+void CContextMenuManager::Deinit()
+{
+  m_addonMgr.Events().Unsubscribe(this);
+  m_items.clear();
 }
 
 CContextMenuManager& CContextMenuManager::GetInstance()
 {
-  static CContextMenuManager mgr;
-  return mgr;
+  return CServiceBroker::GetContextMenuManager();
 }
 
 void CContextMenuManager::Init()
 {
-  VECADDONS addons;
-  if (CAddonMgr::GetInstance().GetAddons(addons, ADDON_CONTEXT_ITEM))
-    for (const auto& addon : addons)
-      Register(std::static_pointer_cast<CContextMenuAddon>(addon));
+  m_addonMgr.Events().Subscribe(this, &CContextMenuManager::OnEvent);
 
+  CSingleLock lock(m_criticalSection);
   m_items = {
       std::make_shared<CONTEXTMENU::CResume>(),
       std::make_shared<CONTEXTMENU::CPlay>(),
       std::make_shared<CONTEXTMENU::CAddonInfo>(),
+      std::make_shared<CONTEXTMENU::CEnableAddon>(),
+      std::make_shared<CONTEXTMENU::CDisableAddon>(),
       std::make_shared<CONTEXTMENU::CAddonSettings>(),
       std::make_shared<CONTEXTMENU::CCheckForUpdates>(),
       std::make_shared<CONTEXTMENU::CEpisodeInfo>(),
@@ -71,42 +82,74 @@ void CContextMenuManager::Init()
       std::make_shared<CONTEXTMENU::CSongInfo>(),
       std::make_shared<CONTEXTMENU::CMarkWatched>(),
       std::make_shared<CONTEXTMENU::CMarkUnWatched>(),
+      std::make_shared<CONTEXTMENU::CRemoveResumePoint>(),
+      std::make_shared<CONTEXTMENU::CEjectDisk>(),
+      std::make_shared<CONTEXTMENU::CEjectDrive>(),
+      std::make_shared<CONTEXTMENU::CRemoveFavourite>(),
+      std::make_shared<CONTEXTMENU::CRenameFavourite>(),
+      std::make_shared<CONTEXTMENU::CChooseThumbnailForFavourite>(),
   };
+
+  ReloadAddonItems();
+
+  const std::vector<std::shared_ptr<IContextMenuItem>> pvrItems(CPVRContextMenuManager::GetInstance().GetMenuItems());
+  for (const auto &item : pvrItems)
+    m_items.emplace_back(item);
 }
 
-void CContextMenuManager::Register(const ContextItemAddonPtr& cm)
+void CContextMenuManager::ReloadAddonItems()
 {
-  if (!cm)
-    return;
+  VECADDONS addons;
+  m_addonMgr.GetAddons(addons, ADDON_CONTEXT_ITEM);
 
-  CSingleLock lock(m_criticalSection);
-  for (const auto& menuItem : cm->GetItems())
+  std::vector<CContextMenuItem> addonItems;
+  for (const auto& addon : addons)
   {
-    auto it = std::find(m_addonItems.begin(), m_addonItems.end(), menuItem);
-    if (it == m_addonItems.end())
-      m_addonItems.push_back(menuItem);
+    auto items = std::static_pointer_cast<CContextMenuAddon>(addon)->GetItems();
+    for (auto& item : items)
+    {
+      auto it = std::find(addonItems.begin(), addonItems.end(), item);
+      if (it == addonItems.end())
+        addonItems.push_back(item);
+    }
   }
-}
-
-bool CContextMenuManager::Unregister(const ContextItemAddonPtr& cm)
-{
-  if (!cm)
-    return false;
-
-  const auto menuItems = cm->GetItems();
 
   CSingleLock lock(m_criticalSection);
+  m_addonItems = std::move(addonItems);
 
-  auto it = std::remove_if(m_addonItems.begin(), m_addonItems.end(),
-    [&](const CContextMenuItem& item)
+  CLog::Log(LOGDEBUG, "ContextMenuManager: addon menus reloaded.");
+}
+
+void CContextMenuManager::OnEvent(const ADDON::AddonEvent& event)
+{
+  if (typeid(event) == typeid(AddonEvents::ReInstalled) ||
+      typeid(event) == typeid(AddonEvents::UnInstalled))
+  {
+    ReloadAddonItems();
+  }
+  else if (typeid(event) == typeid(AddonEvents::Enabled))
+  {
+    AddonPtr addon;
+    if (m_addonMgr.GetAddon(event.id, addon, ADDON_CONTEXT_ITEM))
     {
-      if (item.IsGroup())
-        return false; //keep in case other items use them
-      return std::find(menuItems.begin(), menuItems.end(), item) != menuItems.end();
+      CSingleLock lock(m_criticalSection);
+      auto items = std::static_pointer_cast<CContextMenuAddon>(addon)->GetItems();
+      for (auto& item : items)
+      {
+        auto it = std::find(m_addonItems.begin(), m_addonItems.end(), item);
+        if (it == m_addonItems.end())
+          m_addonItems.push_back(item);
+      }
+      CLog::Log(LOGDEBUG, "ContextMenuManager: loaded %s.", event.id.c_str());
     }
-  );
-  m_addonItems.erase(it, m_addonItems.end());
-  return true;
+  }
+  else if (typeid(event) == typeid(AddonEvents::Disabled))
+  {
+    if (m_addonMgr.HasType(event.id, ADDON_CONTEXT_ITEM))
+    {
+      ReloadAddonItems();
+    }
+  }
 }
 
 bool CContextMenuManager::IsVisible(
@@ -128,7 +171,7 @@ bool CContextMenuManager::IsVisible(
 ContextMenuView CContextMenuManager::GetItems(const CFileItem& fileItem, const CContextMenuItem& root /*= MAIN*/) const
 {
   ContextMenuView result;
-  //TODO: implement group support
+  //! @todo implement group support
   if (&root == &MAIN)
   {
     CSingleLock lock(m_criticalSection);
@@ -160,7 +203,6 @@ ContextMenuView CContextMenuManager::GetAddonItems(const CFileItem& fileItem, co
   return result;
 }
 
-
 bool CONTEXTMENU::ShowFor(const CFileItemPtr& fileItem, const CContextMenuItem& root)
 {
   if (!fileItem)
@@ -174,11 +216,11 @@ bool CONTEXTMENU::ShowFor(const CFileItemPtr& fileItem, const CContextMenuItem& 
     return true;
 
   CContextButtons buttons;
-  for (int i = 0; i < menuItems.size(); ++i)
+  for (size_t i = 0; i < menuItems.size(); ++i)
     buttons.Add(i, menuItems[i]->GetLabel(*fileItem));
 
   int selected = CGUIDialogContextMenu::Show(buttons);
-  if (selected < 0 || selected >= menuItems.size())
+  if (selected < 0 || selected >= static_cast<int>(menuItems.size()))
     return false;
 
   return menuItems[selected]->IsGroup() ?

@@ -19,7 +19,7 @@ image which includes Linux.
 The following steps were tested with Ubuntu 14.04 x64. (Note that building on
 a 32 bit machine requires slightly different setting).
 
-The following commands build for newer Rapberry Pi 2 generation. In order to
+The following commands build for newer Raspberry Pi 2 generation. In order to
 build for the first Raspberry Pi, the commands have to be adapted to use
 `--with-platform=raspberry-pi` instead of `--with-platform=raspberry-pi2`.
 
@@ -42,34 +42,33 @@ build for the first Raspberry Pi, the commands have to be adapted to use
     $ git clone --depth 1 https://github.com/raspberrypi/tools
     $ cp -r tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 /opt/rpi/
 
+    $ mkdir -p /opt/rpi/kodi-bcm
+    $ ln -s /opt/rpi/rootfs/usr /opt/rpi/kodi-bcm/raspberry-pi-debug
+
     $ git clone https://github.com/0p1pp1/xbmc kodi
     $ cd kodi/tools/depends
 
     $ ./bootstrap
-    $ ./configure CFLAGS=-isystem/opt/rpi/rootfs/usr/include \
-         CXXFLAGS=-isystem/opt/rpi/rootfs/usr/include \
-         CPPFLAGS=-isystem/opt/rpi/rootfs/usr/include \
-         LDFLAGS="--sysroot=/opt/rpi/rootfs \
-         -L/opt/rpi/rootfs/lib/arm-linux-gnueabihf \
-         -L/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf \
-         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/usr/lib" \
-         --host=arm-linux-gnueabihf --prefix=/opt/rpi/kodi-bcm \
+    $ ./configure --prefix=/opt/rpi/kodi-bcm \
+         --host=arm-linux-gnueabihf --with-firmware=/opt/rpi/rootfs \
          --with-toolchain=/opt/rpi/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
-         --with-firmware=/opt/rpi/rootfs --with-platform=raspberry-pi
+         --with-target-cxxflags="-std=c++11" \
+         --with-target-ldflags="--sysroot=/opt/rpi/rootfs \
+         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/lib/arm-linux-gnueabihf \
+         -L/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf" \
+         --with-platform=raspberry-pi
 
-    $ make
+    $ make -C native
+    $ make -C target/crossguid
     $ cd ../..
 
-    $ export CONFIG_EXTRA="--with-platform=raspberry-pi \
-       --enable-player=omxplayer --disable-x11 \
-       --disable-optical-drive --disable-gtest \
-       --disable-mysql --enable-alsa \
-       PKG_CONFIG_SYSROOT_DIR=/opt/rpi/rootfs \
-       CXXFLAGS=-D__STDC_LIMIT_MACROS=1"
-    $ make -C tools/depends/target/xbmc
+    $ export PKG_CONFIG_PATH=/opt/rpi/rootfs/usr/lib/pkgconfig:/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf/pkgconfig
+    $ make -C tools/depends/target/cmakebuildsys
+    $ cd build
 
+    $ export PKG_CONFIG_SYSROOT_DIR=/opt/rpi/rootfs
     $ make
-    $ sudo make install
+    $ make install
 
 -----------------------------------------------------------------------------
 3. Building Kodi using buildroot environment

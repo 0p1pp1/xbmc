@@ -20,13 +20,11 @@
 
 #include "system.h"
 #include "Texture.h"
-#include "windowing/WindowingFactory.h"
 #include "utils/log.h"
 #include "utils/GLUtils.h"
 #include "guilib/TextureManager.h"
 #include "utils/URIUtils.h"
 
-#if defined(HAS_OMXPLAYER)
 #include "cores/omxplayer/OMXImage.h"
 
 /************************************************************************/
@@ -93,6 +91,10 @@ void CPiTexture::LoadToGPU()
     // Bind the texture object
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
+    if (IsMipmapped()) {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
     m_loadedToGPU = true;
     return;
   }
@@ -147,5 +149,3 @@ bool CPiTexture::LoadFromFileInternal(const std::string& texturePath, unsigned i
   }
   return CGLTexture::LoadFromFileInternal(texturePath, maxWidth, maxHeight, requirePixels);
 }
-
-#endif

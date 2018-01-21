@@ -60,6 +60,26 @@ msgctxt "#31016"
 msgid "Albums"
 msgstr "Albumok"
 
+msgctxt "#31017"
+msgid "PVR info"
+msgstr "PVR információ"
+
+msgctxt "#31018"
+msgid "Player process info"
+msgstr "Feldolgozási információ"
+
+msgctxt "#31019"
+msgid "Video decoder"
+msgstr "Videó dekóder"
+
+msgctxt "#31020"
+msgid "Pixel format"
+msgstr "Képpont formátum"
+
+msgctxt "#31021"
+msgid "System memory usage"
+msgstr "Rendszer memóriahasználata"
+
 msgctxt "#31024"
 msgid "Page"
 msgstr "Oldal"
@@ -83,6 +103,10 @@ msgstr "ELŐRETEKERÉS"
 msgctxt "#31045"
 msgid "REWIND"
 msgstr "VISSZATEKERÉS"
+
+msgctxt "#31046"
+msgid "Play speed"
+msgstr "Lejátszási sebesség"
 
 msgctxt "#31049"
 msgid "End Time"
@@ -141,8 +165,8 @@ msgid "Data provider"
 msgstr "Adatszolgáltató"
 
 msgctxt "#31309"
-msgid "Memory Used:"
-msgstr "Használt memória:"
+msgid "System Memory Used:"
+msgstr "Használt Rendszermemória:"
 
 msgctxt "#31320"
 msgid "Last Logged In"
@@ -176,53 +200,53 @@ msgctxt "#31400"
 msgid "Change the skin · Set language and region · Change file listing options · Set up a screensaver"
 msgstr "Felszín választás · Nyelv és régió beállítás · Fájllista beállítások · Képernyővédő beállítása"
 
-msgctxt "#31401"
-msgid "Manage your video library · Set video playback options · Change video listing options · Set subtitle fonts"
-msgstr "Filmkönyvtár kezelése · Filmlejátszási opciók · Filmlistázási opciók · Feliratok betűtípusa"
-
-msgctxt "#31402"
-msgid "Manage your music library · Set music playback options · Change music listing options · Setup song submission"
-msgstr "Zenekönyvtár kezelése · Zenelejátszási opciók · Zenelistázási opciók · Zenebeküldés beállítása"
-
-msgctxt "#31403"
-msgid "Set picture listing options · Configure slideshows"
-msgstr "Képlistázási opciók · Diavetítés beállítása"
-
-msgctxt "#31404"
-msgid "Set three cities to collect weather information"
-msgstr "3 város beállítása az időjáráshoz"
-
 msgctxt "#31405"
-msgid "Setup control of Kodi via UPnP and HTTP · Configure file sharing · Set internet access options"
-msgstr "Az Kodi beállítása UPnP-n és HTTP-n történő eléréshez · Fájlmegosztások · Internet hozzáférési opciók"
+msgid "Configure & manage media sharing services · Configure & manage the weather service"
+msgstr "Médiamegosztási szolgáltatások beállítása és kezelése · Időjárási szolgáltatás beállítása és kezelése"
 
 msgctxt "#31406"
-msgid "Setup and calibrate displays · Configure audio output · Setup remote controls · Set power saving options · Enable debugging · Setup master lock"
-msgstr "Kijelző beállítása / kalibrálása · Hangkimenet beállítása · Távvzérlés beállítása · Energiagazdálkodási opciók · Debug · Mesterzár beállítása"
+msgid "Configure display · Configure audio · Configure internet access · Configure power saving· Configure logging"
+msgstr "Kijelző beállítása · Hang beállítása · Internetelérés beállítása · Energiagazdálkodás beállítása · Naplózás beállítása"
 
 msgctxt "#31407"
 msgid "Manage your installed add-ons · Browse for and install add-ons from kodi.tv · Modify add-on settings"
 msgstr "Telepített kiegészítők kezelése · Kiegészítők böngészése és telepítése a kodi.tv-ről · Kiegészítőbeállítások módosítása"
 
+msgctxt "#31408"
+msgid "Configure actions that can be used during playback · Configure how media content is played"
+msgstr "A lejátszás során elérhető műveletek beállítása · A médiatartalom lejátszásának beállítása"
+
+msgctxt "#31409"
+msgid "Configure library sources · Show the media lists display content · Configure how library lists are navigated"
+msgstr "Médiatár forrás konfiguráció · Médialistán megjelenített tartalom mutatása · Médialista navigáció beállítása"
+
+msgctxt "#31410"
+msgid "Configure skin · Configure region · Configure control · Configure screensaver · Configure master lock"
+msgstr "Felület beállítása · Régió beállítása · Vezérlés beállítása · Képernyővédő beállítása · Mesterzár beállítása"
+
+msgctxt "#31411"
+msgid "Configure your profiles · Set locking options · Enable login screen"
+msgstr "Profilok beállítása · Zárolási beállítások · Bejelentkező képernyő engedélyezése"
+
+msgctxt "#31412"
+msgid "Display system information · Hardware statistics · Check storage availability · View network configuration"
+msgstr "Rendszerinformációk megjelenítése · Hardverstatisztika · Tárolóelérés ellenőrzése · Hálózati beállítások megtekintése"
+
 msgctxt "#31421"
 msgid "Select your Kodi user Profile[CR]to login and continue"
 msgstr "Az Kodi profilod kiválasztása[CR]bejelentkezéshez és folytatás"
 
-msgctxt "#31500"
-msgid "Home Menu Catagory Buttons"
-msgstr "Főmenü kategória gombok"
+msgctxt "#31548"
+msgid "Home menu"
+msgstr "Főmenü"
 
-msgctxt "#31501"
-msgid "Home Page Add-on Quick Links"
-msgstr "Főoldal kiegészítő gyorslinkek"
-
-msgctxt "#31502"
-msgid "Miscellaneous Options"
-msgstr "Egyéb opciók"
+msgctxt "#31549"
+msgid "Home Add-ons"
+msgstr "Főmenü kiegészítők"
 
 msgctxt "#31550"
-msgid "Home Screen Weather Info and button"
-msgstr "Főmenü időjárás infó és gomb"
+msgid "Backgrounds"
+msgstr "Hátterek"
 
 msgctxt "#31551"
 msgid "Add-on Shortcut"

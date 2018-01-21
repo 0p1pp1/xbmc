@@ -23,7 +23,9 @@
 
 #if defined(TARGET_DARWIN_OSX)
 
+#include <list>
 #include <string>
+#include <vector>
 
 #include "cores/AudioEngine/Sinks/osx/CoreAudioStream.h"
 
@@ -38,7 +40,7 @@ class CCoreAudioDevice
 {
 public:
   CCoreAudioDevice();
-  CCoreAudioDevice(AudioDeviceID deviceId);
+  explicit CCoreAudioDevice(AudioDeviceID deviceId);
   virtual ~CCoreAudioDevice();
   
   bool          Open(AudioDeviceID deviceId);

@@ -33,7 +33,8 @@ namespace ANNOUNCEMENT
     Application   = 0x040,
     Input         = 0x080,
     PVR           = 0x100,
-    Other         = 0x200
+    Other         = 0x200,
+    Info          = 0x400
   };
 
   #define ANNOUNCE_ALL (Player | Playlist | GUI | System | VideoLibrary | AudioLibrary | Application | Input | ANNOUNCEMENT::PVR | Other)
@@ -76,8 +77,8 @@ namespace ANNOUNCEMENT
   class IAnnouncer
   {
   public:
-    IAnnouncer() { };
-    virtual ~IAnnouncer() { };
+    IAnnouncer() = default;
+    virtual ~IAnnouncer() = default;
     virtual void Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) = 0;
   };
 }

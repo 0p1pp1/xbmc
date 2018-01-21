@@ -20,8 +20,6 @@
 
 #include "XRandR.h"
 
-#ifdef HAVE_X11
-
 #include <string.h>
 #include <sys/wait.h>
 #include "system.h"
@@ -38,7 +36,7 @@
 #endif
 
 #ifdef TARGET_POSIX
-#include "linux/XTimeUtils.h"
+#include "platform/linux/XTimeUtils.h"
 #endif
 
 CXRandR::CXRandR(bool query)
@@ -104,7 +102,7 @@ bool CXRandR::Query(bool force, int screennum, bool ignoreoff)
   TiXmlElement *pRootElement = xmlDoc.RootElement();
   if (atoi(pRootElement->Attribute("id")) != screennum)
   {
-    // TODO ERROR
+    //! @todo ERROR
     return false;
   }
 
@@ -407,7 +405,7 @@ void CXRandR::LoadCustomModeLinesToAllOutputs(void)
   TiXmlElement *pRootElement = xmlDoc.RootElement();
   if (strcasecmp(pRootElement->Value(), "modelines") != 0)
   {
-    // TODO ERROR
+    //! @todo ERROR
     return;
   }
 
@@ -509,8 +507,6 @@ int CXRandR::GetCrtc(int x, int y, float &hz)
 }
 
 CXRandR g_xrandr;
-
-#endif // HAVE_X11
 
 /*
   int main()

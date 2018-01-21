@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include "input/joysticks/JoystickTypes.h"
 
 #include <string>
+#include <vector>
 
 class CEvent;
 
@@ -44,6 +45,11 @@ class CEvent;
  *   3) When the wizard's active feature loses focus, the wizard is cancelled
  *      and the prompt for input ends.
  */
+
+#include "input/joysticks/JoystickTypes.h"
+
+namespace KODI
+{
 namespace GAME
 {
   class CControllerFeature;
@@ -54,7 +60,7 @@ namespace GAME
   class IControllerList
   {
   public:
-    virtual ~IControllerList(void) { }
+    virtual ~IControllerList() = default;
 
     /*!
      * \brief  Initialize the resource
@@ -70,8 +76,9 @@ namespace GAME
 
     /*!
      * \brief Refresh the contents of the list
+     * \return True if the list was changed
      */
-    virtual void Refresh(void) = 0;
+    virtual bool Refresh(void) = 0;
 
     /*
      * \brief  The specified controller has been focused
@@ -86,6 +93,12 @@ namespace GAME
     virtual void OnSelect(unsigned int controllerIndex) = 0;
 
     /*!
+     * \brief Get the index of the focused controller
+     * \return The index of the focused controller, or -1 if no controller has been focused yet
+     */
+    virtual int GetFocusedController() const = 0;
+
+    /*!
      * \brief Reset the focused controller
      */
     virtual void ResetController(void) = 0;
@@ -97,7 +110,7 @@ namespace GAME
   class IFeatureList
   {
   public:
-    virtual ~IFeatureList(void) { }
+    virtual ~IFeatureList() = default;
 
     /*!
      * \brief  Initialize the resource
@@ -113,31 +126,38 @@ namespace GAME
     virtual void Deinitialize(void) = 0;
 
     /*!
+     * \brief Check if the feature type has any buttons in the GUI
+     * \param The type of the feature being added to the GUI
+     * \return True if the type is support, false otherwise
+     */
+    virtual bool HasButton(JOYSTICK::FEATURE_TYPE type) const = 0;
+
+    /*!
      * \brief Load the features for the specified controller
      * \param controller The controller to load
      */
     virtual void Load(const ControllerPtr& controller) = 0;
 
     /*!
-     * \brief  Focus has been set to the specified feature
-     * \param  featureIndex The index of the feature being focused
+     * \brief  Focus has been set to the specified GUI button
+     * \param  buttonIndex The index of the button being focused
      */
-    virtual void OnFocus(unsigned int index) = 0;
+    virtual void OnFocus(unsigned int buttonIndex) = 0;
 
     /*!
-     * \brief  The specified feature has been selected
-     * \param  featureIndex The index of the feature being selected
+     * \brief  The specified GUI button has been selected
+     * \param  buttonIndex The index of the button being selected
      */
-    virtual void OnSelect(unsigned int index) = 0;
+    virtual void OnSelect(unsigned int buttonIndex) = 0;
   };
 
   /*!
-   * \brief A button in a feature list
+   * \brief A GUI button in a feature list
    */
   class IFeatureButton
   {
   public:
-    virtual ~IFeatureButton(void) { }
+    virtual ~IFeatureButton() = default;
 
     /*!
      * \brief Get the feature represented by this button
@@ -165,7 +185,21 @@ namespace GAME
      * \return The next direction to be prompted, or UNKNOWN if this isn't an
      *         analog stick or the prompt is finished
      */
-    virtual JOYSTICK::CARDINAL_DIRECTION GetDirection(void) const = 0;
+    virtual JOYSTICK::ANALOG_STICK_DIRECTION GetAnalogStickDirection(void) const = 0;
+
+    /*!
+     * \brief Get the direction of the next wheel prompt
+     * \return The next direction to be prompted, or UNKNOWN if this isn't a
+     *         wheel or the prompt is finished
+     */
+    virtual JOYSTICK::WHEEL_DIRECTION GetWheelDirection(void) const = 0;
+
+    /*!
+     * \brief Get the direction of the next throttle prompt
+     * \return The next direction to be prompted, or UNKNOWN if this isn't a
+     *         throttle or the prompt is finished
+     */
+    virtual JOYSTICK::THROTTLE_DIRECTION GetThrottleDirection(void) const = 0;
 
     /*!
      * \brief Reset button after prompting for input has finished
@@ -179,11 +213,12 @@ namespace GAME
   class IConfigurationWizard
   {
   public:
-    virtual ~IConfigurationWizard(void) { }
+    virtual ~IConfigurationWizard() = default;
 
     /*!
-     * \brief Start the wizard at the specified feature
-     * \param featureIndex The index of the feature to start at
+     * \brief Start the wizard for the specified buttons
+     * \param controllerId The controller ID being mapped
+     * \param buttons The buttons to map
      */
     virtual void Run(const std::string& strControllerId, const std::vector<IFeatureButton*>& buttons) = 0;
 
@@ -200,4 +235,5 @@ namespace GAME
      */
     virtual bool Abort(bool bWait = true) = 0;
   };
+}
 }

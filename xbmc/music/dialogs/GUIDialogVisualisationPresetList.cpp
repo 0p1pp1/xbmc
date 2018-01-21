@@ -19,15 +19,14 @@
  */
 
 #include "GUIDialogVisualisationPresetList.h"
-#include "addons/Visualisation.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/GUIVisualisationControl.h"
 #include "GUIUserMessages.h"
 #include "FileItem.h"
 #include "input/Key.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/StringUtils.h"
-
-using ADDON::CVisualisation;
+#include "utils/Variant.h"
 
 CGUIDialogVisualisationPresetList::CGUIDialogVisualisationPresetList()
     : CGUIDialogSelect(WINDOW_DIALOG_VIS_PRESET_LIST),
@@ -50,10 +49,10 @@ bool CGUIDialogVisualisationPresetList::OnMessage(CGUIMessage &message)
 void CGUIDialogVisualisationPresetList::OnSelect(int idx)
 {
   if (m_viz)
-    m_viz->OnAction(VIS_ACTION_LOAD_PRESET, static_cast<void*>(&idx));
+    m_viz->SetPreset(idx);
 }
 
-void CGUIDialogVisualisationPresetList::SetVisualisation(CVisualisation* vis)
+void CGUIDialogVisualisationPresetList::SetVisualisation(CGUIVisualisationControl* vis)
 {
   m_viz = vis;
   Reset();
@@ -61,7 +60,7 @@ void CGUIDialogVisualisationPresetList::SetVisualisation(CVisualisation* vis)
   {
     SetUseDetails(false);
     SetMultiSelection(false);
-    SetHeading(StringUtils::Format(g_localizeStrings.Get(13407).c_str(), m_viz->Name().c_str()));
+    SetHeading(CVariant{StringUtils::Format(g_localizeStrings.Get(13407).c_str(), m_viz->Name().c_str())});
     std::vector<std::string> presets;
     if (m_viz->GetPresetList(presets))
     {
@@ -71,7 +70,7 @@ void CGUIDialogVisualisationPresetList::SetVisualisation(CVisualisation* vis)
         item.RemoveExtension();
         Add(item);
       }
-      SetSelected(m_viz->GetPreset());
+      SetSelected(m_viz->GetActivePreset());
     }
   }
 }
@@ -81,7 +80,7 @@ void CGUIDialogVisualisationPresetList::OnInitWindow()
   CGUIMessage msg(GUI_MSG_GET_VISUALISATION, 0, 0);
   g_windowManager.SendMessage(msg);
   if (msg.GetPointer())
-    SetVisualisation(static_cast<CVisualisation*>(msg.GetPointer()));
+    SetVisualisation(static_cast<CGUIVisualisationControl*>(msg.GetPointer()));
   CGUIDialogSelect::OnInitWindow();
 }
 

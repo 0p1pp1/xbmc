@@ -20,9 +20,6 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
-  #include "config.h"
-#endif
 extern "C" {
   #include <ass/ass.h>
 }
@@ -39,7 +36,7 @@ typedef ass_event_t ASS_Event;
 class DllLibassInterface
 {
 public:
-  virtual ~DllLibassInterface() {}
+  virtual ~DllLibassInterface() = default;
   virtual void ass_set_extract_fonts(ASS_Library* priv, int extract)=0;
   virtual void ass_set_fonts_dir(ASS_Library* priv, const char* fonts_dir)=0;
   virtual ASS_Library* ass_library_init(void)=0;

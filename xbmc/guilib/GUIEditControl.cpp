@@ -20,6 +20,7 @@
 
 #include "GUIEditControl.h"
 #include "GUIWindowManager.h"
+#include "ServiceBroker.h"
 #include "utils/CharsetConverter.h"
 #include "utils/Variant.h"
 #include "GUIKeyboardFactory.h"
@@ -28,9 +29,8 @@
 #include "input/Key.h"
 #include "LocalizeStrings.h"
 #include "XBDateTime.h"
-#include "windowing/WindowingFactory.h"
+#include "windowing/WinSystem.h"
 #include "utils/md5.h"
-#include "utils/Variant.h"
 #include "GUIUserMessages.h"
 
 #if defined(TARGET_DARWIN)
@@ -80,9 +80,7 @@ CGUIEditControl::CGUIEditControl(const CGUIButtonControl &button)
   DefaultConstructor();
 }
 
-CGUIEditControl::~CGUIEditControl(void)
-{
-}
+CGUIEditControl::~CGUIEditControl(void) = default;
 
 bool CGUIEditControl::OnMessage(CGUIMessage &message)
 {
@@ -101,14 +99,6 @@ bool CGUIEditControl::OnMessage(CGUIMessage &message)
   {
     SetLabel2(message.GetLabel());
     UpdateText();
-  }
-  else if (message.GetMessage() == GUI_MSG_INPUT_TEXT_EDIT && HasFocus())
-  {
-    g_charsetConverter.utf8ToW(message.GetLabel(), m_edit);
-    m_editOffset = message.GetParam1();
-    m_editLength = message.GetParam2();
-    UpdateText(false);
-    return true;
   }
   return CGUIButtonControl::OnMessage(message);
 }
@@ -260,12 +250,9 @@ bool CGUIEditControl::OnAction(const CAction &action)
         }
       default:
         {
-          if (!g_Windowing.IsTextInputEnabled())
-          {
-            ClearMD5();
-            m_edit.clear();
-            m_text2.insert(m_text2.begin() + m_cursorPos++, (WCHAR)action.GetUnicode());
-          }
+          ClearMD5();
+          m_edit.clear();
+          m_text2.insert(m_text2.begin() + m_cursorPos++, (WCHAR)action.GetUnicode());
           break;
         }
       }
@@ -358,7 +345,7 @@ void CGUIEditControl::OnClick()
       textChanged = CGUIDialogNumeric::ShowAndVerifyNewPassword(utf8);
       break;
     case INPUT_TYPE_PASSWORD_MD5:
-      utf8 = ""; // TODO: Ideally we'd send this to the keyboard and tell the keyboard we have this type of input
+      utf8 = ""; //! @todo Ideally we'd send this to the keyboard and tell the keyboard we have this type of input
       // fallthrough
     case INPUT_TYPE_TEXT:
     default:
@@ -397,7 +384,7 @@ void CGUIEditControl::SetInputType(CGUIEditControl::INPUT_TYPE type, CVariant he
     m_inputHeading = heading.asString();
   else if (heading.isInteger() && heading.asInteger())
     m_inputHeading = g_localizeStrings.Get(static_cast<uint32_t>(heading.asInteger()));
-  // TODO: Verify the current input string?
+  //! @todo Verify the current input string?
 }
 
 void CGUIEditControl::RecalcLabelPosition()
@@ -688,8 +675,8 @@ void CGUIEditControl::OnPasteClipboard()
   std::wstring unicode_text;
   std::string utf8_text;
 
-// Get text from the clipboard
-  utf8_text = g_Windowing.GetClipboardText();
+  // Get text from the clipboard
+  utf8_text = CServiceBroker::GetWinSystem().GetClipboardText();
   g_charsetConverter.utf8ToW(utf8_text, unicode_text);
 
   // Insert the pasted text at the current cursor position.
@@ -746,7 +733,6 @@ void CGUIEditControl::ValidateInput()
 void CGUIEditControl::SetFocus(bool focus)
 {
   m_smsTimer.Stop();
-  g_Windowing.EnableTextInput(focus);
   CGUIControl::SetFocus(focus);
   SetInvalid();
 }

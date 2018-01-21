@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,31 +19,59 @@
  */
 
 #include "PeripheralJoystick.h"
+#include "games/controllers/ControllerIDs.h"
+#include "input/joysticks/interfaces/IDriverHandler.h"
+#include "input/joysticks/keymaps/KeymapHandling.h"
+#include "input/joysticks/DeadzoneFilter.h"
+#include "input/joysticks/JoystickMonitor.h"
+#include "input/joysticks/JoystickTranslator.h"
+#include "input/joysticks/RumbleGenerator.h"
+#include "input/InputManager.h"
 #include "peripherals/Peripherals.h"
+#include "peripherals/addons/AddonButtonMap.h"
 #include "peripherals/bus/android/PeripheralBusAndroid.h"
 #include "peripherals/bus/virtual/PeripheralBusAddon.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
+#include "Application.h"
 
 #include <algorithm>
 
+using namespace KODI;
 using namespace JOYSTICK;
 using namespace PERIPHERALS;
 
-CPeripheralJoystick::CPeripheralJoystick(const PeripheralScanResult& scanResult, CPeripheralBus* bus) :
-  CPeripheral(scanResult, bus),
+CPeripheralJoystick::CPeripheralJoystick(CPeripherals& manager, const PeripheralScanResult& scanResult, CPeripheralBus* bus) :
+  CPeripheral(manager, scanResult, bus),
   m_requestedPort(JOYSTICK_PORT_UNKNOWN),
   m_buttonCount(0),
   m_hatCount(0),
-  m_axisCount(0)
+  m_axisCount(0),
+  m_motorCount(0),
+  m_supportsPowerOff(false),
+  m_rumbleGenerator(new CRumbleGenerator)
 {
   m_features.push_back(FEATURE_JOYSTICK);
+  // FEATURE_RUMBLE conditionally added via SetMotorCount()
 }
 
 CPeripheralJoystick::~CPeripheralJoystick(void)
 {
-  UnregisterJoystickInputHandler(&m_defaultInputHandler);
-  UnregisterJoystickDriverHandler(&m_joystickMonitor);
+  if (m_rumbleGenerator)
+  {
+    m_rumbleGenerator->AbortRumble();
+    m_rumbleGenerator.reset();
+  }
+
+  if (m_joystickMonitor)
+  {
+    UnregisterInputHandler(m_joystickMonitor.get());
+    m_joystickMonitor.reset();
+  }
+
+  m_appInput.reset();
+  m_deadzoneFilter.reset();
+  m_buttonMap.reset();
 }
 
 bool CPeripheralJoystick::InitialiseFeature(const PeripheralFeature feature)
@@ -54,41 +82,92 @@ bool CPeripheralJoystick::InitialiseFeature(const PeripheralFeature feature)
   {
     if (feature == FEATURE_JOYSTICK)
     {
-      if (m_mappedBusType == PERIPHERAL_BUS_ADDON)
+      if (m_bus->InitializeProperties(*this))
+        bSuccess = true;
+      else
+        CLog::Log(LOGERROR, "CPeripheralJoystick: Invalid location (%s)", m_strLocation.c_str());
+
+      if (bSuccess)
       {
-        CPeripheralBusAddon* addonBus = dynamic_cast<CPeripheralBusAddon*>(m_bus);
-        if (addonBus)
-        {
-          if (addonBus->InitializeProperties(this))
-            bSuccess = true;
-          else
-            CLog::Log(LOGERROR, "CPeripheralJoystick: Invalid location (%s)", m_strLocation.c_str());
-        }
+        InitializeDeadzoneFiltering();
+
+        // Give joystick monitor priority over default controller
+        m_appInput.reset(new CKeymapHandling(this, false, m_manager.GetInputManager().KeymapEnvironment()));
+        m_joystickMonitor.reset(new CJoystickMonitor);
+        RegisterInputHandler(m_joystickMonitor.get(), false);
       }
-#ifdef TARGET_ANDROID
-      else if (m_mappedBusType == PERIPHERAL_BUS_ANDROID)
-      {
-        CPeripheralBusAndroid* androidBus = dynamic_cast<CPeripheralBusAndroid*>(m_bus);
-        if (androidBus)
-        {
-          if (androidBus->InitializeProperties(this))
-            bSuccess = true;
-          else
-            CLog::Log(LOGERROR, "CPeripheralJoystick: Invalid location (%s)", m_strLocation.c_str());
-        }
-      }
-#endif
+    }
+    else if (feature == FEATURE_RUMBLE)
+    {
+      bSuccess = true; // Nothing to do
+    }
+    else if (feature == FEATURE_POWER_OFF)
+    {
+      bSuccess = true; // Nothing to do
     }
   }
 
-  if (bSuccess)
+  return bSuccess;
+}
+
+void CPeripheralJoystick::InitializeDeadzoneFiltering()
+{
+  // Get a button map for deadzone filtering
+  PeripheralAddonPtr addon = m_manager.GetAddonWithButtonMap(this);
+  if (addon)
   {
-    // Give joystick monitor priority over default controller
-    RegisterJoystickInputHandler(&m_defaultInputHandler);
-    RegisterJoystickDriverHandler(&m_joystickMonitor, false);
+    m_buttonMap.reset(new CAddonButtonMap(this, addon, DEFAULT_CONTROLLER_ID));
+    if (m_buttonMap->Load())
+    {
+      m_deadzoneFilter.reset(new CDeadzoneFilter(m_buttonMap.get(), this));
+    }
+    else
+    {
+      CLog::Log(LOGERROR, "CPeripheralJoystick: Failed to load button map for deadzone filtering on %s", m_strLocation.c_str());
+      m_buttonMap.reset();
+    }
+  }
+  else
+  {
+    CLog::Log(LOGERROR, "CPeripheralJoystick: Failed to create button map for deadzone filtering on %s", m_strLocation.c_str());
+  }
+}
+
+void CPeripheralJoystick::OnUserNotification()
+{
+  IInputReceiver *inputReceiver = m_appInput->GetInputReceiver(m_rumbleGenerator->ControllerID());
+  m_rumbleGenerator->NotifyUser(inputReceiver);
+}
+
+bool CPeripheralJoystick::TestFeature(PeripheralFeature feature)
+{
+  bool bSuccess = false;
+
+  switch (feature)
+  {
+  case FEATURE_RUMBLE:
+  {
+    IInputReceiver *inputReceiver = m_appInput->GetInputReceiver(m_rumbleGenerator->ControllerID());
+    bSuccess = m_rumbleGenerator->DoTest(inputReceiver);
+    break;
+  }
+  case FEATURE_POWER_OFF:
+    if (m_supportsPowerOff)
+    {
+      PowerOff();
+      bSuccess = true;
+    }
+    break;
+  default:
+    break;
   }
 
   return bSuccess;
+}
+
+void CPeripheralJoystick::PowerOff()
+{
+  m_bus->PowerOff(m_strLocation);
 }
 
 void CPeripheralJoystick::RegisterJoystickDriverHandler(IDriverHandler* handler, bool bPromiscuous)
@@ -110,8 +189,20 @@ void CPeripheralJoystick::UnregisterJoystickDriverHandler(IDriverHandler* handle
     }), m_driverHandlers.end());
 }
 
+IKeymap *CPeripheralJoystick::GetKeymap(const std::string &controllerId)
+{
+  return m_appInput->GetKeymap(controllerId);
+}
+
 bool CPeripheralJoystick::OnButtonMotion(unsigned int buttonIndex, bool bPressed)
 {
+  CLog::Log(LOGDEBUG, "BUTTON [ %u ] on \"%s\" %s", buttonIndex,
+            DeviceName().c_str(), bPressed ? "pressed" : "released");
+
+  // Avoid sending activated input if the app is in the background
+  if (bPressed && !g_application.IsAppFocused())
+    return false;
+
   CSingleLock lock(m_handlerMutex);
 
   // Process promiscuous handlers
@@ -146,6 +237,13 @@ bool CPeripheralJoystick::OnButtonMotion(unsigned int buttonIndex, bool bPressed
 
 bool CPeripheralJoystick::OnHatMotion(unsigned int hatIndex, HAT_STATE state)
 {
+  CLog::Log(LOGDEBUG, "HAT [ %u ] on \"%s\" %s", hatIndex,
+            DeviceName().c_str(), CJoystickTranslator::HatStateToString(state));
+
+  // Avoid sending activated input if the app is in the background
+  if (state != HAT_STATE::UNPRESSED && !g_application.IsAppFocused())
+    return false;
+
   CSingleLock lock(m_handlerMutex);
 
   // Process promiscuous handlers
@@ -180,13 +278,27 @@ bool CPeripheralJoystick::OnHatMotion(unsigned int hatIndex, HAT_STATE state)
 
 bool CPeripheralJoystick::OnAxisMotion(unsigned int axisIndex, float position)
 {
+  // Get axis properties
+  int center = 0;
+  unsigned int range = 1;
+  if (m_buttonMap)
+    m_buttonMap->GetAxisProperties(axisIndex, center, range);
+
+  // Apply deadzone filtering
+  if (center == 0 && m_deadzoneFilter)
+    position = m_deadzoneFilter->FilterAxis(axisIndex, position);
+
+  // Avoid sending activated input if the app is in the background
+  if (position != static_cast<float>(center) && !g_application.IsAppFocused())
+    return false;
+
   CSingleLock lock(m_handlerMutex);
 
   // Process promiscuous handlers
   for (std::vector<DriverHandler>::iterator it = m_driverHandlers.begin(); it != m_driverHandlers.end(); ++it)
   {
     if (it->bPromiscuous)
-      it->handler->OnAxisMotion(axisIndex, position);
+      it->handler->OnAxisMotion(axisIndex, position, center, range);
   }
 
   bool bHandled = false;
@@ -196,11 +308,11 @@ bool CPeripheralJoystick::OnAxisMotion(unsigned int axisIndex, float position)
   {
     if (!it->bPromiscuous)
     {
-      bHandled |= it->handler->OnAxisMotion(axisIndex, position);
+      bHandled |= it->handler->OnAxisMotion(axisIndex, position, center, range);
 
       // If axis is centered, force bHandled to false to notify all handlers.
       // This avoids "sticking".
-      if (position == 0.0f)
+      if (position == static_cast<float>(center))
         bHandled = false;
 
       // Once an axis is handled, we're done
@@ -218,4 +330,39 @@ void CPeripheralJoystick::ProcessAxisMotions(void)
 
   for (std::vector<DriverHandler>::iterator it = m_driverHandlers.begin(); it != m_driverHandlers.end(); ++it)
     it->handler->ProcessAxisMotions();
+}
+
+bool CPeripheralJoystick::SetMotorState(unsigned int motorIndex, float magnitude)
+{
+  bool bHandled = false;
+
+  if (m_mappedBusType == PERIPHERAL_BUS_ADDON)
+  {
+    CPeripheralBusAddon* addonBus = static_cast<CPeripheralBusAddon*>(m_bus);
+    if (addonBus)
+    {
+      bHandled = addonBus->SendRumbleEvent(m_strLocation, motorIndex, magnitude);
+    }
+  }
+  return bHandled;
+}
+
+void CPeripheralJoystick::SetMotorCount(unsigned int motorCount)
+{
+  m_motorCount = motorCount;
+
+  if (m_motorCount == 0)
+    m_features.erase(std::remove(m_features.begin(), m_features.end(), FEATURE_RUMBLE), m_features.end());
+  else if (std::find(m_features.begin(), m_features.end(), FEATURE_RUMBLE) == m_features.end())
+    m_features.push_back(FEATURE_RUMBLE);
+}
+
+void CPeripheralJoystick::SetSupportsPowerOff(bool bSupportsPowerOff)
+{
+  m_supportsPowerOff = bSupportsPowerOff;
+
+  if (!m_supportsPowerOff)
+    m_features.erase(std::remove(m_features.begin(), m_features.end(), FEATURE_POWER_OFF), m_features.end());
+  else if (std::find(m_features.begin(), m_features.end(), FEATURE_POWER_OFF) == m_features.end())
+    m_features.push_back(FEATURE_POWER_OFF);
 }

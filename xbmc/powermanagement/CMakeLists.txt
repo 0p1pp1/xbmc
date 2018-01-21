@@ -6,8 +6,8 @@ set(HEADERS DPMSSupport.h
             IPowerSyscall.h
             PowerManager.h)
 
-core_add_library(powermanagement)
-
-if(ENABLE_INTERNAL_FFMPEG)
-  add_dependencies(powermanagement ffmpeg)
+if(CORE_SYSTEM_NAME MATCHES windows)
+  list(APPEND HEADERS WinIdleTimer.h)
 endif()
+
+core_add_library(powermanagement)

@@ -215,17 +215,14 @@ std::string CCoreAudioDevice::GetName() const
   AudioObjectPropertyAddress  propertyAddress;
   propertyAddress.mScope    = kAudioDevicePropertyScopeOutput;
   propertyAddress.mElement  = 0;
-  propertyAddress.mSelector = kAudioDevicePropertyDeviceName;
-
-  UInt32 propertySize;
-  OSStatus ret = AudioObjectGetPropertyDataSize(m_DeviceId, &propertyAddress, 0, NULL, &propertySize);
-  if (ret != noErr)
-    return "";
+  propertyAddress.mSelector = kAudioDevicePropertyDeviceNameCFString;
 
   std::string name;
-  char *buff = new char[propertySize + 1];
-  buff[propertySize] = 0x00;
-  ret = AudioObjectGetPropertyData(m_DeviceId, &propertyAddress, 0, NULL, &propertySize, buff);
+  CFStringRef deviceName = NULL;
+  UInt32 propertySize = sizeof(deviceName);
+
+  OSStatus ret = AudioObjectGetPropertyData(m_DeviceId, &propertyAddress, 0, NULL, &propertySize, &deviceName);
+  
   if (ret != noErr)
   {
     CLog::Log(LOGERROR, "CCoreAudioDevice::GetName: "
@@ -233,10 +230,9 @@ std::string CCoreAudioDevice::GetName() const
   }
   else
   {
-    name = buff;
-    name.erase(name.find_last_not_of(" ") + 1);
+    CDarwinUtils::CFStringRefToUTF8String(deviceName, name);
+    CFRelease(deviceName);
   }
-  delete[] buff;
 
   return name;
 }
@@ -423,7 +419,7 @@ bool CCoreAudioDevice::SetHogStatus(bool hog)
     {
       OSStatus ret = AudioObjectSetPropertyData(m_DeviceId, &propertyAddress, 0, NULL, sizeof(m_HogPid), &m_HogPid);
 
-      // even if setting hogmode was successfull our PID might not get written
+      // even if setting hogmode was successful our PID might not get written
       // into m_HogPid (so it stays -1). Readback hogstatus for judging if we
       // had success on getting hog status
       // We do this only when AudioObjectSetPropertyData didn't set m_HogPid because

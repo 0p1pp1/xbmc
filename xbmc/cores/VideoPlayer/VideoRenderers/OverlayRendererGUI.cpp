@@ -22,6 +22,7 @@
 #include "settings/Settings.h"
 
 #include "filesystem/File.h"
+#include "ServiceBroker.h"
 #include "Util.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
@@ -115,7 +116,7 @@ COverlayText::COverlayText(CDVDOverlayText * src)
   StringUtils::Replace(m_text, "</b", "[/B]");
   StringUtils::Replace(m_text, "</u", "");
 
-  m_subalign = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_ALIGN);
+  m_subalign = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_SUBTITLES_ALIGN);
   if (m_subalign == SUBTITLE_ALIGN_MANUAL)
   {
     m_align  = ALIGN_SUBTITLE;
@@ -159,6 +160,11 @@ void COverlayText::PrepareRender(const std::string &font, int color, int height,
   if (!m_layout)
     m_layout = GetFontLayout(font, color, height, style, fontcache, fontbordercache);
 
+  if (m_layout == NULL)
+  {
+    CLog::Log(LOGERROR, "COverlayText::PrepareRender - GetFontLayout failed for font %s", font.c_str());
+    return;
+  }
   RESOLUTION_INFO res = g_graphicsContext.GetResInfo();
   float width_max = (float)res.Overscan.right - res.Overscan.left;
   m_layout->Update(m_text, width_max * 0.9f, false, true); // true to force LTR reading order (most Hebrew subs are this format)

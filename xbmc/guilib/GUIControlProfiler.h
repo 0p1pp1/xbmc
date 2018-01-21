@@ -22,6 +22,8 @@
 #define GUILIB_GUICONTROLPROFILER_H__
 #pragma once
 
+#include <vector>
+
 #include "GUIControl.h"
 
 class CGUIControlProfiler;
@@ -79,9 +81,9 @@ public:
   float m_fPerfScale;
 private:
   CGUIControlProfiler(void);
-  ~CGUIControlProfiler(void) {};
-  CGUIControlProfiler(const CGUIControlProfiler &that);
-  CGUIControlProfiler &operator=(const CGUIControlProfiler &that);
+  ~CGUIControlProfiler(void) = default;
+  CGUIControlProfiler(const CGUIControlProfiler &that) = delete;
+  CGUIControlProfiler &operator=(const CGUIControlProfiler &that) = delete;
 
   CGUIControlProfilerItem m_ItemHead;
   CGUIControlProfilerItem *m_pLastItem;

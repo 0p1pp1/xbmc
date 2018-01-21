@@ -22,6 +22,7 @@
 #include "DebugRenderer.h"
 #include "OverlayRendererGUI.h"
 #include "cores/VideoPlayer/DVDCodecs/Overlay/DVDOverlayText.h"
+#include "guilib/GraphicContext.h"
 
 using namespace OVERLAY;
 
@@ -107,7 +108,7 @@ void CDebugRenderer::CRenderer::Render(int idx)
 {
   std::vector<COverlay*> render;
   std::vector<SElement>& list = m_buffers[idx];
-  int posY = 0;
+  float posY = 0.0f;
   for (std::vector<SElement>::iterator it = list.begin(); it != list.end(); ++it)
   {
     COverlay* o = nullptr;
@@ -122,9 +123,11 @@ void CDebugRenderer::CRenderer::Render(int idx)
     if (text)
       text->PrepareRender("arial.ttf", 1, 16, 0, m_font, m_fontBorder);
 
+    RESOLUTION_INFO res = g_graphicsContext.GetResInfo(g_graphicsContext.GetVideoResolution());
+
     o->m_pos = COverlay::POSITION_ABSOLUTE;
     o->m_align = COverlay::ALIGN_SCREEN;
-    o->m_x = 10 + o->m_width / 2;
+    o->m_x = 10 + (o->m_width * m_rv.Width() / res.iWidth) / 2;
     o->m_y = posY + o->m_height;
     OVERLAY::CRenderer::Render(o, 0);
 

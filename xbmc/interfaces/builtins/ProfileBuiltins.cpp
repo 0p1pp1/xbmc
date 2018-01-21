@@ -31,6 +31,7 @@
 #include "network/Network.h"
 #include "network/NetworkServices.h"
 #include "profiles/ProfilesManager.h"
+#include "ServiceBroker.h"
 #include "Util.h"
 #include "utils/StringUtils.h"
 #include "video/VideoLibraryQueue.h"
@@ -75,9 +76,7 @@ static int LogOff(const std::vector<std::string>& params)
   if (CVideoLibraryQueue::GetInstance().IsRunning())
     CVideoLibraryQueue::GetInstance().CancelAllJobs();
 
-  ADDON::CAddonMgr::GetInstance().StopServices(true);
-
-  g_application.getNetwork().NetworkMessage(CNetwork::SERVICES_DOWN,1);
+  CServiceBroker::GetNetwork().NetworkMessage(CNetwork::SERVICES_DOWN,1);
   CProfilesManager::GetInstance().LoadMasterProfileForLogin();
   g_passwordManager.bMasterUser = false;
 
@@ -132,7 +131,7 @@ static int MasterMode(const std::vector<std::string>& params)
 ///     ,
 ///     Load the specified profile. If prompt is not specified\, and a password
 ///     would be required for the requested profile\, this command will silently
-///     fail. If promp' is specified and a password is required\, a password
+///     fail. If prompt is specified and a password is required\, a password
 ///     dialog will be shown.
 ///     @param[in] profilename           The profile name.
 ///     @param[in] prompt                Add "prompt" to allow unlocking dialogs (optional)

@@ -24,8 +24,8 @@
 #include "guilib/GUIControlGroupList.h"
 #include "GUIDialogFileBrowser.h"
 #include "GUIUserMessages.h"
-#include "Autorun.h"
 #include "GUIPassword.h"
+#include "ServiceBroker.h"
 #include "Util.h"
 #include "utils/URIUtils.h"
 #include "settings/MediaSourceSettings.h"
@@ -37,15 +37,14 @@
 #include "guilib/GUIWindowManager.h"
 #include "input/Key.h"
 #include "GUIDialogYesNo.h"
-#include "addons/AddonManager.h"
 #include "FileItem.h"
 #include "filesystem/File.h"
 #include "guilib/LocalizeStrings.h"
 #include "TextureCache.h"
-#include "video/windows/GUIWindowVideoBase.h"
 #include "URL.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "addons/Scraper.h"
 
 #define BACKGROUND_IMAGE       999
 #define GROUP_LIST             996
@@ -79,9 +78,7 @@ CGUIDialogContextMenu::CGUIDialogContextMenu(void)
   m_coordY = 0.0f;
 }
 
-CGUIDialogContextMenu::~CGUIDialogContextMenu(void)
-{
-}
+CGUIDialogContextMenu::~CGUIDialogContextMenu(void) = default;
 
 bool CGUIDialogContextMenu::OnMessage(CGUIMessage &message)
 {
@@ -153,7 +150,7 @@ void CGUIDialogContextMenu::SetupButtons()
   }
 
   // fix up background images placement and size
-  CGUIControl *pControl = (CGUIControl *)GetControl(BACKGROUND_IMAGE);
+  CGUIControl *pControl = GetControl(BACKGROUND_IMAGE);
   if (pControl)
   {
     // first set size of background image
@@ -190,25 +187,23 @@ void CGUIDialogContextMenu::SetPosition(float posX, float posY)
 
 float CGUIDialogContextMenu::GetHeight() const
 {
-  const CGUIControl *backMain = GetControl(BACKGROUND_IMAGE);
-  if (backMain)
-    return backMain->GetHeight();
+  if (m_backgroundImage)
+    return m_backgroundImage->GetHeight();
   else
     return CGUIDialog::GetHeight();
 }
 
 float CGUIDialogContextMenu::GetWidth() const
 {
-  const CGUIControl *pControl = GetControl(BACKGROUND_IMAGE);
-  if (pControl)
-    return pControl->GetWidth();
+  if (m_backgroundImage)
+    return m_backgroundImage->GetWidth();
   else
     return CGUIDialog::GetWidth();
 }
 
 bool CGUIDialogContextMenu::SourcesMenu(const std::string &strType, const CFileItemPtr& item, float posX, float posY)
 {
-  // TODO: This should be callable even if we don't have any valid items
+  //! @todo This should be callable even if we don't have any valid items
   if (!item)
     return false;
 
@@ -224,20 +219,6 @@ bool CGUIDialogContextMenu::SourcesMenu(const std::string &strType, const CFileI
 
 void CGUIDialogContextMenu::GetContextButtons(const std::string &type, const CFileItemPtr& item, CContextButtons &buttons)
 {
-  // Add buttons to the ContextMenu that should be visible for both sources and autosourced items
-  if (item && item->IsRemovable())
-  {
-    if (item->IsDVD() || item->IsCDDA())
-    {
-      buttons.Add(CONTEXT_BUTTON_EJECT_DISC, 13391);  // Eject/Load CD/DVD!
-    }
-    else // Must be HDD
-    {
-      buttons.Add(CONTEXT_BUTTON_EJECT_DRIVE, 13420);  // Eject Removable HDD!
-    }
-  }
-
-
   // Next, Add buttons to the ContextMenu that should ONLY be visible for sources and not autosourced items
   CMediaSource *share = GetShare(type, item.get());
 
@@ -246,7 +227,7 @@ void CGUIDialogContextMenu::GetContextButtons(const std::string &type, const CFi
     if (share)
     {
       // Note. from now on, remove source & disable plugin should mean the same thing
-      //TODO might be smart to also combine editing source & plugin settings into one concept/dialog
+      //! @todo might be smart to also combine editing source & plugin settings into one concept/dialog
       // Note. Temporarily disabled ability to remove plugin sources until installer is operational
 
       CURL url(share->strPath);
@@ -274,8 +255,8 @@ void CGUIDialogContextMenu::GetContextButtons(const std::string &type, const CFi
       buttons.Add(CONTEXT_BUTTON_REMOVE_LOCK, 12335);
 
       bool maxRetryExceeded = false;
-      if (CSettings::GetInstance().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES) != 0)
-        maxRetryExceeded = (share->m_iBadPwdCount >= CSettings::GetInstance().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES));
+      if (CServiceBroker::GetSettings().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES) != 0)
+        maxRetryExceeded = (share->m_iBadPwdCount >= CServiceBroker::GetSettings().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES));
 
       if (maxRetryExceeded)
         buttons.Add(CONTEXT_BUTTON_RESET_LOCK, 12334);
@@ -291,21 +272,7 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
 {
   // buttons that are available on both sources and autosourced items
   if (!item) return false;
-
-  switch (button)
-  {
-  case CONTEXT_BUTTON_EJECT_DRIVE:
-    return g_mediaManager.Eject(item->GetPath());
-
-#ifdef HAS_DVD_DRIVE
-  case CONTEXT_BUTTON_EJECT_DISC:
-    g_mediaManager.ToggleTray(g_mediaManager.TranslateDevicePath(item->GetPath())[0]);
-#endif
-    return true;
-  default:
-    break;
-  }
-
+  
   // the rest of the operations require a valid share
   CMediaSource *share = GetShare(type, item.get());
   if (!share) return false;
@@ -494,8 +461,8 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
   case CONTEXT_BUTTON_REACTIVATE_LOCK:
     {
       bool maxRetryExceeded = false;
-      if (CSettings::GetInstance().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES) != 0)
-        maxRetryExceeded = (share->m_iBadPwdCount >= CSettings::GetInstance().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES));
+      if (CServiceBroker::GetSettings().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES) != 0)
+        maxRetryExceeded = (share->m_iBadPwdCount >= CServiceBroker::GetSettings().GetInt(CSettings::SETTING_MASTERLOCK_MAXRETRIES));
       if (!maxRetryExceeded)
       {
         // don't prompt user for mastercode when reactivating a lock
@@ -533,7 +500,8 @@ bool CGUIDialogContextMenu::OnContextButton(const std::string &type, const CFile
 CMediaSource *CGUIDialogContextMenu::GetShare(const std::string &type, const CFileItem *item)
 {
   VECSOURCES *shares = CMediaSourceSettings::GetInstance().GetSources(type);
-  if (!shares || !item) return NULL;
+  if (!shares || !item) 
+    return nullptr;
   for (unsigned int i = 0; i < shares->size(); i++)
   {
     CMediaSource &testShare = shares->at(i);
@@ -554,7 +522,7 @@ CMediaSource *CGUIDialogContextMenu::GetShare(const std::string &type, const CFi
       return &testShare;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 void CGUIDialogContextMenu::OnWindowLoaded()
@@ -563,13 +531,13 @@ void CGUIDialogContextMenu::OnWindowLoaded()
   m_coordY = m_posY;
   
   const CGUIControlGroupList* pGroupList = dynamic_cast<const CGUIControlGroupList *>(GetControl(GROUP_LIST));
-  const CGUIControl *pControl = GetControl(BACKGROUND_IMAGE);
-  if (pControl && pGroupList)
+  m_backgroundImage = GetControl(BACKGROUND_IMAGE);
+  if (m_backgroundImage && pGroupList)
   {
     if (pGroupList->GetOrientation() == VERTICAL)
-      m_backgroundImageSize = pControl->GetHeight();
+      m_backgroundImageSize = m_backgroundImage->GetHeight();
     else
-      m_backgroundImageSize = pControl->GetWidth();
+      m_backgroundImageSize = m_backgroundImage->GetWidth();
   }
 
   CGUIDialog::OnWindowLoaded();
@@ -621,9 +589,9 @@ void CGUIDialogContextMenu::SwitchMedia(const std::string& strType, const std::s
   // create menu
   CContextButtons choices;
   if (strType != "music")
-    choices.Add(WINDOW_MUSIC_FILES, 2);
+    choices.Add(WINDOW_MUSIC_NAV, 2);
   if (strType != "video")
-    choices.Add(WINDOW_VIDEO_FILES, 3);
+    choices.Add(WINDOW_VIDEO_NAV, 3);
   if (strType != "pictures")
     choices.Add(WINDOW_PICTURES, 1);
   if (strType != "files")
@@ -639,7 +607,7 @@ void CGUIDialogContextMenu::SwitchMedia(const std::string& strType, const std::s
 
 int CGUIDialogContextMenu::Show(const CContextButtons& choices)
 {
-  auto dialog = static_cast<CGUIDialogContextMenu*>(g_windowManager.GetWindow(WINDOW_DIALOG_CONTEXT_MENU));
+  auto dialog = g_windowManager.GetWindow<CGUIDialogContextMenu>(WINDOW_DIALOG_CONTEXT_MENU);
   if (!dialog)
     return -1;
 
@@ -657,7 +625,7 @@ int CGUIDialogContextMenu::ShowAndGetChoice(const CContextButtons &choices)
   if (choices.empty())
     return -1;
 
-  CGUIDialogContextMenu *pMenu = (CGUIDialogContextMenu *)g_windowManager.GetWindow(WINDOW_DIALOG_CONTEXT_MENU);
+  CGUIDialogContextMenu *pMenu = g_windowManager.GetWindow<CGUIDialogContextMenu>(WINDOW_DIALOG_CONTEXT_MENU);
   if (pMenu)
   {
     pMenu->m_buttons = choices;
@@ -682,8 +650,7 @@ void CGUIDialogContextMenu::PositionAtCurrentFocus()
     const CGUIControl *focusedControl = window->GetFocusedControl();
     if (focusedControl)
     {
-      CPoint pos = focusedControl->GetRenderPosition() + CPoint(focusedControl->GetWidth() * 0.5f, focusedControl->GetHeight() * 0.5f)
-                   + window->GetRenderPosition();
+      CPoint pos = focusedControl->GetRenderPosition() + CPoint(focusedControl->GetWidth() * 0.5f, focusedControl->GetHeight() * 0.5f);
       SetPosition(m_coordX + pos.x - GetWidth() * 0.5f, m_coordY + pos.y - GetHeight() * 0.5f);
       return;
     }

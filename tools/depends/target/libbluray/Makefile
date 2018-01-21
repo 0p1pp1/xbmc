@@ -3,14 +3,14 @@ DEPS= ../../Makefile.include Makefile
 
 # lib name, version
 LIBNAME=libbluray
-VERSION=0.8.1
+VERSION=1.0.2
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.bz2
 
 # configuration settings
 CONFIGURE=./configure --prefix=$(PREFIX) --exec-prefix=$(PREFIX) \
   --disable-examples --disable-doxygen-doc \
-  --disable-bdjava --without-libxml2 --without-freetype
+  --disable-bdjava-jar --without-libxml2 --without-freetype
 
 LIBDYLIB=$(PLATFORM)/src/.libs/libbluray.la
 
@@ -24,11 +24,11 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	# libbluray has borked Makefile.am with respect to CFLAGS, remove the offending line
 	sed -i -e "s|CFLAGS=|#CFLAGS=|" $(PLATFORM)/Makefile.am
-ifeq ($(OS),android)
-	cd $(PLATFORM); patch -p1 < ../android.patch
-endif
 	cd $(PLATFORM); ./bootstrap
 	cd $(PLATFORM); $(CONFIGURE)
+ifeq ($(TARGET_PLATFORM),appletvos)
+	cd $(PLATFORM); patch -p0 < ../tvos.patch
+endif
 
 $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -C $(PLATFORM)

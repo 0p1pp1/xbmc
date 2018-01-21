@@ -45,6 +45,7 @@ namespace PERIPHERALS
 #ifdef TARGET_ANDROID
     PERIPHERAL_BUS_ANDROID,
 #endif
+    PERIPHERAL_BUS_APPLICATION,
   };
 
   enum PeripheralFeature
@@ -59,6 +60,8 @@ namespace PERIPHERALS
     FEATURE_TUNER,
     FEATURE_IMON,
     FEATURE_JOYSTICK,
+    FEATURE_RUMBLE,
+    FEATURE_POWER_OFF,
   };
 
   enum PeripheralType
@@ -73,11 +76,19 @@ namespace PERIPHERALS
     PERIPHERAL_TUNER,
     PERIPHERAL_IMON,
     PERIPHERAL_JOYSTICK,
+    PERIPHERAL_JOYSTICK_EMULATION,
   };
+
+  class CPeripheral;
+  typedef std::shared_ptr<CPeripheral> PeripheralPtr;
+  typedef std::vector<PeripheralPtr>   PeripheralVector;
 
   class CPeripheralAddon;
   typedef std::shared_ptr<CPeripheralAddon> PeripheralAddonPtr;
   typedef std::vector<PeripheralAddonPtr>   PeripheralAddonVector;
+
+  class CEventPollHandle;
+  typedef std::unique_ptr<CEventPollHandle> EventPollHandlePtr;
 
   struct PeripheralID
   {
@@ -87,8 +98,8 @@ namespace PERIPHERALS
 
   struct PeripheralDeviceSetting
   {
-    CSetting* m_setting;
-    int       m_order;
+    std::shared_ptr<CSetting> m_setting;
+    int m_order;
   };
 
   struct PeripheralDeviceMapping
@@ -126,6 +137,8 @@ namespace PERIPHERALS
         return "imon";
       case PERIPHERAL_JOYSTICK:
         return "joystick";
+      case PERIPHERAL_JOYSTICK_EMULATION:
+        return "joystickemulation";
       default:
         return "unknown";
       }
@@ -154,6 +167,8 @@ namespace PERIPHERALS
         return PERIPHERAL_IMON;
       else if (strTypeLowerCase == "joystick")
         return PERIPHERAL_JOYSTICK;
+      else if (strTypeLowerCase == "joystickemulation")
+        return PERIPHERAL_JOYSTICK_EMULATION;
 
       return PERIPHERAL_UNKNOWN;
     };
@@ -176,6 +191,8 @@ namespace PERIPHERALS
       case PERIPHERAL_BUS_ANDROID:
         return "android";
 #endif
+      case PERIPHERAL_BUS_APPLICATION:
+        return "application";
       default:
         return "unknown";
       }
@@ -200,8 +217,71 @@ namespace PERIPHERALS
       else if (strTypeLowerCase == "android")
         return PERIPHERAL_BUS_ANDROID;
 #endif
+      else if (strTypeLowerCase == "application")
+        return PERIPHERAL_BUS_APPLICATION;
 
       return PERIPHERAL_BUS_UNKNOWN;
+    };
+
+    static const char *FeatureToString(const PeripheralFeature type)
+    {
+      switch (type)
+      {
+      case FEATURE_HID:
+        return "HID";
+      case FEATURE_NIC:
+        return "NIC";
+      case FEATURE_DISK:
+        return "disk";
+      case FEATURE_NYXBOARD:
+        return "nyxboard";
+      case FEATURE_CEC:
+        return "CEC";
+      case FEATURE_BLUETOOTH:
+        return "bluetooth";
+      case FEATURE_TUNER:
+        return "tuner";
+      case FEATURE_IMON:
+        return "imon";
+      case FEATURE_JOYSTICK:
+        return "joystick";
+      case FEATURE_RUMBLE:
+        return "rumble";
+      case FEATURE_POWER_OFF:
+        return "poweroff";
+      case FEATURE_UNKNOWN:
+      default:
+        return "unknown";
+      }
+    };
+
+    static PeripheralFeature GetFeatureTypeFromString(const std::string &strType)
+    {
+      std::string strTypeLowerCase(strType);
+      StringUtils::ToLower(strTypeLowerCase);
+
+      if (strTypeLowerCase == "hid")
+        return FEATURE_HID;
+      else if (strTypeLowerCase == "cec")
+        return FEATURE_CEC;
+      else if (strTypeLowerCase == "disk")
+        return FEATURE_DISK;
+      else if (strTypeLowerCase == "nyxboard")
+        return FEATURE_NYXBOARD;
+      else if (strTypeLowerCase == "bluetooth")
+        return FEATURE_BLUETOOTH;
+      else if (strTypeLowerCase == "tuner")
+        return FEATURE_TUNER;
+      else if (strTypeLowerCase == "imon")
+        return FEATURE_IMON;
+      else if (strTypeLowerCase == "joystick")
+        return FEATURE_JOYSTICK;
+      else if (strTypeLowerCase == "rumble")
+        return FEATURE_RUMBLE;
+      else if (strTypeLowerCase == "poweroff")
+        return FEATURE_POWER_OFF;
+
+      return FEATURE_UNKNOWN;
     };
 
     static int HexStringToInt(const char *strHex)
@@ -225,7 +305,7 @@ namespace PERIPHERALS
   class PeripheralScanResult
   {
   public:
-    PeripheralScanResult(const PeripheralBusType busType) :
+    explicit PeripheralScanResult(const PeripheralBusType busType) :
       m_type(PERIPHERAL_UNKNOWN),
       m_iVendorId(0),
       m_iProductId(0),
@@ -272,11 +352,11 @@ namespace PERIPHERALS
   {
     bool GetDeviceOnLocation(const std::string& strLocation, PeripheralScanResult* result) const
     {
-      for (std::vector<PeripheralScanResult>::const_iterator it = m_results.begin(); it != m_results.end(); it++)
+      for (const auto& it : m_results)
       {
-        if ((*it).m_strLocation == strLocation)
+        if (it.m_strLocation == strLocation)
         {
-          *result = *it;
+          *result = it;
           return true;
         }
       }

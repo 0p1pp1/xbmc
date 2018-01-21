@@ -20,19 +20,18 @@
 
 #pragma once
 
-#if defined(HAVE_X11)
 #include "GLContext.h"
 #include "GL/glx.h"
 
 class CGLContextGLX : public CGLContext
 {
 public:
-  CGLContextGLX(Display *dpy);
+  explicit CGLContextGLX(Display *dpy);
   bool Refresh(bool force, int screen, Window glWindow, bool &newContext) override;
   void Destroy() override;
   void Detach() override;
-  void SetVSync(bool enable, int &mode) override;
-  void SwapBuffers(int &mode) override;
+  void SetVSync(bool enable) override;
+  void SwapBuffers() override;
   void QueryExtensions() override;
   GLXWindow m_glxWindow;
   GLXContext m_glxContext;
@@ -45,6 +44,5 @@ protected:
   PFNGLXSWAPINTERVALEXTPROC m_glXSwapIntervalEXT;
   int m_nScreen;
   int m_iVSyncErrors;
+  int m_vsyncMode;
 };
-
-#endif

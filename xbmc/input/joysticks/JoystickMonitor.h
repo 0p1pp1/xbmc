@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2015-2016 Team Kodi
+ *      Copyright (C) 2015-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,22 +19,31 @@
  */
 #pragma once
 
-#include "IDriverHandler.h"
+#include "input/joysticks/interfaces/IInputHandler.h"
 
+namespace KODI
+{
 namespace JOYSTICK
 {
   /*!
+   * \ingroup joystick
    * \brief Monitors joystick input and resets screensaver/shutdown timers
    *        whenever motion occurs.
    */
-  class CJoystickMonitor : public IDriverHandler
+  class CJoystickMonitor : public IInputHandler
   {
   public:
-    // implementation of IDriverHandler
-    virtual bool OnButtonMotion(unsigned int buttonIndex, bool bPressed) override;
-    virtual bool OnHatMotion(unsigned int hatIndex, HAT_STATE state) override;
-    virtual bool OnAxisMotion(unsigned int axisIndex, float position) override;
-    virtual void ProcessAxisMotions(void) override { }
+    // implementation of IInputHandler
+    virtual std::string ControllerID() const override;
+    virtual bool HasFeature(const FeatureName& feature) const override { return true; }
+    virtual bool AcceptsInput(const FeatureName& feature) const override;
+    virtual bool OnButtonPress(const FeatureName& feature, bool bPressed) override;
+    virtual void OnButtonHold(const FeatureName& feature, unsigned int holdTimeMs) override { }
+    virtual bool OnButtonMotion(const FeatureName& feature, float magnitude, unsigned int motionTimeMs) override;
+    virtual bool OnAnalogStickMotion(const FeatureName& feature, float x, float y, unsigned int motionTimeMs) override;
+    virtual bool OnAccelerometerMotion(const FeatureName& feature, float x, float y, float z) override { return false; }
+    virtual bool OnWheelMotion(const FeatureName& feature, float position, unsigned int motionTimeMs) override;
+    virtual bool OnThrottleMotion(const FeatureName& feature, float position, unsigned int motionTimeMs) override;
 
   private:
     /*!
@@ -43,4 +52,5 @@ namespace JOYSTICK
      */
     bool ResetTimers(void);
   };
+}
 }

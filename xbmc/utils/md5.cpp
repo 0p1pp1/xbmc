@@ -34,8 +34,7 @@ XBMC::XBMC_MD5::XBMC_MD5(void)
   MD5Init(&m_ctx);
 }
 
-XBMC::XBMC_MD5::~XBMC_MD5(void)
-{}
+XBMC::XBMC_MD5::~XBMC_MD5(void) = default;
 
 void XBMC::XBMC_MD5::append(const void *inBuf, size_t inLen)
 {
@@ -95,13 +94,8 @@ std::string XBMC::XBMC_MD5::GetMD5(const std::string &text)
  * Still in the public domain.
  */
 
-#include "md5.h"
-
 #include <sys/types.h>		/* for stupid systems */
 #include <string.h>		/* for memcpy() */
-#if defined(HAVE_CONFIG_H) && !defined(TARGET_WINDOWS)
-#include "../config.h"
-#endif
 
 #ifdef WORDS_BIGENDIAN
 void

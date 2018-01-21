@@ -45,9 +45,7 @@ CGUIProgressControl::CGUIProgressControl(int parentID, int controlID,
   m_bChanged = false;
 }
 
-CGUIProgressControl::~CGUIProgressControl(void)
-{
-}
+CGUIProgressControl::~CGUIProgressControl(void) = default;
 
 void CGUIProgressControl::SetPosition(float posX, float posY)
 {
@@ -209,7 +207,7 @@ bool CGUIProgressControl::UpdateColors()
 
 std::string CGUIProgressControl::GetDescription() const
 {
-  return StringUtils::Format("%2.f", m_fPercent);
+  return StringUtils::Format("{:2.0f}", m_fPercent);
 }
 
 bool CGUIProgressControl::UpdateLayout(void)

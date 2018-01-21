@@ -34,13 +34,13 @@ namespace PVR
     static const std::string PATH_DELETED_TV_RECORDINGS;
     static const std::string PATH_DELETED_RADIO_RECORDINGS;
 
-    CPVRRecordingsPath(const std::string &strPath);
+    explicit CPVRRecordingsPath(const std::string &strPath);
     CPVRRecordingsPath(bool bDeleted, bool bRadio);
     CPVRRecordingsPath(bool bDeleted, bool bRadio,
                        const std::string &strDirectory, const std::string &strTitle,
                        int iSeason, int iEpisode, int iYear,
                        const std::string &strSubtitle, const std::string &strChannelName,
-                       const CDateTime &recordingTime);
+                       const CDateTime &recordingTime, const std::string &strId);
 
     operator std::string() const { return m_path; }
 
@@ -52,8 +52,8 @@ namespace PVR
     bool IsDeleted() const { return !IsActive(); }
     bool IsRadio() const { return m_bRadio; }
     bool IsTV() const { return !IsRadio(); }
-    std::string GetDirectoryPath() const { return m_directoryPath; }
-    std::string GetSubDirectoryPath(const std::string &strPath) const;
+    std::string GetUnescapedDirectoryPath() const;
+    std::string GetUnescapedSubDirectoryPath(const std::string &strPath) const;
 
     const std::string GetTitle() const;
     void AppendSegment(const std::string &strSegment);

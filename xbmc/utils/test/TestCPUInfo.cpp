@@ -18,6 +18,13 @@
  *
  */
 
+#if defined(TARGET_WINDOWS)
+#  if !defined(WIN32_LEAN_AND_MEAN)
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
+#endif
+
 #include "utils/CPUInfo.h"
 #include "utils/Temperature.h"
 #include "settings/AdvancedSettings.h"
@@ -130,7 +137,7 @@ TEST(TestCPUInfo, GetCPUFeatures)
 TEST(TestCPUInfo, getUsedPercentage_output)
 {
   CCPUInfo c;
-  Sleep(1); /* TODO: Support option from main that sets this parameter */
+  Sleep(1); //! @todo Support option from main that sets this parameter
   int r = c.getUsedPercentage();
   std::cout << "Percentage: " << testing::PrintToString(r) << std::endl;
 }

@@ -5,8 +5,9 @@ set(HEADERS DVDAudioCodec.h
             DVDAudioCodecFFmpeg.h
             DVDAudioCodecPassthrough.h)
 
-core_add_library(dvdaudiocodecs)
-
-if(ENABLE_INTERNAL_FFMPEG)
-  add_dependencies(dvdaudiocodecs ffmpeg)
+if(CORE_SYSTEM_NAME STREQUAL android)
+  list(APPEND SOURCES DVDAudioCodecAndroidMediaCodec.cpp)
+  list(APPEND HEADERS DVDAudioCodecAndroidMediaCodec.h)
 endif()
+
+core_add_library(dvdaudiocodecs)

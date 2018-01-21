@@ -21,11 +21,14 @@
 
 #include "gtest/gtest.h"
 
+#include <string>
+
 class TestBasicEnvironment : public testing::Environment
 {
 public:
-  void SetUp();
-  void TearDown();
+  void SetUp() override;
+  void TearDown() override;
 private:
   void SetUpError();
+  std::string m_tempPath;
 };

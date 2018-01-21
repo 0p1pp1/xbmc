@@ -2,19 +2,22 @@ set(SOURCES ActorProtocol.cpp
             AlarmClock.cpp
             AliasShortcutUtils.cpp
             Archive.cpp
-            AsyncFileCopy.cpp
             auto_buffer.cpp
             Base64.cpp
             BitstreamConverter.cpp
+            BitstreamReader.cpp
             BitstreamStats.cpp
+            BitstreamWriter.cpp
             BooleanLogic.cpp
-            CharsetConverter.cpp 
+            CharsetConverter.cpp
             CharsetDetection.cpp
             CPUInfo.cpp
             Crc32.cpp
             DatabaseUtils.cpp
             EndianSwap.cpp
             Environment.cpp
+            EmbeddedArt.cpp
+            FileExtensionProvider.cpp
             Fanart.cpp
             FileOperationJob.cpp
             FileUtils.cpp
@@ -37,8 +40,6 @@ set(SOURCES ActorProtocol.cpp
             md5.cpp
             Mime.cpp
             Observer.cpp
-            PerformanceSample.cpp
-            PerformanceStats.cpp
             POUtils.cpp
             RecentlyAddedJob.cpp
             RegExp.cpp
@@ -51,10 +52,8 @@ set(SOURCES ActorProtocol.cpp
             ScraperParser.cpp
             ScraperUrl.cpp
             Screenshot.cpp
-            SeekHandler.cpp
             SortUtils.cpp
             Speed.cpp
-            Splash.cpp
             Stopwatch.cpp
             StreamDetails.cpp
             StreamUtils.cpp
@@ -69,21 +68,21 @@ set(SOURCES ActorProtocol.cpp
             UrlOptions.cpp
             Utf8Utils.cpp
             Variant.cpp
+            VC1BitstreamParser.cpp
             Vector.cpp
-            Weather.cpp
             XBMCTinyXML.cpp
-            XMLUtils.cpp
-            XSLTUtils.cpp)
+            XMLUtils.cpp)
 
 set(HEADERS ActorProtocol.h
             AlarmClock.h
             AliasShortcutUtils.h
             Archive.h
-            AsyncFileCopy.h
             auto_buffer.h
             Base64.h
             BitstreamConverter.h
+            BitstreamReader.h
             BitstreamStats.h
+            BitstreamWriter.h
             BooleanLogic.h
             CharsetConverter.h
             CharsetDetection.h
@@ -92,6 +91,9 @@ set(HEADERS ActorProtocol.h
             DatabaseUtils.h
             EndianSwap.h
             Environment.h
+            EventStream.h
+            EventStreamDetail.h
+            FileExtensionProvider.h
             Fanart.h
             FileOperationJob.h
             FileUtils.h
@@ -104,6 +106,7 @@ set(HEADERS ActorProtocol.h
             HttpRangeUtils.h
             HttpResponse.h
             IArchivable.h
+            ILocalizer.h
             InfoLoader.h
             IRssObserver.h
             ISerializable.h
@@ -123,8 +126,6 @@ set(HEADERS ActorProtocol.h
             Mime.h
             Observer.h
             params_check_macros.h
-            PerformanceSample.h
-            PerformanceStats.h
             POUtils.h
             ProgressJob.h
             RecentlyAddedJob.h
@@ -138,10 +139,8 @@ set(HEADERS ActorProtocol.h
             ScraperParser.h
             ScraperUrl.h
             Screenshot.h
-            SeekHandler.h
             SortUtils.h
             Speed.h
-            Splash.h
             Stopwatch.h
             StreamDetails.h
             StreamUtils.h
@@ -155,42 +154,47 @@ set(HEADERS ActorProtocol.h
             URIUtils.h
             UrlOptions.h
             Utf8Utils.h
-            uXstrings.h
             Variant.h
+            VC1BitstreamParser.h
             Vector.h
-            Weather.h
             XBMCTinyXML.h
-            XMLUtils.h
-            XSLTUtils.h)
+            XMLUtils.h)
+
+if(XSLT_FOUND)
+  list(APPEND SOURCES XSLTUtils.cpp)
+  list(APPEND HEADERS XSLTUtils.h)
+endif()
+if(EGL_FOUND)
+  list(APPEND SOURCES EGLUtils.cpp)
+  list(APPEND HEADERS EGLUtils.h)
+endif()
 
 # The large map trips the clang optimizer
 if(CMAKE_CXX_COMPILER_ID STREQUAL Clang)
   set_source_files_properties(Mime.cpp PROPERTIES COMPILE_FLAGS -O0)
 endif()
 
-if(NOT CORE_SYSTEM_NAME STREQUAL windows)
+if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
   list(APPEND SOURCES CryptThreading.cpp
                       GLUtils.cpp)
   list(APPEND HEADERS CryptThreading.h
                       GLUtils.h)
-else()
-  set_source_files_properties(fstrcmp.c PROPERTIES LANGUAGE CXX)
+endif()
+
+if(CORE_SYSTEM_NAME STREQUAL android OR AML_FOUND)
+  list(APPEND SOURCES AMLUtils.cpp)
+  list(APPEND HEADERS AMLUtils.h)
 endif()
 
 if(AML_FOUND)
-  list(APPEND SOURCES AMLUtils.cpp
-                      ScreenshotAML.cpp)
-  list(APPEND HEADERS AMLUtils.h
-                      ScreenshotAML.h)
+  list(APPEND HEADERS ScreenshotAML.cpp)
+  list(APPEND HEADERS ScreenshotAML.h)
 endif()
 
 core_add_library(utils)
-add_dependencies(utils libcpluff)
 
-if(ENABLE_INTERNAL_FFMPEG)
-  add_dependencies(utils ffmpeg)
-endif()
-
-if(ENABLE_INTERNAL_CROSSGUID)
-  add_dependencies(utils crossguid)
+if(NOT CORE_SYSTEM_NAME STREQUAL windows AND NOT CORE_SYSTEM_NAME STREQUAL windowsstore)
+  if(HAVE_SSE2)
+    target_compile_options(${CORE_LIBRARY} PRIVATE -msse2)
+  endif()
 endif()

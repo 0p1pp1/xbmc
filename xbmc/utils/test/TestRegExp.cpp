@@ -18,7 +18,7 @@
  *
  */
 
-/* TODO: gtest/gtest.h needs to come in before utils/RegExp.h.
+/** @todo gtest/gtest.h needs to come in before utils/RegExp.h.
  * Investigate why.
  */
 #include "gtest/gtest.h"
@@ -137,8 +137,8 @@ TEST(TestRegExp, operatorEqual)
 class TestRegExpLog : public testing::Test
 {
 protected:
-  TestRegExpLog(){}
-  ~TestRegExpLog()
+  TestRegExpLog() = default;
+  ~TestRegExpLog() override
   {
     CLog::Close();
   }

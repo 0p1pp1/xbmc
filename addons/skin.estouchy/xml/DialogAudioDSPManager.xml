@@ -116,43 +116,6 @@
 					<aligny>center</aligny>
 				</control>
 			</focusedlayout>
-			<content>
-				<item id="91">
-					<label>1. $LOCALIZE[15057]</label>
-					<label2>$LOCALIZE[15114]</label2>
-					<visible>true</visible>
-					<onclick>noop</onclick>
-					<property name="currentMode">InputResampling</property>
-				</item>
-				<item id="92">
-					<label>2. $LOCALIZE[15058]</label>
-					<label2>$LOCALIZE[15113]</label2>
-					<visible>true</visible>
-					<onclick>noop</onclick>
-					<property name="currentMode">Preprocessing</property>
-				</item>
-				<item id="93">
-					<label>3. $LOCALIZE[15059]</label>
-					<label2>$LOCALIZE[15115]</label2>
-					<visible>true</visible>
-					<onclick>noop</onclick>
-					<property name="currentMode">Masterprocessing</property>
-				</item>
-				<item id="94">
-					<label>4. $LOCALIZE[15060]</label>
-					<label2>$LOCALIZE[15117]</label2>
-					<visible>true</visible>
-					<onclick>noop</onclick>
-					<property name="currentMode">Postprocessing</property>
-				</item>
-				<item id="95">
-					<label>5. $LOCALIZE[15061]</label>
-					<label2>$LOCALIZE[15116]</label2>
-					<visible>true</visible>
-					<onclick>noop</onclick>
-					<property name="currentMode">OutputResampling</property>
-				</item>
-			</content>
 		</control>
 		<control type="textbox">
 			<posx>20</posx>
@@ -201,18 +164,11 @@
 					<scrolltime>200</scrolltime>
 					<itemlayout height="100" width="580">
 						<control type="image">
-							<posx>0</posx>
-							<posy>0</posy>
-							<width>579</width>
-							<height>100</height>
-							<texture border="40,0,40,5">list_nofocus.png</texture>
-						</control>
-						<control type="image">
 							<posx>5</posx>
 							<posy>5</posy>
 							<width>90</width>
 							<height>90</height>
-							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Property(Icon)]</texture>
+							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Icon]</texture>
 							<aspectratio aligny="center" align="left">keep</aspectratio>
 						</control>
 						<control type="label">
@@ -225,7 +181,7 @@
 							<aligny>center</aligny>
 							<textcolor>grey3</textcolor>
 							<scroll>false</scroll>
-							<label>$INFO[ListItem.AddonName)]</label>
+							<label>$INFO[ListItem.Label2)]</label>
 						</control>
 						<control type="label">
 							<posx>100</posx>
@@ -235,18 +191,10 @@
 							<font>font20</font>
 							<align>left</align>
 							<aligny>center</aligny>
-							<label>$INFO[ListItem.Property(Name)]</label>
+							<label>$INFO[ListItem.Label]</label>
 						</control>
 					</itemlayout>
 					<focusedlayout height="100" width="580">
-						<control type="image">
-							<posx>0</posx>
-							<posy>0</posy>
-							<width>579</width>
-							<height>100</height>
-							<texture border="40,0,40,5">list_nofocus.png</texture>
-							<visible>!Control.HasFocus(20)</visible>
-						</control>
 						<control type="image">
 							<posx>0</posx>
 							<posy>0</posy>
@@ -260,7 +208,7 @@
 							<posy>5</posy>
 							<width>90</width>
 							<height>90</height>
-							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Property(Icon)]</texture>
+							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Icon]</texture>
 							<aspectratio aligny="center" align="left">keep</aspectratio>
 						</control>
 						<control type="label">
@@ -273,7 +221,7 @@
 							<aligny>center</aligny>
 							<textcolor>white</textcolor>
 							<scroll>false</scroll>
-							<label>$INFO[ListItem.AddonName]</label>
+							<label>$INFO[ListItem.Label2]</label>
 						</control>
 						<control type="label">
 							<posx>100</posx>
@@ -283,7 +231,7 @@
 							<font>font20</font>
 							<align>left</align>
 							<aligny>center</aligny>
-							<label>$INFO[ListItem.Property(Name)]</label>
+							<label>$INFO[ListItem.Label]</label>
 						</control>
 					</focusedlayout>
 				</control>
@@ -327,18 +275,11 @@
 					<scrolltime>200</scrolltime>
 					<itemlayout height="100" width="580">
 						<control type="image">
-							<posx>1</posx>
-							<posy>0</posy>
-							<width>579</width>
-							<height>100</height>
-							<texture border="40,0,40,5">list_nofocus.png</texture>
-						</control>
-						<control type="image">
 							<posx>5</posx>
 							<posy>5</posy>
 							<width>90</width>
 							<height>90</height>
-							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Property(Icon)]</texture>
+							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Icon]</texture>
 							<aspectratio aligny="center" align="left">keep</aspectratio>
 						</control>
 						<control type="label">
@@ -351,7 +292,7 @@
 							<aligny>center</aligny>
 							<textcolor>grey3</textcolor>
 							<scroll>false</scroll>
-							<label>$INFO[ListItem.AddonName]</label>
+							<label>$INFO[ListItem.Label2]</label>
 						</control>
 						<control type="label">
 							<posx>100</posx>
@@ -361,18 +302,10 @@
 							<font>font20</font>
 							<align>left</align>
 							<aligny>center</aligny>
-							<label>$INFO[ListItem.Property(Name)]</label>
+							<label>$INFO[ListItem.Label]</label>
 						</control>
 					</itemlayout>
 					<focusedlayout height="100" width="580">
-						<control type="image">
-							<posx>1</posx>
-							<posy>0</posy>
-							<width>579</width>
-							<height>100</height>
-							<texture border="40,0,40,5">list_nofocus.png</texture>
-							<visible>!Control.HasFocus(21)</visible>
-						</control>
 						<control type="image">
 							<posx>1</posx>
 							<posy>0</posy>
@@ -386,7 +319,7 @@
 							<posy>5</posy>
 							<width>90</width>
 							<height>90</height>
-							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Property(Icon)]</texture>
+							<texture fallback="DefaultAddonAudioDSP.png">$INFO[ListItem.Icon]</texture>
 							<aspectratio aligny="center" align="left">keep</aspectratio>
 						</control>
 						<control type="label">
@@ -399,7 +332,7 @@
 							<aligny>center</aligny>
 							<textcolor>white</textcolor>
 							<scroll>false</scroll>
-							<label>$INFO[ListItem.AddonName]</label>
+							<label>$INFO[ListItem.Label2]</label>
 						</control>
 						<control type="label">
 							<posx>101</posx>
@@ -409,7 +342,7 @@
 							<font>font20</font>
 							<align>left</align>
 							<aligny>center</aligny>
-							<label>$INFO[ListItem.Property(Name)]</label>
+							<label>$INFO[ListItem.Label]</label>
 						</control>
 					</focusedlayout>
 				</control>

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,35 +19,49 @@
  */
 #pragma once
 
-#include "input/joysticks/IDriverHandler.h"
+#include "input/joysticks/interfaces/IDriverHandler.h"
+#include "input/joysticks/interfaces/IInputReceiver.h"
 
 #include <memory>
 
+namespace KODI
+{
 namespace JOYSTICK
 {
   class IButtonMap;
+  class IDriverReceiver;
   class IInputHandler;
+}
 }
 
 namespace PERIPHERALS
 {
   class CPeripheral;
+  class CPeripherals;
 
-  class CAddonInputHandling : public JOYSTICK::IDriverHandler
+  class CAddonInputHandling : public KODI::JOYSTICK::IDriverHandler,
+                              public KODI::JOYSTICK::IInputReceiver
   {
   public:
-    CAddonInputHandling(CPeripheral* peripheral, JOYSTICK::IInputHandler* handler);
+    CAddonInputHandling(CPeripherals& manager,
+                        CPeripheral* peripheral,
+                        KODI::JOYSTICK::IInputHandler* handler,
+                        KODI::JOYSTICK::IDriverReceiver* receiver);
 
-    virtual ~CAddonInputHandling(void);
+    ~CAddonInputHandling(void) override;
 
     // implementation of IDriverHandler
-    virtual bool OnButtonMotion(unsigned int buttonIndex, bool bPressed) override;
-    virtual bool OnHatMotion(unsigned int hatIndex, JOYSTICK::HAT_STATE state) override;
-    virtual bool OnAxisMotion(unsigned int axisIndex, float position) override;
-    virtual void ProcessAxisMotions(void) override;
+    bool OnButtonMotion(unsigned int buttonIndex, bool bPressed) override;
+    bool OnHatMotion(unsigned int hatIndex, KODI::JOYSTICK::HAT_STATE state) override;
+    bool OnAxisMotion(unsigned int axisIndex, float position, int center, unsigned int range) override;
+    void ProcessAxisMotions(void) override;
+
+    // implementation of IInputReceiver
+    bool SetRumbleState(const KODI::JOYSTICK::FeatureName& feature, float magnitude) override;
 
   private:
-    std::unique_ptr<JOYSTICK::IDriverHandler> m_driverHandler;
-    std::unique_ptr<JOYSTICK::IButtonMap>     m_buttonMap;
+    std::unique_ptr<KODI::JOYSTICK::IDriverHandler> m_driverHandler;
+    std::unique_ptr<KODI::JOYSTICK::IInputReceiver> m_inputReceiver;
+    std::unique_ptr<KODI::JOYSTICK::IButtonMap>     m_buttonMap;
   };
 }

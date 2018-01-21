@@ -2,6 +2,7 @@ set(SOURCES Addon.cpp
             AddonBuilder.cpp
             BinaryAddonCache.cpp
             AddonDatabase.cpp
+            AddonInfo.cpp
             AddonInstaller.cpp
             AddonManager.cpp
             AddonStatusHandler.cpp
@@ -11,12 +12,13 @@ set(SOURCES Addon.cpp
             AudioEncoder.cpp
             ContextMenuAddon.cpp
             ContextMenus.cpp
+            FilesystemInstaller.cpp
+            GameResource.cpp
             GUIDialogAddonInfo.cpp
-            GUIDialogAddonSettings.cpp
             GUIViewStateAddonBrowser.cpp
             GUIWindowAddonBrowser.cpp
+            ImageDecoder.cpp
             ImageResource.cpp
-            InputStream.cpp
             LanguageResource.cpp
             PluginSource.cpp
             PVRClient.cpp
@@ -27,16 +29,19 @@ set(SOURCES Addon.cpp
             Service.cpp
             Skin.cpp
             UISoundsResource.cpp
-            Visualisation.cpp
+            VFSEntry.cpp
+            Visualization.cpp
             Webinterface.cpp)
 
 set(HEADERS Addon.h
             AddonBuilder.h
+            AddonEvents.h
             BinaryAddonCache.h
             AddonDatabase.h
-            AddonDll.h
+            AddonInfo.h
             AddonInstaller.h
             AddonManager.h
+            AddonProvider.h
             AddonStatusHandler.h
             AddonSystemSettings.h
             AddonVersion.h
@@ -44,17 +49,15 @@ set(HEADERS Addon.h
             AudioEncoder.h
             ContextMenuAddon.h
             ContextMenus.h
-            DllAddon.h
-            DllAudioDSP.h
             DllLibCPluff.h
-            DllPVRClient.h
+            FilesystemInstaller.h
+            GameResource.h
             GUIDialogAddonInfo.h
-            GUIDialogAddonSettings.h
             GUIViewStateAddonBrowser.h
             GUIWindowAddonBrowser.h
             IAddon.h
+            ImageDecoder.h
             ImageResource.h
-            InputStream.h
             LanguageResource.h
             PluginSource.h
             PVRClient.h
@@ -66,12 +69,8 @@ set(HEADERS Addon.h
             Service.h
             Skin.h
             UISoundsResource.h
-            Visualisation.h
+            VFSEntry.h
+            Visualization.h
             Webinterface.h)
 
 core_add_library(addons)
-add_dependencies(addons libcpluff)
-
-if(ENABLE_INTERNAL_FFMPEG)
-  add_dependencies(addons ffmpeg)
-endif()

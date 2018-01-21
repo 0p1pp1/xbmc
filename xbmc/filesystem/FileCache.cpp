@@ -30,7 +30,7 @@
 #include "settings/AdvancedSettings.h"
 
 #if !defined(TARGET_WINDOWS)
-#include "linux/ConvUtils.h" //GetLastError()
+#include "platform/linux/ConvUtils.h"
 #endif
 
 #include <cassert>
@@ -38,12 +38,12 @@
 #include <memory>
 
 #ifdef TARGET_POSIX
-#include "linux/ConvUtils.h"
+#include "platform/linux/ConvUtils.h"
 #endif
 
 using namespace XFILE;
 
-#define READ_CACHE_CHUNK_SIZE (64*1024)
+#define READ_CACHE_CHUNK_SIZE (128*1024)
 
 class CWriteRate
 {
@@ -146,7 +146,7 @@ void CFileCache::SetCacheStrategy(CCacheStrategy *pCache, bool bDeleteCache /* =
 
 IFile *CFileCache::GetFileImp()
 {
-  return m_source.GetImplemenation();
+  return m_source.GetImplementation();
 }
 
 bool CFileCache::Open(const CURL& url)
@@ -179,7 +179,7 @@ bool CFileCache::Open(const CURL& url)
 
   if (!m_pCache)
   {
-    if (g_advancedSettings.m_cacheMemBufferSize == 0)
+    if (g_advancedSettings.m_cacheMemSize == 0)
     {
       // Use cache on disk
       m_pCache = new CSimpleFileCache();
@@ -188,14 +188,14 @@ bool CFileCache::Open(const CURL& url)
     else
     {
       size_t cacheSize;
-      if (m_fileSize > 0 && m_fileSize < g_advancedSettings.m_cacheMemBufferSize && !(m_flags & READ_AUDIO_VIDEO))
+      if (m_fileSize > 0 && m_fileSize < g_advancedSettings.m_cacheMemSize && !(m_flags & READ_AUDIO_VIDEO))
       {
         // NOTE: We don't need to take into account READ_MULTI_STREAM here as it's only used for audio/video
         cacheSize = m_fileSize;
       }
       else
       {
-        cacheSize = g_advancedSettings.m_cacheMemBufferSize;
+        cacheSize = g_advancedSettings.m_cacheMemSize;
       }
 
       size_t back = cacheSize / 4;
@@ -296,13 +296,13 @@ void CFileCache::Process()
 
     while (m_writeRate)
     {
-      if (m_writePos - m_readPos < m_writeRate * g_advancedSettings.m_readBufferFactor)
+      if (m_writePos - m_readPos < m_writeRate * g_advancedSettings.m_cacheReadFactor)
       {
         limiter.Reset(m_writePos);
         break;
       }
 
-      if (limiter.Rate(m_writePos) < m_writeRate * g_advancedSettings.m_readBufferFactor)
+      if (limiter.Rate(m_writePos) < m_writeRate * g_advancedSettings.m_cacheReadFactor)
         break;
 
       if (m_seekEvent.WaitMSec(100))
@@ -517,7 +517,7 @@ int64_t CFileCache::Seek(int64_t iFilePosition, int iWhence)
       return -1;
     }
 
-    /* wait for any remainin data */
+    /* wait for any remaining data */
     if(m_seekPos < iTarget)
     {
       CLog::Log(LOGDEBUG,"%s - waiting for position %" PRId64".", __FUNCTION__, iTarget);
@@ -566,21 +566,12 @@ void CFileCache::StopThread(bool bWait /*= true*/)
   CThread::StopThread(bWait);
 }
 
-std::string CFileCache::GetContent()
+const std::string CFileCache::GetProperty(XFILE::FileProperty type, const std::string &name) const
 {
-  if (!m_source.GetImplemenation())
-    return IFile::GetContent();
+  if (!m_source.GetImplementation())
+    return IFile::GetProperty(type, name);
 
-  return m_source.GetImplemenation()->GetContent();
-}
-
-std::string CFileCache::GetContentCharset(void)
-{
-  IFile* impl = m_source.GetImplemenation();
-  if (!impl)
-    return IFile::GetContentCharset();
-
-  return impl->GetContentCharset();
+  return m_source.GetImplementation()->GetProperty(type, name);
 }
 
 int CFileCache::IoControl(EIoControl request, void* param)

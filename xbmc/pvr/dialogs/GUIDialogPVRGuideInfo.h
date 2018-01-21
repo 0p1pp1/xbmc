@@ -20,41 +20,35 @@
  */
 
 #include "guilib/GUIDialog.h"
-#include <memory>
 
-namespace EPG
-{
-  class CEpgInfoTag;
-  typedef std::shared_ptr<EPG::CEpgInfoTag> CEpgInfoTagPtr;
-}
+#include "pvr/PVRTypes.h"
 
 namespace PVR
 {
-  class CPVRTimerInfoTag;
-
   class CGUIDialogPVRGuideInfo : public CGUIDialog
   {
   public:
     CGUIDialogPVRGuideInfo(void);
-    virtual ~CGUIDialogPVRGuideInfo(void);
-    virtual bool OnMessage(CGUIMessage& message);
-    virtual bool OnInfo(int actionID) override;
-    virtual bool HasListItems() const { return true; };
-    virtual CFileItemPtr GetCurrentListItem(int offset = 0);
+    ~CGUIDialogPVRGuideInfo(void) override;
+    bool OnMessage(CGUIMessage& message) override;
+    bool OnInfo(int actionID) override;
+    bool HasListItems() const override { return true; }
+    CFileItemPtr GetCurrentListItem(int offset = 0) override;
 
-    void SetProgInfo(const EPG::CEpgInfoTagPtr &tag);
+    void SetProgInfo(const CPVREpgInfoTagPtr &tag);
+
+    static void ShowFor(const CFileItemPtr& item);
 
   protected:
-    virtual void OnInitWindow();
+    void OnInitWindow() override;
 
-    bool ActionStartTimer(const EPG::CEpgInfoTagPtr &tag);
-    bool ActionCancelTimer(const CFileItemPtr &timer);
-
+  private:
     bool OnClickButtonOK(CGUIMessage &message);
     bool OnClickButtonRecord(CGUIMessage &message);
     bool OnClickButtonPlay(CGUIMessage &message);
     bool OnClickButtonFind(CGUIMessage &message);
+    bool OnClickButtonAddTimer(CGUIMessage &message);
 
-    EPG::CEpgInfoTagPtr m_progItem;
+    CPVREpgInfoTagPtr m_progItem;
   };
 }

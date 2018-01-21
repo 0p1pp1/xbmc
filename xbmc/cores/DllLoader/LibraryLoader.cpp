@@ -33,15 +33,13 @@ LibraryLoader::LibraryLoader(const std::string& libraryFile):
   m_iRefCount = 1;
 }
 
-LibraryLoader::~LibraryLoader()
-{
-}
+LibraryLoader::~LibraryLoader() = default;
 
 const char *LibraryLoader::GetName() const
 {
   size_t pos = m_fileName.find_last_of('/');
   if (pos != std::string::npos)
-    return &m_fileName.at(pos);
+    return &m_fileName.at(pos + 1); // don't include /
   return m_fileName.c_str();
 }
 

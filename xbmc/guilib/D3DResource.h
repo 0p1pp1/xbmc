@@ -20,8 +20,6 @@
 
 #pragma once
 
-#ifdef HAS_DX
-
 #include <map>
 #include <d3dx11effect.h>
 #include <DirectXMath.h>
@@ -38,8 +36,6 @@ typedef enum SHADER_METHOD {
   SHADER_METHOD_RENDER_FONT,
   SHADER_METHOD_RENDER_TEXTURE_BLEND,
   SHADER_METHOD_RENDER_MULTI_TEXTURE_BLEND,
-  SHADER_METHOD_RENDER_VIDEO,
-  SHADER_METHOD_RENDER_VIDEO_CONTROL,
   SHADER_METHOD_RENDER_STEREO_INTERLACED_LEFT,
   SHADER_METHOD_RENDER_STEREO_INTERLACED_RIGHT,
   SHADER_METHOD_RENDER_STEREO_CHECKERBOARD_LEFT,
@@ -47,21 +43,13 @@ typedef enum SHADER_METHOD {
   SHADER_METHOD_RENDER_COUNT
 } _SHADER_METHOD;
 
-typedef enum SHADER_SAMPLER {
-  SHADER_SAMPLER_LINEAR = 1,
-  SHADER_SAMPLER_POINT = 2
-} _SHADER_SAMPLER;
-
-
 class ID3DResource
 {
 public:
   virtual ~ID3DResource() {};
 
-  virtual void OnDestroyDevice()=0;
+  virtual void OnDestroyDevice(bool fatal)=0;
   virtual void OnCreateDevice()=0;
-  virtual void OnLostDevice() {};
-  virtual void OnResetDevice() {};
 };
 
 class CD3DHelper
@@ -107,21 +95,25 @@ class CD3DTexture : public ID3DResource
 {
 public:
   CD3DTexture();
-  ~CD3DTexture();
+  virtual ~CD3DTexture();
 
   bool Create(UINT width, UINT height, UINT mipLevels, D3D11_USAGE usage, DXGI_FORMAT format, const void* pInitData = nullptr, unsigned int srcPitch = 0);
+
   void Release();
-  bool GetDesc(D3D11_TEXTURE2D_DESC *desc);
-  bool LockRect(UINT subresource, D3D11_MAPPED_SUBRESOURCE *res, D3D11_MAP mapType);
-  bool UnlockRect(UINT subresource);
+  bool GetDesc(D3D11_TEXTURE2D_DESC *desc) const;
+  bool LockRect(UINT subresource, D3D11_MAPPED_SUBRESOURCE *res, D3D11_MAP mapType) const;
+  bool UnlockRect(UINT subresource) const;
 
   // Accessors
   ID3D11Texture2D* Get() const { return m_texture; };
-  ID3D11ShaderResourceView* GetShaderResource();
+  ID3D11ShaderResourceView* GetShaderResource(DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
+  ID3D11ShaderResourceView** GetAddressOfSRV(DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
   ID3D11RenderTargetView* GetRenderTarget();
+  ID3D11RenderTargetView** GetAddressOfRTV();
   UINT GetWidth()  const { return m_width; }
   UINT GetHeight() const { return m_height; }
   DXGI_FORMAT GetFormat() const { return m_format; }
+  void GenerateMipmaps();
 
   // static methods
   static void DrawQuad(const CPoint points[4], color_t color, CD3DTexture *texture, const CRect *texCoords,
@@ -136,12 +128,11 @@ public:
   static void DrawQuad(const CRect &coords, color_t color, unsigned numViews, ID3D11ShaderResourceView **view, const CRect *texCoords,
     SHADER_METHOD options = SHADER_METHOD_RENDER_TEXTURE_BLEND);
 
-  virtual void OnDestroyDevice();
-  virtual void OnCreateDevice();
-  virtual void OnLostDevice();
-  virtual void OnResetDevice();
+  void OnDestroyDevice(bool fatal) override;
+  void OnCreateDevice() override;
 
-private:
+protected:
+  ID3D11RenderTargetView* GetRenderTargetInternal(unsigned idx = 0);
   unsigned int GetMemoryUsage(unsigned int pitch) const;
   bool CreateInternal(const void* pInitData = nullptr, unsigned int srcPitch = 0);
 
@@ -157,11 +148,13 @@ private:
   UINT        m_pitch;
   UINT        m_bindFlags;
   UINT        m_cpuFlags;
+  UINT        m_viewIdx;
 
   // created texture
   ID3D11Texture2D* m_texture;
-  ID3D11ShaderResourceView* m_textureView;
-  ID3D11RenderTargetView* m_renderTarget;
+  ID3D11RenderTargetView* m_renderTargets[2];
+  // store views in different formats
+  std::map<DXGI_FORMAT, ID3D11ShaderResourceView*> m_views;
 
   // saved data
   BYTE*     m_data;
@@ -169,7 +162,7 @@ private:
 
 typedef std::map<std::string, std::string> DefinesMap;
 
-class CD3DEffect : public ID3DResource
+class CD3DEffect : public ID3DResource, public ID3DInclude
 {
 public:
   CD3DEffect();
@@ -190,8 +183,12 @@ public:
 
   ID3DX11Effect *Get() const { return m_effect; };
 
-  virtual void OnDestroyDevice();
-  virtual void OnCreateDevice();
+  void OnDestroyDevice(bool fatal) override;
+  void OnCreateDevice() override;
+
+  // ID3DInclude interface
+  __declspec(nothrow) HRESULT __stdcall Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes) override;
+  __declspec(nothrow) HRESULT __stdcall Close(LPCVOID pData) override;
 
 private:
   bool         CreateEffect();
@@ -217,8 +214,8 @@ public:
   DXGI_FORMAT GetFormat() { return m_format; }
   ID3D11Buffer* Get() const { return m_buffer; };
 
-  virtual void OnDestroyDevice();
-  virtual void OnCreateDevice();
+  void OnDestroyDevice(bool fatal) override;
+  void OnCreateDevice() override;
 private:
   bool CreateBuffer(const void *pData);
   D3D11_BIND_FLAG  m_type;
@@ -246,8 +243,8 @@ public:
   void Release();
   bool IsInited() { return m_inited; }
 
-  virtual void OnDestroyDevice();
-  virtual void OnCreateDevice();
+  void OnDestroyDevice(bool fatal) override;
+  void OnCreateDevice() override;
 
 private:
   bool CreateInternal();
@@ -274,8 +271,8 @@ public:
   void Release();
   bool IsInited() { return m_inited; }
 
-  virtual void OnDestroyDevice();
-  virtual void OnCreateDevice();
+  void OnDestroyDevice(bool fatal) override;
+  void OnCreateDevice() override;
 
 private:
   bool CreateInternal();
@@ -284,5 +281,3 @@ private:
   ID3D11PixelShader*        m_PS;
   bool                      m_inited;
 };
-
-#endif

@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <sys/stat.h>
 #include <string>
+#include <vector>
 
 #if !defined(SIZE_MAX) || !defined(SSIZE_MAX)
 #include <limits.h>
@@ -61,6 +62,7 @@ public:
 
   virtual bool Open(const CURL& url) = 0;
   virtual bool OpenForWrite(const CURL& url, bool bOverWrite = false) { return false; };
+  virtual bool ReOpen(const CURL& url) { return false; };
   virtual bool Exists(const CURL& url) = 0;
   /**
    * Fills struct __stat64 with information about file specified by url.
@@ -122,16 +124,27 @@ public:
   virtual int  GetChunkSize() {return 0;}
   virtual double GetDownloadSpeed(){ return 0.0f; };
 
-  virtual bool SkipNext(){return false;}
-
   virtual bool Delete(const CURL& url) { return false; }
   virtual bool Rename(const CURL& url, const CURL& urlnew) { return false; }
   virtual bool SetHidden(const CURL& url, bool hidden) { return false; }
 
   virtual int IoControl(EIoControl request, void* param) { return -1; }
 
-  virtual std::string GetContent()                           { return "application/octet-stream"; }
-  virtual std::string GetContentCharset(void)                { return ""; }
+  virtual const std::string GetProperty(XFILE::FileProperty type, const std::string &name = "") const
+  {
+    return type == XFILE::FILE_PROPERTY_CONTENT_TYPE ? "application/octet-stream" : "";
+  };
+
+  virtual const std::vector<std::string> GetPropertyValues(XFILE::FileProperty type, const std::string &name = "") const
+  {
+    std::vector<std::string> values;
+    std::string value = GetProperty(type, name);
+    if (!value.empty())
+    {
+      values.emplace_back(value);
+    }
+    return values;
+  }
 };
 
 class CRedirectException

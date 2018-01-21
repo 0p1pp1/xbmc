@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2015-2016 Team Kodi
+ *      Copyright (C) 2015-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,37 +19,95 @@
  */
 #pragma once
 
-#include "ControllerLayout.h"
+#include "ControllerFeature.h"
 #include "ControllerTypes.h"
 #include "addons/Addon.h"
+#include "input/joysticks/JoystickTypes.h"
 
+#include <map>
+#include <memory>
 #include <string>
+#include <vector>
 
+namespace KODI
+{
 namespace GAME
 {
+class CControllerLayout;
+
+using JOYSTICK::FEATURE_TYPE;
 
 class CController : public ADDON::CAddon
 {
 public:
-  static std::unique_ptr<CController> FromExtension(ADDON::AddonProps props, const cp_extension_t* ext);
+  static std::unique_ptr<CController> FromExtension(ADDON::CAddonInfo addonInfo, const cp_extension_t* ext);
 
-  CController(ADDON::AddonProps addonprops);
+  explicit CController(ADDON::CAddonInfo addonInfo);
 
-  virtual ~CController(void) { }
+  virtual ~CController();
 
   static const ControllerPtr EmptyPtr;
 
-  std::string Label(void);
-  std::string ImagePath(void) const;
-  std::string OverlayPath(void) const;
+  /*!
+   * \brief Get all controller features
+   *
+   * \return The features
+   */
+  const std::vector<CControllerFeature>& Features(void) const { return m_features; }
 
+  /*!
+   * \brief Get the count of controller features matching the specified types
+   *
+   * \param type The feature type, or FEATURE_TYPE::UNKNOWN to match all feature types
+   * \param inputType The input type, or INPUT_TYPE::UNKNOWN to match all input types
+   *
+   * \return The feature count
+   */
+  unsigned int FeatureCount(FEATURE_TYPE type = FEATURE_TYPE::UNKNOWN,
+                            JOYSTICK::INPUT_TYPE inputType = JOYSTICK::INPUT_TYPE::UNKNOWN) const;
+
+  /*!
+   * \brief Get the features matching the specified type
+   *
+   * \param type The feature type, or FEATURE_TYPE::UNKNOWN to get all features
+   */
+  void GetFeatures(std::vector<std::string>& features, FEATURE_TYPE type = FEATURE_TYPE::UNKNOWN) const;
+
+  /*!
+   * \brief Get the type of the specified feature
+   *
+   * \param feature The feature name to look up
+   *
+   * \return The feature type, or FEATURE_TYPE::UNKNOWN if an invalid feature was specified
+   */
+  FEATURE_TYPE FeatureType(const std::string &feature) const;
+
+  /*!
+   * \brief Get the input type of the specified feature
+   *
+   * \param feature The feature name to look up
+   *
+   * \return The input type of the feature, or INPUT_TYPE::UNKNOWN if unknown
+   */
+  JOYSTICK::INPUT_TYPE GetInputType(const std::string& feature) const;
+
+  /*!
+   * \brief Load the controller layout
+   *
+   * \return true if the layout is loaded or was already loaded, false otherwise
+   */
   bool LoadLayout(void);
 
-  const CControllerLayout& Layout(void) const { return m_layout; }
+  /*!
+   * \brief Get the controller layout
+   */
+  const CControllerLayout& Layout(void) const { return *m_layout; }
 
 private:
-  CControllerLayout m_layout;
-  bool              m_bLoaded;
+  std::unique_ptr<CControllerLayout> m_layout;
+  std::vector<CControllerFeature> m_features;
+  bool m_bLoaded = false;
 };
 
+}
 }

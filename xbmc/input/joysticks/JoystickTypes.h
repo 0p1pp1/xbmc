@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,25 +19,38 @@
  */
 #pragma once
 
+/*!
+ \file
+ \ingroup joystick
+ */
+
+#include <set>
 #include <string>
 
+namespace KODI
+{
 namespace JOYSTICK
 {
   /*!
    * \brief Name of a physical feature belonging to the joystick
    */
-  typedef std::string FeatureName;
+  using FeatureName = std::string;
 
   /*!
    * \brief Types of features used in the joystick library
    *
    * Available types:
    *
-   *   1) scalar[1]
+   *   1) scalar[*]
    *   2) analog stick
    *   3) accelerometer
+   *   4) rumble motor
+   *   5) relative pointer
+   *   6) absolute pointer
+   *   7) wheel
+   *   8) throttle
    *
-   * [1] All three driver primitives (buttons, hats and axes) have a state that
+   * [*] All three driver primitives (buttons, hats and axes) have a state that
    *     can be represented using a single scalar value. For this reason,
    *     features that map to a single primitive are called "scalar features".
    */
@@ -47,6 +60,35 @@ namespace JOYSTICK
     SCALAR,
     ANALOG_STICK,
     ACCELEROMETER,
+    MOTOR,
+    RELPOINTER,
+    ABSPOINTER,
+    WHEEL,
+    THROTTLE,
+  };
+
+  /*!
+   * \brief Categories of features used in the joystick library
+   */
+  enum class FEATURE_CATEGORY
+  {
+    UNKNOWN,
+    FACE,
+    SHOULDER,
+    TRIGGER,
+    ANALOG_STICK,
+    ACCELEROMETER,
+    HAPTICS,
+    MOUSE_BUTTON,
+    POINTER,
+    LIGHTGUN,
+    OFFSCREEN, // Virtual button to shoot light gun offscreen
+    KEY, // A keyboard key
+    KEYPAD, // A key on a numeric keymap, including star and pound
+    HARDWARE, // A button or functionality on the console
+    WHEEL,
+    JOYSTICK,
+    PADDLE,
   };
 
   /*!
@@ -62,9 +104,9 @@ namespace JOYSTICK
   };
 
   /*!
-   * \brief Generic typedef for cardinal directions
+   * \brief Typedef for analog stick directions
    */
-  typedef HAT_DIRECTION CARDINAL_DIRECTION;
+  using ANALOG_STICK_DIRECTION = HAT_DIRECTION;
 
   /*!
    * \brief States in which a hat can be
@@ -83,11 +125,6 @@ namespace JOYSTICK
   };
 
   /*!
-   * \brief Generic typedef for intercardinal directions
-   */
-  typedef HAT_STATE  INTERCARDINAL_DIRECTION;
-
-  /*!
    * \brief Directions in which a semiaxis can point
    */
   enum class SEMIAXIS_DIRECTION
@@ -95,6 +132,26 @@ namespace JOYSTICK
     NEGATIVE = -1,  // semiaxis lies in the interval [-1.0, 0.0]
     ZERO     =  0,  // semiaxis is unknown or invalid
     POSITIVE =  1,  // semiaxis lies in the interval [0.0, 1.0]
+  };
+
+  /*!
+   * \brief Directions on a wheel
+   */
+  enum class WHEEL_DIRECTION
+  {
+    UNKNOWN,
+    RIGHT,
+    LEFT,
+  };
+
+  /*!
+   * \brief Directions on a throttle
+   */
+  enum class THROTTLE_DIRECTION
+  {
+    UNKNOWN,
+    UP,
+    DOWN,
   };
 
   /*!
@@ -106,4 +163,44 @@ namespace JOYSTICK
     DIGITAL,
     ANALOG,
   };
+
+  /*!
+  * \brief Type of driver primitive
+  */
+  enum class PRIMITIVE_TYPE
+  {
+    UNKNOWN = 0, // primitive has no type (invalid)
+    BUTTON,      // a digital button
+    HAT,         // one of the four direction arrows on a D-pad
+    SEMIAXIS,    // the positive or negative half of an axis
+    MOTOR,       // a rumble motor
+  };
+  
+  /*!
+   * \ingroup joystick
+   * \brief Action entry in joystick.xml
+   */
+  struct KeymapAction
+  {
+    unsigned int actionId;
+    std::string actionString;
+    unsigned int holdTimeMs;
+    std::set<std::string> hotkeys;
+
+    bool operator<(const KeymapAction &rhs) const
+    {
+      return holdTimeMs < rhs.holdTimeMs;
+    }
+  };
+
+  /*!
+   * \ingroup joystick
+   * \brief Container that sorts action entries by their holdtime
+   */
+  struct KeymapActionGroup
+  {
+    int windowId = -1;
+    std::set<KeymapAction> actions;
+  };
+}
 }

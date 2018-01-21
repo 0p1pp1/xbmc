@@ -20,6 +20,7 @@
 
 #include "GUIOperations.h"
 #include "Application.h"
+#include "ServiceBroker.h"
 #include "messaging/ApplicationMessenger.h"
 #include "GUIInfoManager.h"
 #include "guilib/GUIWindowManager.h"
@@ -30,7 +31,7 @@
 #include "settings/Settings.h"
 #include "utils/Variant.h"
 #include "guilib/StereoscopicsManager.h"
-#include "windowing/WindowingFactory.h"
+#include "rendering/RenderSystem.h"
 
 using namespace JSONRPC;
 using namespace ADDON;
@@ -121,7 +122,7 @@ JSONRPC_STATUS CGUIOperations::GetStereoscopicModes(const std::string &method, I
   for (int i = RENDER_STEREO_MODE_OFF; i < RENDER_STEREO_MODE_COUNT; i++)
   {
     RENDER_STEREO_MODE mode = (RENDER_STEREO_MODE) i;
-    if (g_Windowing.SupportsStereo(mode))
+    if (CServiceBroker::GetRenderSystem().SupportsStereo(mode))
       result["stereoscopicmodes"].push_back(GetStereoModeObjectFromGuiMode(mode));
   }
 
@@ -139,9 +140,9 @@ JSONRPC_STATUS CGUIOperations::GetPropertyValue(const std::string &property, CVa
     result["label"] = g_infoManager.GetLabel(g_infoManager.TranslateString("System.CurrentControl"));
   else if (property == "skin")
   {
-    std::string skinId = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
+    std::string skinId = CServiceBroker::GetSettings().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
     AddonPtr addon;
-    if (!CAddonMgr::GetInstance().GetAddon(skinId, addon, ADDON_SKIN))
+    if (!CServiceBroker::GetAddonMgr().GetAddon(skinId, addon, ADDON_SKIN))
       return InternalError;
 
     result["id"] = skinId;

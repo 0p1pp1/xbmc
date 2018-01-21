@@ -21,6 +21,9 @@
 
 #include <list>
 #include <memory>
+#include <string>
+#include <vector>
+
 #include "Addon.h"
 #include "ContextMenuItem.h"
 
@@ -32,19 +35,17 @@ namespace ADDON
   class CContextMenuAddon : public CAddon
   {
   public:
-    static std::unique_ptr<CContextMenuAddon> FromExtension(AddonProps props, const cp_extension_t* ext);
+    static std::unique_ptr<CContextMenuAddon> FromExtension(CAddonInfo addonInfo, const cp_extension_t* ext);
 
-    explicit CContextMenuAddon(AddonProps props) : CAddon(std::move(props)) {}
-    CContextMenuAddon(AddonProps props, std::vector<CContextMenuItem> items);
+    explicit CContextMenuAddon(CAddonInfo addonInfo) : CAddon(std::move(addonInfo)) {}
+    CContextMenuAddon(CAddonInfo addonInfo, std::vector<CContextMenuItem> items);
 
-    std::vector<CContextMenuItem> GetItems() const;
+    const std::vector<CContextMenuItem>& GetItems() const { return m_items; };
 
   private:
-    static void ParseMenu(const AddonProps& props, cp_cfg_element_t* elem, const std::string& parent,
+    static void ParseMenu(const CAddonInfo& addonInfo, cp_cfg_element_t* elem, const std::string& parent,
         int& anonGroupCount, std::vector<CContextMenuItem>& items);
 
     std::vector<CContextMenuItem> m_items;
   };
-
-  typedef std::shared_ptr<const CContextMenuAddon> ContextItemAddonPtr;
 }

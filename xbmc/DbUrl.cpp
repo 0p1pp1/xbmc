@@ -18,19 +18,15 @@
  *
  */
 
-#include <sstream>
-
 #include "DbUrl.h"
 #include "utils/URIUtils.h"
-#include "utils/Variant.h"
 
 CDbUrl::CDbUrl()
 {
   Reset();
 }
 
-CDbUrl::~CDbUrl()
-{ }
+CDbUrl::~CDbUrl() = default;
 
 void CDbUrl::Reset()
 {

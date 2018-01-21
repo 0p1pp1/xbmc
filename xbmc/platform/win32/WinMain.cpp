@@ -18,19 +18,22 @@
  *
  */
 
+#include "AppParamParser.h"
 #include "CompileInfo.h"
 #include "threads/Thread.h"
 #include "threads/platform/win/Win32Exception.h"
+#include "platform/win32/CharsetConverter.h"
 #include "platform/xbmc.h"
+#include "platform/XbmcContext.h"
+#include "settings/AdvancedSettings.h"
 #include "utils/CPUInfo.h"
 #include "utils/Environment.h"
 #include "utils/CharsetConverter.h" // Required to initialize converters before usage
 
+
 #include <dbghelp.h>
 #include <shellapi.h>
 
-
-extern "C" int main(int argc, char* argv[]);
 
 // Minidump creation function
 LONG WINAPI CreateMiniDump(EXCEPTION_POINTERS* pEp)
@@ -46,6 +49,7 @@ LONG WINAPI CreateMiniDump(EXCEPTION_POINTERS* pEp)
 //-----------------------------------------------------------------------------
 INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
 {
+  using KODI::PLATFORM::WINDOWS::ToW;
   // this fixes crash if OPENSSL_CONF is set to existed openssl.cfg  
   // need to set it as soon as possible  
   CEnvironment::unsetenv("OPENSSL_CONF");
@@ -59,27 +63,33 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
     sprintf_s(ver, "%d.%d Git:%s", CCompileInfo::GetMajor(),
     CCompileInfo::GetMinor(), CCompileInfo::GetSCMID());
 
-  win32_exception::set_version(std::string(ver));
-  SetUnhandledExceptionFilter(CreateMiniDump);
+  if (win32_exception::ShouldHook())
+  {
+    win32_exception::set_version(std::string(ver));
+    SetUnhandledExceptionFilter(CreateMiniDump);
+  }
 
   // check if Kodi is already running
   std::string appName = CCompileInfo::GetAppName();
-  CreateMutex(nullptr, FALSE, (appName + " Media Center").c_str());
+  HANDLE appRunningMutex = CreateMutex(nullptr, FALSE, ToW(appName + " Media Center").c_str());
   if (GetLastError() == ERROR_ALREADY_EXISTS)
   {
-    HWND hwnd = FindWindow(appName.c_str(), appName.c_str());
-    if (hwnd != NULL)
+    auto appNameW = ToW(appName);
+    HWND hwnd = FindWindow(appNameW.c_str(), appNameW.c_str());
+    if (hwnd != nullptr)
     {
       // switch to the running instance
       ShowWindow(hwnd, SW_RESTORE);
       SetForegroundWindow(hwnd);
     }
+    ReleaseMutex(appRunningMutex);
     return 0;
   }
 
   if ((g_cpuInfo.GetCPUFeatures() & CPU_FEATURE_SSE2) == 0)
   {
-    MessageBox(NULL, "No SSE2 support detected", (appName + ": Fatal Error").c_str(), MB_OK | MB_ICONERROR);
+    MessageBox(NULL, L"No SSE2 support detected", ToW(appName + ": Fatal Error").c_str(), MB_OK | MB_ICONERROR);
+    ReleaseMutex(appRunningMutex);
     return 0;
   }
 
@@ -114,8 +124,18 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
 #endif
 
-  // Create and run the app
-  int status = main(argc, argv);
+  int status;
+  {
+    // set up some xbmc specific relationships
+    XBMC::Context context;
+    // Initialize before CAppParamParser so it can set the log level
+    g_advancedSettings.Initialize();
+    
+    CAppParamParser appParamParser;
+    appParamParser.Parse(argv, argc);
+    // Create and run the app
+    status = XBMC_Run(true, appParamParser);
+  }
 
   for (int i = 0; i < argc; ++i)
     delete[] argv[i];
@@ -126,6 +146,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR commandLine, INT)
 
   WSACleanup();
   CoUninitialize();
+  ReleaseMutex(appRunningMutex);
 
   return status;
 }

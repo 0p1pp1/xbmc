@@ -17,8 +17,6 @@
 *  <http://www.gnu.org/licenses/>.
 *
 */
-#ifdef HAS_DX
-
 #pragma once
 
 #include "Geometry.h"
@@ -59,11 +57,17 @@ public:
 
   void SetShaderViews(unsigned int numViews, ID3D11ShaderResourceView** views);
   void SetViewPort(D3D11_VIEWPORT viewPort);
-  void SetSampler(SHADER_SAMPLER sampler);
 
+  void XM_CALLCONV GetWVP(XMMATRIX &w, XMMATRIX &v, XMMATRIX &p) 
+  { 
+    w = m_cbWorldViewProj.world; 
+    v = m_cbWorldViewProj.view; 
+    p = m_cbWorldViewProj.projection; 
+  }
   XMMATRIX XM_CALLCONV GetWorld()      const { return m_cbWorldViewProj.world; }
   XMMATRIX XM_CALLCONV GetView()       const { return m_cbWorldViewProj.view; }
   XMMATRIX XM_CALLCONV GetProjection() const { return m_cbWorldViewProj.projection; }
+  void     XM_CALLCONV SetWVP(const XMMATRIX &w, const XMMATRIX &v, const XMMATRIX &p);
   void     XM_CALLCONV SetWorld(const XMMATRIX &value);
   void     XM_CALLCONV SetView(const XMMATRIX &value);
   void     XM_CALLCONV SetProjection(const XMMATRIX &value);
@@ -73,14 +77,14 @@ public:
   void DrawIndexed(unsigned int indexCount, unsigned int startIndex, unsigned int startVertex);
   void Draw(unsigned int vertexCount, unsigned int startVertex);
   
-  bool  HardwareClipIsPossible(void) { return m_clipPossible; }
-  float GetClipXFactor(void)         { return m_clipXFactor;  }
-  float GetClipXOffset(void)         { return m_clipXOffset;  }
-  float GetClipYFactor(void)         { return m_clipYFactor;  }
-  float GetClipYOffset(void)         { return m_clipYOffset;  }
+  bool  HardwareClipIsPossible(void) const { return m_clipPossible; }
+  float GetClipXFactor(void) const { return m_clipXFactor;  }
+  float GetClipXOffset(void) const { return m_clipXOffset;  }
+  float GetClipYFactor(void) const { return m_clipYFactor;  }
+  float GetClipYOffset(void) const { return m_clipYOffset;  }
 
   // need to use aligned allocation bacause we use XMMATRIX in structures.
-  static void* operator new (size_t size)
+  void* operator new (size_t size)
   {
     void* ptr = _aligned_malloc(size, __alignof(CGUIShaderDX));
     if (!ptr)
@@ -88,7 +92,7 @@ public:
     return ptr;
   }
   // free aligned memory.
-  static void operator delete (void* ptr)
+  void operator delete (void* ptr)
   {
     _aligned_free(ptr);
   }
@@ -126,7 +130,6 @@ private:
 
   bool                m_bCreated;
   ID3D11SamplerState* m_pSampLinear;
-  ID3D11SamplerState* m_pSampPoint;
   CD3DVertexShader    m_vertexShader;
   CD3DPixelShader     m_pixelShader[SHADER_METHOD_RENDER_COUNT];
   size_t              m_currentShader;
@@ -145,5 +148,3 @@ private:
   float               m_clipYFactor;
   float               m_clipYOffset;
 };
-
-#endif

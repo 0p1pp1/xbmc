@@ -19,12 +19,13 @@
  */
 
 #include "HTTPWebinterfaceAddonsHandler.h"
+#include "ServiceBroker.h"
 #include "addons/AddonManager.h"
 #include "network/WebServer.h"
 
 #define ADDON_HEADER      "<html><head><title>Add-on List</title></head><body>\n<h1>Available web interfaces:</h1>\n<ul>\n"
 
-bool CHTTPWebinterfaceAddonsHandler::CanHandleRequest(const HTTPRequest &request)
+bool CHTTPWebinterfaceAddonsHandler::CanHandleRequest(const HTTPRequest &request) const
 {
   return (request.pathUrl.compare("/addons") == 0 || request.pathUrl.compare("/addons/") == 0);
 }
@@ -33,7 +34,7 @@ int CHTTPWebinterfaceAddonsHandler::HandleRequest()
 {
   m_responseData = ADDON_HEADER;
   ADDON::VECADDONS addons;
-  if (!ADDON::CAddonMgr::GetInstance().GetAddons(addons, ADDON::ADDON_WEB_INTERFACE) || addons.empty())
+  if (!CServiceBroker::GetAddonMgr().GetAddons(addons, ADDON::ADDON_WEB_INTERFACE) || addons.empty())
   {
     m_response.type = HTTPError;
     m_response.status = MHD_HTTP_INTERNAL_SERVER_ERROR;

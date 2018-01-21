@@ -19,12 +19,14 @@
  */
 
 #include "GUIWindowMusicNav.h"
+#include "ServiceBroker.h"
 #include "addons/AddonManager.h"
+#include "addons/AddonSystemSettings.h"
 #include "utils/FileUtils.h"
 #include "utils/URIUtils.h"
 #include "PlayListPlayer.h"
 #include "GUIPassword.h"
-#include "settings/dialogs/GUIDialogContentSettings.h"
+#include "music/dialogs/GUIDialogInfoProviderSettings.h"
 #include "filesystem/MusicDatabaseDirectory.h"
 #include "filesystem/VideoDatabaseDirectory.h"
 #include "PartyModeManager.h"
@@ -36,7 +38,6 @@
 #include "video/windows/GUIWindowVideoNav.h"
 #include "music/tags/MusicInfoTag.h"
 #include "guilib/GUIWindowManager.h"
-#include "dialogs/GUIDialogOK.h"
 #include "guilib/GUIKeyboardFactory.h"
 #include "view/GUIViewState.h"
 #include "input/Key.h"
@@ -45,6 +46,7 @@
 #include "GUIUserMessages.h"
 #include "FileItem.h"
 #include "Application.h"
+#include "messaging/helpers/DialogOKHelper.h"
 #include "messaging/ApplicationMessenger.h"
 #include "settings/Settings.h"
 #include "guilib/LocalizeStrings.h"
@@ -55,6 +57,7 @@
 #include "Util.h"
 #include "URL.h"
 #include "storage/MediaManager.h"
+#include "ContextMenuManager.h"
 
 using namespace XFILE;
 using namespace PLAYLIST;
@@ -82,9 +85,7 @@ CGUIWindowMusicNav::CGUIWindowMusicNav(void)
   m_searchWithEdit = false;
 }
 
-CGUIWindowMusicNav::~CGUIWindowMusicNav(void)
-{
-}
+CGUIWindowMusicNav::~CGUIWindowMusicNav(void) = default;
 
 bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
 {
@@ -100,10 +101,29 @@ bool CGUIWindowMusicNav::OnMessage(CGUIMessage& message)
 
       // is this the first time the window is opened?
       if (m_vecItems->GetPath() == "?" && message.GetStringParam().empty())
-        message.SetStringParam(CSettings::GetInstance().GetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW));
+        message.SetStringParam(CServiceBroker::GetSettings().GetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW));
 
       if (!CGUIWindowMusicBase::OnMessage(message))
         return false;
+
+      if (message.GetStringParam(0) != "")
+      {
+        CURL url(message.GetStringParam(0));
+
+        int i = 0;
+        for (; i < m_vecItems->Size(); i++)
+        {
+          CFileItemPtr pItem = m_vecItems->Get(i);
+          if (URIUtils::PathEquals(pItem->GetPath(), message.GetStringParam(0), true, true))
+          {
+            m_viewControl.SetSelectedItem(i);
+            i = -1;
+            if (url.GetOption("showinfo") == "true")
+              OnItemInfo(pItem.get(), true);
+            break;
+          }
+        }
+      }
 
       return true;
     }
@@ -232,6 +252,122 @@ std::string CGUIWindowMusicNav::GetQuickpathName(const std::string& strPath) con
     CLog::Log(LOGERROR, "  CGUIWindowMusicNav::GetQuickpathName: Unknown parameter (%s)", strPath.c_str());
     return strPath;
   }
+}
+
+bool CGUIWindowMusicNav::ManageInfoProvider(const CFileItemPtr item)
+{
+  CQueryParams params;
+  CDirectoryNode::GetDatabaseInfo(item->GetPath(), params);
+  // Management of Info provider only valid for specific artist or album items
+  if (params.GetAlbumId() == -1 && params.GetArtistId() == -1)
+    return false;
+
+  // Set things up for processing artist or albums
+  CONTENT_TYPE content = CONTENT_ALBUMS;
+  int id = params.GetAlbumId();
+  if (id == -1)
+  {
+    content = CONTENT_ARTISTS;
+    id = params.GetArtistId();
+  }
+
+  ADDON::ScraperPtr scraper;
+  // Get specific scraper and settings for current  item or use default
+  if (!m_musicdatabase.GetScraper(id, content, scraper))
+  {
+    ADDON::AddonPtr defaultScraper;
+    if (ADDON::CAddonSystemSettings::GetInstance().GetActive(
+        ADDON::ScraperTypeFromContent(content), defaultScraper))
+    {
+      scraper = std::dynamic_pointer_cast<ADDON::CScraper>(defaultScraper);
+    }
+  }
+
+  // Set Information provider and settings
+  int applyto = CGUIDialogInfoProviderSettings::Show(scraper);
+  if (applyto >= 0)
+  {
+    bool result = false;
+    CVariant msgctxt;
+    switch (applyto)
+    {
+    case INFOPROVIDERAPPLYOPTIONS::INFOPROVIDER_THISITEM: // Change information provider for specific item
+      result = m_musicdatabase.SetScraper(id, content, scraper);
+      break;
+    case INFOPROVIDERAPPLYOPTIONS::INFOPROVIDER_ALLVIEW: // Change information provider for the filtered items shown on this node
+      {
+        msgctxt = 38069;
+        if (content == CONTENT_ARTISTS)
+          msgctxt = 38068;
+        if (CGUIDialogYesNo::ShowAndGetInput(CVariant{ 20195 }, msgctxt)) // Change information provider, confirm for all shown
+        { 
+          // Set scraper for all items on curent view. 
+          std::string strPath = "musicdb://";
+          if (content == CONTENT_ARTISTS)
+            strPath += "artists";
+          else
+            strPath += "albums";
+          URIUtils::AddSlashAtEnd(strPath);
+          // Items on view could be limited by navigation criteria, smart playlist rules or a filter.
+          // Get these options, except ID, from item path
+          CURL musicUrl(item->GetPath());  //Use CURL, as CMusicDbUrl removes "filter" option
+          if (content == CONTENT_ARTISTS)
+            musicUrl.RemoveOption("artistid");
+          else
+            musicUrl.RemoveOption("albumid");
+         strPath += musicUrl.GetOptions();        
+          result = m_musicdatabase.SetScraperAll(strPath, scraper);
+        }
+      }
+      break;
+    case INFOPROVIDERAPPLYOPTIONS::INFOPROVIDER_DEFAULT: // Change information provider for all items
+      {
+        msgctxt = 38071; 
+        if (content == CONTENT_ARTISTS)
+          msgctxt = 38070;
+        if (CGUIDialogYesNo::ShowAndGetInput(CVariant{20195}, msgctxt)) // Change information provider, confirm default and clear
+        {
+          // Save scraper addon default setting values
+          scraper->SaveSettings();
+          // Set default scraper 
+          if (content == CONTENT_ARTISTS)
+            CServiceBroker::GetSettings().SetString(CSettings::SETTING_MUSICLIBRARY_ARTISTSSCRAPER, scraper->ID());
+          else 
+            CServiceBroker::GetSettings().SetString(CSettings::SETTING_MUSICLIBRARY_ALBUMSSCRAPER, scraper->ID());
+          CServiceBroker::GetSettings().Save();
+          // Clear all item specifc settings
+          if (content == CONTENT_ARTISTS)
+            result = m_musicdatabase.SetScraperAll("musicdb://artists/", nullptr);
+          else
+            result = m_musicdatabase.SetScraperAll("musicdb://albums/", nullptr);
+        }
+      }
+    default:
+      break;
+    }
+    if (!result)
+      return false;
+
+    // Refresh additional information using the new settings
+    if (applyto == INFOPROVIDERAPPLYOPTIONS::INFOPROVIDER_ALLVIEW || applyto == INFOPROVIDERAPPLYOPTIONS::INFOPROVIDER_DEFAULT)
+    { 
+      // Change information provider, all artists or albums
+      if (CGUIDialogYesNo::ShowAndGetInput(CVariant{20195}, CVariant{38072}))
+        OnItemInfoAll(m_vecItems->GetPath(), true);
+    }
+    else
+    {
+      // Change information provider, selected artist or album
+      if (CGUIDialogYesNo::ShowAndGetInput(CVariant{20195}, CVariant{38073}))
+      {
+        std::string itempath = StringUtils::Format("musicdb://albums/%li/", id);
+        if (content == CONTENT_ARTISTS)
+          itempath = StringUtils::Format("musicdb://artists/%li/", id);
+        OnItemInfoAll(itempath, true);
+      }
+    }
+  }
+  return true;
 }
 
 bool CGUIWindowMusicNav::OnClick(int iItem, const std::string &player /* = "" */)
@@ -444,7 +580,7 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
   {
     // are we in the playlists location?
     bool inPlaylists = m_vecItems->IsPath(CUtil::MusicPlaylistsLocation()) ||
-                       m_vecItems->IsPath("special://musicplaylists/");
+      m_vecItems->IsPath("special://musicplaylists/");
 
     if (m_vecItems->IsPath("sources://music/"))
     {
@@ -481,85 +617,72 @@ void CGUIWindowMusicNav::GetContextButtons(int itemNumber, CContextButtons &butt
 
       CMusicDatabaseDirectory dir;
 
-      // enable query all albums button only in album view
-      if (item->IsAlbum() && !dir.IsAllItem(item->GetPath()) &&
-          item->m_bIsFolder && !item->IsVideoDb() && !item->IsParentFolder()   &&
-         !item->IsPlugin() && !StringUtils::StartsWithNoCase(item->GetPath(), "musicsearch://"))
+      if (!item->IsParentFolder() && !dir.IsAllItem(item->GetPath()))
       {
-        buttons.Add(CONTEXT_BUTTON_INFO_ALL, 20059);
-      }
-
-      // enable query all artist button only in artist view
-      if (dir.IsArtistDir(item->GetPath()) && !dir.IsAllItem(item->GetPath()) &&
-        item->m_bIsFolder && !item->IsVideoDb())
-      {
-        ADDON::ScraperPtr info;
-        if(m_musicdatabase.GetScraperForPath(item->GetPath(), info, ADDON::ADDON_SCRAPER_ARTISTS))
+        if (item->m_bIsFolder && !item->IsVideoDb() &&
+          !item->IsPlugin() && !StringUtils::StartsWithNoCase(item->GetPath(), "musicsearch://"))
         {
-          if (info && info->Supports(CONTENT_ARTISTS))
+          if (item->IsAlbum())
+            // enable query all albums button only in album view
+            buttons.Add(CONTEXT_BUTTON_INFO_ALL, 20059);
+          else if (dir.IsArtistDir(item->GetPath()))
+            // enable query all artist button only in artist view
             buttons.Add(CONTEXT_BUTTON_INFO_ALL, 21884);
-        }
-      }
 
-      //Set default or clear default
-      NODE_TYPE nodetype = dir.GetDirectoryType(item->GetPath());
-      if (!item->IsParentFolder() && !inPlaylists &&
-         (nodetype == NODE_TYPE_ROOT ||
-          nodetype == NODE_TYPE_OVERVIEW ||
-          nodetype == NODE_TYPE_TOP100))
-      {
-        if (!item->IsPath(CSettings::GetInstance().GetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW)))
-          buttons.Add(CONTEXT_BUTTON_SET_DEFAULT, 13335); // set default
-        if (!CSettings::GetInstance().GetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW).empty())
-          buttons.Add(CONTEXT_BUTTON_CLEAR_DEFAULT, 13403); // clear default
-      }
-      NODE_TYPE childtype = dir.GetDirectoryChildType(item->GetPath());
-      if (childtype == NODE_TYPE_ALBUM ||
-          childtype == NODE_TYPE_ARTIST ||
-          nodetype == NODE_TYPE_GENRE ||
-          nodetype == NODE_TYPE_ALBUM ||
-          nodetype == NODE_TYPE_ALBUM_RECENTLY_ADDED ||
-          nodetype == NODE_TYPE_ALBUM_COMPILATIONS)
-      {
-        // we allow the user to set content for
-        // 1. general artist and album nodes
-        // 2. specific per genre
-        // 3. specific per artist
-        // 4. specific per album
-        buttons.Add(CONTEXT_BUTTON_SET_CONTENT, 20195);
-      }
-      if (item->HasMusicInfoTag() && !item->GetMusicInfoTag()->GetArtistString().empty())
-      {
-        CVideoDatabase database;
-        database.Open();
-        if (database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString()) > -1)
-          buttons.Add(CONTEXT_BUTTON_GO_TO_ARTIST, 20400);
-      }
-      if (item->HasMusicInfoTag() && !item->GetMusicInfoTag()->GetArtistString().empty() &&
-         !item->GetMusicInfoTag()->GetAlbum().empty() &&
-         !item->GetMusicInfoTag()->GetTitle().empty())
-      {
-        CVideoDatabase database;
-        database.Open();
-        if (database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString(), item->GetMusicInfoTag()->GetAlbum(), item->GetMusicInfoTag()->GetTitle()) > -1)
-          buttons.Add(CONTEXT_BUTTON_PLAY_OTHER, 20401);
-      }
-      if (item->HasVideoInfoTag() && !item->m_bIsFolder)
-      {
-        if ((CProfilesManager::GetInstance().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !item->IsPlugin())
+          //Set default or clear default
+          NODE_TYPE nodetype = dir.GetDirectoryType(item->GetPath());
+          if (!inPlaylists &&
+             (nodetype == NODE_TYPE_ROOT ||
+              nodetype == NODE_TYPE_OVERVIEW ||
+              nodetype == NODE_TYPE_TOP100))
+          {
+            if (!item->IsPath(CServiceBroker::GetSettings().GetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW)))
+              buttons.Add(CONTEXT_BUTTON_SET_DEFAULT, 13335); // set default
+            if (!CServiceBroker::GetSettings().GetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW).empty())
+              buttons.Add(CONTEXT_BUTTON_CLEAR_DEFAULT, 13403); // clear default
+          }
+
+          //Change information provider
+          if (StringUtils::EqualsNoCase(m_vecItems->GetContent(), "albums") ||
+              StringUtils::EqualsNoCase(m_vecItems->GetContent(), "artists"))
+          {
+            // we allow the user to set information provider for albums and artists
+            buttons.Add(CONTEXT_BUTTON_SET_CONTENT, 20195);
+          }
+        }
+        if (item->HasMusicInfoTag() && !item->GetMusicInfoTag()->GetArtistString().empty())
         {
-          buttons.Add(CONTEXT_BUTTON_RENAME, 16105);
-          buttons.Add(CONTEXT_BUTTON_DELETE, 646);
+          CVideoDatabase database;
+          database.Open();
+          if (database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString()) > -1)
+            buttons.Add(CONTEXT_BUTTON_GO_TO_ARTIST, 20400);
         }
-      }
-      if (inPlaylists && URIUtils::GetFileName(item->GetPath()) != "PartyMode.xsp"
-                      && (item->IsPlayList() || item->IsSmartPlayList()))
-        buttons.Add(CONTEXT_BUTTON_DELETE, 117);
+        if (item->HasMusicInfoTag() && !item->GetMusicInfoTag()->GetArtistString().empty() &&
+          !item->GetMusicInfoTag()->GetAlbum().empty() &&
+          !item->GetMusicInfoTag()->GetTitle().empty())
+        {
+          CVideoDatabase database;
+          database.Open();
+          if (database.GetMatchingMusicVideo(item->GetMusicInfoTag()->GetArtistString(), item->GetMusicInfoTag()->GetAlbum(), item->GetMusicInfoTag()->GetTitle()) > -1)
+            buttons.Add(CONTEXT_BUTTON_PLAY_OTHER, 20401);
+        }
+        if (item->HasVideoInfoTag() && !item->m_bIsFolder)
+        {
+          if ((CProfilesManager::GetInstance().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !item->IsPlugin())
+          {
+            buttons.Add(CONTEXT_BUTTON_RENAME, 16105);
+            buttons.Add(CONTEXT_BUTTON_DELETE, 646);
+          }
+        }
+        if (inPlaylists && URIUtils::GetFileName(item->GetPath()) != "PartyMode.xsp"
+          && (item->IsPlayList() || item->IsSmartPlayList()))
+          buttons.Add(CONTEXT_BUTTON_DELETE, 117);
 
-      if (!item->IsReadOnly() && CSettings::GetInstance().GetBool("filelists.allowfiledeletion"))
-      {
-        buttons.Add(CONTEXT_BUTTON_DELETE, 117);
-        buttons.Add(CONTEXT_BUTTON_RENAME, 118);
+        if (!item->IsReadOnly() && CServiceBroker::GetSettings().GetBool("filelists.allowfiledeletion"))
+        {
+          buttons.Add(CONTEXT_BUTTON_DELETE, 117);
+          buttons.Add(CONTEXT_BUTTON_RENAME, 118);
+        }
       }
     }
   }
@@ -624,17 +747,17 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     }
 
   case CONTEXT_BUTTON_INFO_ALL:
-    OnItemInfoAll(itemNumber);
+    OnItemInfoAll(m_vecItems->GetPath());
     return true;
 
   case CONTEXT_BUTTON_SET_DEFAULT:
-    CSettings::GetInstance().SetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW, GetQuickpathName(item->GetPath()));
-    CSettings::GetInstance().Save();
+    CServiceBroker::GetSettings().SetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW, GetQuickpathName(item->GetPath()));
+    CServiceBroker::GetSettings().Save();
     return true;
 
   case CONTEXT_BUTTON_CLEAR_DEFAULT:
-    CSettings::GetInstance().SetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW, "");
-    CSettings::GetInstance().Save();
+    CServiceBroker::GetSettings().SetString(CSettings::SETTING_MYMUSIC_DEFAULTLIBVIEW, "");
+    CServiceBroker::GetSettings().Save();
     return true;
 
   case CONTEXT_BUTTON_GO_TO_ARTIST:
@@ -683,46 +806,8 @@ bool CGUIWindowMusicNav::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
     Refresh();
     return true;
 
-  case CONTEXT_BUTTON_SET_CONTENT:
-    {
-      ADDON::ScraperPtr scraper;
-      std::string path(item->GetPath());
-      CQueryParams params;
-      CDirectoryNode::GetDatabaseInfo(item->GetPath(), params);
-      CONTENT_TYPE content = CONTENT_ALBUMS;
-      if (params.GetAlbumId() != -1)
-        path = StringUtils::Format("musicdb://albums/%li/",params.GetAlbumId());
-      else if (params.GetArtistId() != -1)
-      {
-        path = StringUtils::Format("musicdb://artists/%li/",params.GetArtistId());
-        content = CONTENT_ARTISTS;
-      }
-
-      if (m_vecItems->IsPath("musicdb://genres/") || item->IsPath("musicdb://artists/"))
-      {
-        content = CONTENT_ARTISTS;
-      }
-
-      if (!m_musicdatabase.GetScraperForPath(path, scraper, ADDON::ScraperTypeFromContent(content)))
-      {
-        ADDON::AddonPtr defaultScraper;
-        if (ADDON::CAddonMgr::GetInstance().GetDefault(ADDON::ScraperTypeFromContent(content), defaultScraper))
-        {
-          scraper = std::dynamic_pointer_cast<ADDON::CScraper>(defaultScraper);
-        }
-      }
-
-      if (CGUIDialogContentSettings::Show(scraper, content))
-      {
-        m_musicdatabase.SetScraperForPath(path,scraper);
-        if (CGUIDialogYesNo::ShowAndGetInput(CVariant{20442}, CVariant{20443}))
-        {
-          OnItemInfoAll(itemNumber,true,true);
-        }
-      }
-
-      return true;
-    }
+  case CONTEXT_BUTTON_SET_CONTENT:    
+    return ManageInfoProvider(item);
 
   default:
     break;
@@ -751,7 +836,7 @@ bool CGUIWindowMusicNav::GetSongsFromPlayList(const std::string& strPlayList, CF
     // load it
     if (!pPlayList->Load(strPlayList))
     {
-      CGUIDialogOK::ShowAndGetInput(CVariant{6}, CVariant{477});
+      HELPERS::ShowOKDialogText(CVariant{6}, CVariant{477});
       return false; //hmmm unable to load playlist?
     }
     CPlayList playlist = *pPlayList;

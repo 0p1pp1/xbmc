@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,17 +19,22 @@
  */
 
 #include "AddonInputHandling.h"
+#include "input/joysticks/generic/DriverReceiving.h"
 #include "input/joysticks/generic/InputHandling.h"
-#include "input/joysticks/IInputHandler.h"
+#include "input/joysticks/interfaces/IInputHandler.h"
+#include "input/joysticks/interfaces/IDriverReceiver.h"
 #include "peripherals/addons/AddonButtonMap.h"
+#include "peripherals/devices/PeripheralJoystick.h"
 #include "peripherals/Peripherals.h"
+#include "utils/log.h"
 
+using namespace KODI;
 using namespace JOYSTICK;
 using namespace PERIPHERALS;
 
-CAddonInputHandling::CAddonInputHandling(CPeripheral* peripheral, IInputHandler* handler)
+CAddonInputHandling::CAddonInputHandling(CPeripherals& manager, CPeripheral* peripheral, IInputHandler* handler, IDriverReceiver* receiver)
 {
-  PeripheralAddonPtr addon = g_peripherals.GetAddon(peripheral);
+  PeripheralAddonPtr addon = manager.GetAddonWithButtonMap(peripheral);
 
   if (!addon)
   {
@@ -39,15 +44,28 @@ CAddonInputHandling::CAddonInputHandling(CPeripheral* peripheral, IInputHandler*
   {
     m_buttonMap.reset(new CAddonButtonMap(peripheral, addon, handler->ControllerID()));
     if (m_buttonMap->Load())
+    {
       m_driverHandler.reset(new CInputHandling(handler, m_buttonMap.get()));
+
+      if (receiver)
+      {
+        m_inputReceiver.reset(new CDriverReceiving(receiver, m_buttonMap.get()));
+
+        // Interfaces are connected here because they share button map as a common resource
+        handler->SetInputReceiver(m_inputReceiver.get());
+      }
+    }
     else
+    {
       m_buttonMap.reset();
+    }
   }
 }
 
 CAddonInputHandling::~CAddonInputHandling(void)
 {
   m_driverHandler.reset();
+  m_inputReceiver.reset();
   m_buttonMap.reset();
 }
 
@@ -67,10 +85,10 @@ bool CAddonInputHandling::OnHatMotion(unsigned int hatIndex, HAT_STATE state)
   return false;
 }
 
-bool CAddonInputHandling::OnAxisMotion(unsigned int axisIndex, float position)
+bool CAddonInputHandling::OnAxisMotion(unsigned int axisIndex, float position, int center, unsigned int range)
 {
   if (m_driverHandler)
-    return m_driverHandler->OnAxisMotion(axisIndex, position);
+    return m_driverHandler->OnAxisMotion(axisIndex, position, center, range);
 
   return false;
 }
@@ -79,4 +97,12 @@ void CAddonInputHandling::ProcessAxisMotions(void)
 {
   if (m_driverHandler)
     m_driverHandler->ProcessAxisMotions();
+}
+
+bool CAddonInputHandling::SetRumbleState(const JOYSTICK::FeatureName& feature, float magnitude)
+{
+  if (m_inputReceiver)
+    return m_inputReceiver->SetRumbleState(feature, magnitude);
+
+  return false;
 }

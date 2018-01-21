@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2016 Team Kodi
+ *      Copyright (C) 2016-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -29,7 +29,12 @@
 using namespace PERIPHERALS;
 using namespace XbmcThreads;
 
+// Default event scan rate when no polling handles are held
 #define DEFAULT_SCAN_RATE_HZ  60
+
+// Timeout when a polling handle is held but doesn't trigger scan. This reduces
+// input latency when the game is running at < 1/4 speed.
+#define WATCHDOG_TIMEOUT_MS   80
 
 CEventScanner::CEventScanner(IEventScannerCallback* callback) :
   CThread("PeripEventScanner"),
@@ -45,55 +50,87 @@ void CEventScanner::Start(void)
 
 void CEventScanner::Stop(void)
 {
+  StopThread(false);
   m_scanEvent.Set();
   StopThread(true);
 }
 
-EventRateHandle CEventScanner::SetRate(float rateHz)
+EventPollHandlePtr CEventScanner::RegisterPollHandle()
 {
-  CSingleLock lock(m_mutex);
+  EventPollHandlePtr handle(new CEventPollHandle(this));
 
-  const float oldRate = GetRateHz();
+  {
+    CSingleLock lock(m_mutex);
+    m_activeHandles.insert(handle.get());
+  }
 
-  EventRateHandle handle = EventRateHandle(new CEventRateHandle(rateHz, this));
-  m_handles.push_back(handle);
-
-  const float newRate = GetRateHz();
-
-  CLog::Log(LOGDEBUG, "PERIPHERALS: Event sampling rate set from %.2f to %.2f", oldRate, newRate);
+  CLog::Log(LOGDEBUG, "PERIPHERALS: Event poll handle registered");
 
   return handle;
 }
 
-void CEventScanner::Release(CEventRateHandle* handle)
+void CEventScanner::Activate(CEventPollHandle* handle)
 {
-  CSingleLock lock(m_mutex);
+  {
+    CSingleLock lock(m_mutex);
+    m_activeHandles.insert(handle);
+  }
 
-  const float oldRate = GetRateHz();
+  CLog::Log(LOGDEBUG, "PERIPHERALS: Event poll handle activated");
+}
 
-  m_handles.erase(std::remove_if(m_handles.begin(), m_handles.end(),
-    [handle](const EventRateHandle& myHandle)
-    {
-      return handle == myHandle.get();
-    }), m_handles.end());
+void CEventScanner::Deactivate(CEventPollHandle* handle)
+{
+  {
+    CSingleLock lock(m_mutex);
+    m_activeHandles.erase(handle);
+  }
 
-  const float newRate = GetRateHz();
+  CLog::Log(LOGDEBUG, "PERIPHERALS: Event poll handle deactivated");
+}
 
-  CLog::Log(LOGDEBUG, "PERIPHERALS: Event sampling rate set from %.2f to %.2f", oldRate, newRate);
+void CEventScanner::HandleEvents(bool bWait)
+{
+  if (bWait)
+  {
+    CSingleLock lock(m_pollMutex);
+
+    m_scanFinishedEvent.Reset();
+    m_scanEvent.Set();
+    m_scanFinishedEvent.Wait();
+  }
+  else
+  {
+    m_scanEvent.Set();
+  }
+}
+
+void CEventScanner::Release(CEventPollHandle* handle)
+{
+  {
+    CSingleLock lock(m_mutex);
+    m_activeHandles.erase(handle);
+  }
+
+  CLog::Log(LOGDEBUG, "PERIPHERALS: Event poll handle released");
 }
 
 void CEventScanner::Process(void)
 {
-  float nextScanMs = static_cast<float>(SystemClockMillis());
+  double nextScanMs = static_cast<double>(SystemClockMillis());
 
   while (!m_bStop)
   {
-    m_scanEvent.Reset();
-
     m_callback->ProcessEvents();
 
-    const float nowMs = static_cast<float>(SystemClockMillis());
-    const float scanIntervalMs = GetScanIntervalMs();
+    m_scanFinishedEvent.Set();
+
+    const double nowMs = static_cast<double>(SystemClockMillis());
+    const double scanIntervalMs = GetScanIntervalMs();
+
+    // Handle wrap-around
+    if (nowMs < nextScanMs)
+      nextScanMs = nowMs;
 
     while (nextScanMs <= nowMs)
       nextScanMs += scanIntervalMs;
@@ -105,20 +142,17 @@ void CEventScanner::Process(void)
   }
 }
 
-float CEventScanner::GetRateHz(void) const
+double CEventScanner::GetScanIntervalMs() const
 {
-  CSingleLock lock(m_mutex);
+  bool bHasActiveHandle;
 
-  float scanRateHz = 0.0f;
-
-  for (const EventRateHandle& handle : m_handles)
   {
-    if (handle->GetRateHz() > scanRateHz)
-      scanRateHz = handle->GetRateHz();
+    CSingleLock lock(m_mutex);
+    bHasActiveHandle = !m_activeHandles.empty();
   }
 
-  if (scanRateHz == 0.0f)
-    scanRateHz = DEFAULT_SCAN_RATE_HZ;
-
-  return scanRateHz;
+  if (!bHasActiveHandle)
+    return 1000.0 / DEFAULT_SCAN_RATE_HZ;
+  else
+    return WATCHDOG_TIMEOUT_MS;
 }

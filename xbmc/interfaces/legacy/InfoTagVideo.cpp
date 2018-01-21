@@ -119,7 +119,7 @@ namespace XBMCAddon
 
     String InfoTagVideo::getIMDBNumber()
     {
-      return infoTag->m_strIMDBNumber;
+      return infoTag->GetUniqueID();
     }
 
     int InfoTagVideo::getSeason()
@@ -134,7 +134,7 @@ namespace XBMCAddon
 
     int InfoTagVideo::getYear()
     {
-      return infoTag->m_iYear;
+      return infoTag->GetYear();
     }
 
     double InfoTagVideo::getRating()
@@ -142,9 +142,14 @@ namespace XBMCAddon
       return infoTag->GetRating().rating;
     }
 
+    int InfoTagVideo::getUserRating()
+    {
+      return infoTag->m_iUserRating;
+    }
+
     int InfoTagVideo::getPlayCount()
     {
-      return infoTag->m_playCount;
+      return infoTag->GetPlayCount();
     }
 
     String InfoTagVideo::getLastPlayed()
@@ -159,12 +164,37 @@ namespace XBMCAddon
 
     String InfoTagVideo::getPremiered()
     {
-      return infoTag->m_premiered.GetAsLocalizedDate();
+      return infoTag->GetPremiered().GetAsLocalizedDate();
     }
 
     String InfoTagVideo::getFirstAired()
     {
       return infoTag->m_firstAired.GetAsLocalizedDate();
+    }
+
+    String InfoTagVideo::getTrailer()
+    {
+      return infoTag->m_strTrailer;
+    }
+
+    std::vector<std::string> InfoTagVideo::getArtist()
+    {
+      return infoTag->m_artist;
+    }
+
+    String InfoTagVideo::getAlbum()
+    {
+      return infoTag->m_strAlbum;
+    }
+
+    int InfoTagVideo::getTrack()
+    {
+      return infoTag->m_iTrack;
+    }
+
+    unsigned int InfoTagVideo::getDuration()
+    {
+      return infoTag->GetDuration();
     }
   }
 }

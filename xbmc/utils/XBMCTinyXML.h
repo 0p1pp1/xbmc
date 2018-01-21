@@ -20,19 +20,7 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H) && (!defined TARGET_WINDOWS)
-  #include "config.h"
-#endif
-#ifdef TARGET_WINDOWS
-#ifndef BUILDING_WITH_CMAKE
-#define TIXML_USE_STL
-#ifdef _DEBUG
-#pragma comment(lib, "tinyxmlSTLd.lib")
-#else
-#pragma comment(lib, "tinyxmlSTL.lib")
-#endif
-#endif
-#else
+#ifndef TARGET_WINDOWS
 //compile fix for TinyXml < 2.6.0
 #define DOCUMENT    TINYXML_DOCUMENT
 #define ELEMENT     TINYXML_ELEMENT
@@ -58,8 +46,8 @@ class CXBMCTinyXML : public TiXmlDocument
 {
 public:
   CXBMCTinyXML();
-  CXBMCTinyXML(const char*);
-  CXBMCTinyXML(const std::string& documentName);
+  explicit CXBMCTinyXML(const char*);
+  explicit CXBMCTinyXML(const std::string& documentName);
   CXBMCTinyXML(const std::string& documentName, const std::string& documentCharset);
   bool LoadFile(TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING);
   bool LoadFile(const char*, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING);
@@ -68,13 +56,13 @@ public:
   bool LoadFile(FILE*, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING);
   bool SaveFile(const char*) const;
   bool SaveFile(const std::string& filename) const;
-  bool Parse(const char*, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING);
   bool Parse(const std::string& data, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING);
   bool Parse(const std::string& data, const std::string& dataCharset);
   inline std::string GetSuggestedCharset(void) const { return m_SuggestedCharset; }
   inline std::string GetUsedCharset(void) const      { return m_UsedCharset; }
   static bool Test();
 protected:
+  using TiXmlDocument::Parse;
   bool TryParse(const std::string& data, const std::string& tryDataCharset);
   bool InternalParse(const std::string& rawdata, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING);
 

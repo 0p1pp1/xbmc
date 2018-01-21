@@ -30,6 +30,7 @@
 #include "guilib/GraphicContext.h"
 #include "guilib/GUIFontManager.h"
 #include "Application.h"
+#include "ServiceBroker.h"
 #include "settings/Settings.h"
 #include "settings/AdvancedSettings.h"
 #include "threads/SingleLock.h"
@@ -55,9 +56,7 @@ COverlay::COverlay()
   m_pos    = POSITION_RELATIVE;
 }
 
-COverlay::~COverlay()
-{
-}
+COverlay::~COverlay() = default;
 
 unsigned int CRenderer::m_textureid = 1;
 
@@ -172,17 +171,17 @@ void CRenderer::Render(int idx)
 
   float total_height = 0.0f;
   float cur_height = 0.0f;
-  int subalign = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_ALIGN);
+  int subalign = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_SUBTITLES_ALIGN);
   for (std::vector<COverlay*>::iterator it = render.begin(); it != render.end(); ++it)
   {
     COverlay* o = nullptr;
     COverlayText *text = dynamic_cast<COverlayText*>(*it);
     if (text)
     {
-      text->PrepareRender(CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_FONT),
-                          CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_COLOR),
-                          CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_HEIGHT),
-                          CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_STYLE),
+      text->PrepareRender(CServiceBroker::GetSettings().GetString(CSettings::SETTING_SUBTITLES_FONT),
+                          CServiceBroker::GetSettings().GetInt(CSettings::SETTING_SUBTITLES_COLOR),
+                          CServiceBroker::GetSettings().GetInt(CSettings::SETTING_SUBTITLES_HEIGHT),
+                          CServiceBroker::GetSettings().GetInt(CSettings::SETTING_SUBTITLES_STYLE),
                           m_font, m_fontBorder);
       o = text;
     }
@@ -334,7 +333,7 @@ COverlay* CRenderer::Convert(CDVDOverlaySSA* o, double pts)
   int targetHeight = MathUtils::round_int(m_rv.Height());
   int useMargin;
 
-  int subalign = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_ALIGN);
+  int subalign = CServiceBroker::GetSettings().GetInt(CSettings::SETTING_SUBTITLES_ALIGN);
   if(subalign == SUBTITLE_ALIGN_BOTTOM_OUTSIDE
   || subalign == SUBTITLE_ALIGN_TOP_OUTSIDE
   ||(subalign == SUBTITLE_ALIGN_MANUAL && g_advancedSettings.m_videoAssFixedWorks))
@@ -394,7 +393,7 @@ COverlay* CRenderer::Convert(CDVDOverlay* o, double pts)
   COverlay* r = NULL;
 
   if(o->IsOverlayType(DVDOVERLAY_TYPE_SSA))
-    r = Convert((CDVDOverlaySSA*)o, pts);
+    r = Convert(static_cast<CDVDOverlaySSA*>(o), pts);
   else if(o->m_textureid)
   {
     std::map<unsigned int, COverlay*>::iterator it = m_textureCache.find(o->m_textureid);
@@ -409,18 +408,18 @@ COverlay* CRenderer::Convert(CDVDOverlay* o, double pts)
 
 #if defined(HAS_GL) || defined(HAS_GLES)
   if (o->IsOverlayType(DVDOVERLAY_TYPE_IMAGE))
-    r = new COverlayTextureGL((CDVDOverlayImage*)o);
+    r = new COverlayTextureGL(static_cast<CDVDOverlayImage*>(o));
   else if(o->IsOverlayType(DVDOVERLAY_TYPE_SPU))
-    r = new COverlayTextureGL((CDVDOverlaySpu*)o);
+    r = new COverlayTextureGL(static_cast<CDVDOverlaySpu*>(o));
 #elif defined(HAS_DX)
   if (o->IsOverlayType(DVDOVERLAY_TYPE_IMAGE))
-    r = new COverlayImageDX((CDVDOverlayImage*)o);
+    r = new COverlayImageDX(static_cast<CDVDOverlayImage*>(o));
   else if(o->IsOverlayType(DVDOVERLAY_TYPE_SPU))
-    r = new COverlayImageDX((CDVDOverlaySpu*)o);
+    r = new COverlayImageDX(static_cast<CDVDOverlaySpu*>(o));
 #endif
 
   if(!r && o->IsOverlayType(DVDOVERLAY_TYPE_TEXT))
-    r = new COverlayText((CDVDOverlayText*)o);
+    r = new COverlayText(static_cast<CDVDOverlayText*>(o));
 
   m_textureCache[m_textureid] = r;
   o->m_textureid = m_textureid;

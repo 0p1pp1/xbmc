@@ -20,11 +20,11 @@
 
 #include "DVDSubtitleParserVplayer.h"
 #include "DVDCodecs/Overlay/DVDOverlayText.h"
-#include "DVDClock.h"
+#include "cores/VideoPlayer/Interface/Addon/TimingConstants.h"
 #include "utils/RegExp.h"
 
-CDVDSubtitleParserVplayer::CDVDSubtitleParserVplayer(CDVDSubtitleStream* pStream, const std::string& strFile)
-    : CDVDSubtitleParserText(pStream, strFile), m_framerate(DVD_TIME_BASE)
+CDVDSubtitleParserVplayer::CDVDSubtitleParserVplayer(std::unique_ptr<CDVDSubtitleStream> && pStream, const std::string& strFile)
+    : CDVDSubtitleParserText(std::move(pStream), strFile), m_framerate(DVD_TIME_BASE)
 {
 }
 

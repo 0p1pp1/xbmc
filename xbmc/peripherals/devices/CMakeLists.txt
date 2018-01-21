@@ -4,6 +4,7 @@ set(SOURCES Peripheral.cpp
             PeripheralHID.cpp
             PeripheralImon.cpp
             PeripheralJoystick.cpp
+            PeripheralJoystickEmulation.cpp
             PeripheralNIC.cpp
             PeripheralNyxboard.cpp
             PeripheralTuner.cpp)
@@ -14,6 +15,7 @@ set(HEADERS Peripheral.h
             PeripheralHID.h
             PeripheralImon.h
             PeripheralJoystick.h
+            PeripheralJoystickEmulation.h
             PeripheralNIC.h
             PeripheralNyxboard.h
             PeripheralTuner.h)
@@ -24,4 +26,3 @@ if(CEC_FOUND)
 endif()
 
 core_add_library(peripherals_devices)
-add_dependencies(peripherals_devices libcpluff)

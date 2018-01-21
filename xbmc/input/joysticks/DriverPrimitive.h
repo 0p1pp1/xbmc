@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -23,9 +23,12 @@
 
 #include <stdint.h>
 
+namespace KODI
+{
 namespace JOYSTICK
 {
   /*!
+   * \ingroup joystick
    * \brief Basic driver element associated with input events
    *
    * Driver input (bools, floats and enums) is split into primitives that better
@@ -53,7 +56,12 @@ namespace JOYSTICK
    *
    *    Semiaxis:
    *       - driver index
+   *       - center (-1, 0 or 1)
    *       - semiaxis direction (positive/negative)
+   *       - range (1 or 2)
+   *
+   *    Motor:
+   *       - driver index
    *
    * For more info, see "Chapter 2. Joystick drivers" in the documentation
    * thread: http://forum.kodi.tv/showthread.php?tid=257764
@@ -62,25 +70,14 @@ namespace JOYSTICK
   {
   public:
     /*!
-     * \brief Type of driver primitive
-     */
-    enum PrimitiveType
-    {
-      UNKNOWN = 0, // primitive has no type (invalid)
-      BUTTON,      // a digital button
-      HAT,         // one of the four direction arrows on a D-pad
-      SEMIAXIS,    // the positive or negative half of an axis
-    };
-
-    /*!
      * \brief Construct an invalid driver primitive
      */
     CDriverPrimitive(void);
 
     /*!
-     * \brief Construct a driver primitive representing a button
+     * \brief Construct a driver primitive representing a button or motor
      */
-    CDriverPrimitive(unsigned int buttonIndex);
+    CDriverPrimitive(PRIMITIVE_TYPE type, unsigned int index);
 
     /*!
      * \brief Construct a driver primitive representing one of the four
@@ -92,7 +89,7 @@ namespace JOYSTICK
      * \brief Construct a driver primitive representing the positive or negative
      *        half of an axis
      */
-    CDriverPrimitive(unsigned int axisIndex, SEMIAXIS_DIRECTION direction);
+    CDriverPrimitive(unsigned int axisIndex, int center, SEMIAXIS_DIRECTION direction, unsigned int range);
 
     bool operator==(const CDriverPrimitive& rhs) const;
     bool operator<(const CDriverPrimitive& rhs) const;
@@ -105,10 +102,16 @@ namespace JOYSTICK
     /*!
      * \brief The type of driver primitive
      */
-    PrimitiveType Type(void) const { return m_type; }
+    PRIMITIVE_TYPE Type(void) const { return m_type; }
 
     /*!
-     * \brief The index used by the driver (valid for all types)
+     * \brief The index used by the joystick driver
+     *
+     * Valid for:
+     *   - buttons
+     *   - hats
+     *   - semiaxes
+     *   - motors
      */
     unsigned int Index(void) const { return m_driverIndex; }
 
@@ -118,9 +121,19 @@ namespace JOYSTICK
     HAT_DIRECTION HatDirection(void) const { return m_hatDirection; }
 
     /*!
+     * \brief The location of the zero point of the semiaxis
+     */
+    int Center() const { return m_center; }
+
+    /*!
      * \brief The semiaxis direction (valid for semiaxes)
      */
     SEMIAXIS_DIRECTION SemiAxisDirection(void) const { return m_semiAxisDirection; }
+
+    /*!
+     * \brief The distance between the center and the farthest valid value (valid for semiaxes)
+     */
+    unsigned int Range() const { return m_range; }
 
     /*!
      * \brief Test if an driver primitive is valid
@@ -133,9 +146,12 @@ namespace JOYSTICK
     bool IsValid(void) const;
 
   private:
-    PrimitiveType      m_type;
-    unsigned int       m_driverIndex;
-    HAT_DIRECTION      m_hatDirection;
-    SEMIAXIS_DIRECTION m_semiAxisDirection;
+    PRIMITIVE_TYPE     m_type = PRIMITIVE_TYPE::UNKNOWN;
+    unsigned int       m_driverIndex = 0;
+    HAT_DIRECTION      m_hatDirection = HAT_DIRECTION::UNKNOWN;
+    int                m_center = 0;
+    SEMIAXIS_DIRECTION m_semiAxisDirection = SEMIAXIS_DIRECTION::ZERO;
+    unsigned int       m_range = 1;
   };
+}
 }

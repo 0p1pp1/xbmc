@@ -20,6 +20,7 @@
 
 #include "SkinBuiltins.h"
 
+#include "ServiceBroker.h"
 #include "addons/Addon.h"
 #include "addons/GUIWindowAddonBrowser.h"
 #include "Application.h"
@@ -72,7 +73,7 @@ static int ToggleSetting(const std::vector<std::string>& params)
 {
   int setting = CSkinSettings::GetInstance().TranslateBool(params[0]);
   CSkinSettings::GetInstance().SetBool(setting, !CSkinSettings::GetInstance().GetBool(setting));
-  CSettings::GetInstance().Save();
+  CServiceBroker::GetSettings().Save();
 
   return 0;
 }
@@ -88,7 +89,7 @@ static int SetAddon(const std::vector<std::string>& params)
   std::vector<ADDON::TYPE> types;
   for (unsigned int i = 1 ; i < params.size() ; i++)
   {
-    ADDON::TYPE type = TranslateType(params[i]);
+    ADDON::TYPE type = CAddonInfo::TranslateType(params[i]);
     if (type != ADDON_UNKNOWN)
       types.push_back(type);
   }
@@ -96,7 +97,7 @@ static int SetAddon(const std::vector<std::string>& params)
   if (!types.empty() && CGUIWindowAddonBrowser::SelectAddonID(types, result, true) == 1)
   {
     CSkinSettings::GetInstance().SetString(string, result);
-    CSettings::GetInstance().Save();
+    CServiceBroker::GetSettings().Save();
   }
 
   return 0;
@@ -110,7 +111,7 @@ static int SelectBool(const std::vector<std::string>& params)
 {
   std::vector<std::pair<std::string, std::string>> settings;
 
-  CGUIDialogSelect* pDlgSelect = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
+  CGUIDialogSelect* pDlgSelect = g_windowManager.GetWindow<CGUIDialogSelect>(WINDOW_DIALOG_SELECT);
   pDlgSelect->Reset();
   pDlgSelect->SetHeading(CVariant{g_localizeStrings.Get(atoi(params[0].c_str()))});
 
@@ -140,7 +141,7 @@ static int SelectBool(const std::vector<std::string>& params)
       else
         CSkinSettings::GetInstance().SetBool(setting, false);
     }
-    CSettings::GetInstance().Save();
+    CServiceBroker::GetSettings().Save();
   }
 
   return 0;
@@ -157,13 +158,13 @@ static int SetBool(const std::vector<std::string>& params)
   {
     int string = CSkinSettings::GetInstance().TranslateBool(params[0]);
     CSkinSettings::GetInstance().SetBool(string, StringUtils::EqualsNoCase(params[1], "true"));
-    CSettings::GetInstance().Save();
+    CServiceBroker::GetSettings().Save();
     return 0;
   }
   // default is to set it to true
   int setting = CSkinSettings::GetInstance().TranslateBool(params[0]);
   CSkinSettings::GetInstance().SetBool(setting, true);
-  CSettings::GetInstance().Save();
+  CServiceBroker::GetSettings().Save();
 
   return 0;
 }
@@ -211,7 +212,7 @@ static int SetPath(const std::vector<std::string>& params)
   if (CGUIDialogFileBrowser::ShowAndGetDirectory(localShares, g_localizeStrings.Get(657), value))
     CSkinSettings::GetInstance().SetString(string, value);
 
-  CSettings::GetInstance().Save();
+  CServiceBroker::GetSettings().Save();
 
   return 0;
 }
@@ -236,7 +237,7 @@ static int SetFile(const std::vector<std::string>& params)
   std::string strMask = (params.size() > 1) ? params[1] : "";
   StringUtils::ToLower(strMask);
   ADDON::TYPE type;
-  if ((type = TranslateType(strMask)) != ADDON_UNKNOWN)
+  if ((type = CAddonInfo::TranslateType(strMask)) != ADDON_UNKNOWN)
   {
     CURL url;
     url.SetProtocol("addons");
@@ -250,7 +251,7 @@ static int SetFile(const std::vector<std::string>& params)
     if (type == ADDON_SCRIPT)
       strMask = ".py";
     std::string replace;
-    if (CGUIDialogFileBrowser::ShowAndGetFile(url.Get(), strMask, TranslateType(type, true), replace, true, true, true))
+    if (CGUIDialogFileBrowser::ShowAndGetFile(url.Get(), strMask, CAddonInfo::TranslateType(type, true), replace, true, true, true))
     {
       if (StringUtils::StartsWithNoCase(replace, "addons://"))
         CSkinSettings::GetInstance().SetString(string, URIUtils::GetFileName(replace));
@@ -310,25 +311,6 @@ static int SetImage(const std::vector<std::string>& params)
   return 0;
 }
 
-/*! \brief Set a skin large image setting.
- *  \param params The parameters.
- *  \details params[0] = Name of skin setting.
- */
-static int SetLargeImage(const std::vector<std::string>& params)
-{
-  int string = CSkinSettings::GetInstance().TranslateString(params[0]);
-  std::string value = CSkinSettings::GetInstance().GetString(string);
-  VECSOURCES localShares;
-  g_mediaManager.GetLocalDrives(localShares);
-  VECSOURCES *shares = CMediaSourceSettings::GetInstance().GetSources("pictures");
-  if (!shares)
-    shares = &localShares;
-  if (CGUIDialogFileBrowser::ShowAndGetImage(*shares, g_localizeStrings.Get(1030), value))
-    CSkinSettings::GetInstance().SetString(string, value);
-
-  return 0;
-}
-
 /*! \brief Set a string skin setting.
  *  \param params The parameters.
  *  \details params[0] = Name of skin setting.
@@ -342,7 +324,7 @@ static int SetString(const std::vector<std::string>& params)
   {
     string = CSkinSettings::GetInstance().TranslateString(params[0]);
     CSkinSettings::GetInstance().SetString(string, params[1]);
-    CSettings::GetInstance().Save();
+    CServiceBroker::GetSettings().Save();
     return 0;
   }
   else
@@ -368,11 +350,11 @@ static int SetTheme(const std::vector<std::string>& params)
   int iTheme = -1;
 
   // find current theme
-  if (!StringUtils::EqualsNoCase(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKINTHEME), "SKINDEFAULT"))
+  if (!StringUtils::EqualsNoCase(CServiceBroker::GetSettings().GetString(CSettings::SETTING_LOOKANDFEEL_SKINTHEME), "SKINDEFAULT"))
   {
     for (size_t i=0;i<vecTheme.size();++i)
     {
-      std::string strTmpTheme(CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKINTHEME));
+      std::string strTmpTheme(CServiceBroker::GetSettings().GetString(CSettings::SETTING_LOOKANDFEEL_SKINTHEME));
       URIUtils::RemoveExtension(strTmpTheme);
       if (StringUtils::EqualsNoCase(vecTheme[i], strTmpTheme))
       {
@@ -396,12 +378,12 @@ static int SetTheme(const std::vector<std::string>& params)
   if (iTheme != -1 && iTheme < (int)vecTheme.size())
     strSkinTheme = vecTheme[iTheme];
 
-  CSettings::GetInstance().SetString(CSettings::SETTING_LOOKANDFEEL_SKINTHEME, strSkinTheme);
+  CServiceBroker::GetSettings().SetString(CSettings::SETTING_LOOKANDFEEL_SKINTHEME, strSkinTheme);
   // also set the default color theme
   std::string colorTheme(URIUtils::ReplaceExtension(strSkinTheme, ".xml"));
   if (StringUtils::EqualsNoCase(colorTheme, "Textures.xml"))
     colorTheme = "defaults.xml";
-  CSettings::GetInstance().SetString(CSettings::SETTING_LOOKANDFEEL_SKINCOLORS, colorTheme);
+  CServiceBroker::GetSettings().SetString(CSettings::SETTING_LOOKANDFEEL_SKINCOLORS, colorTheme);
   g_application.ReloadSkin();
 
   return 0;
@@ -414,7 +396,7 @@ static int SetTheme(const std::vector<std::string>& params)
 static int SkinReset(const std::vector<std::string>& params)
 {
   CSkinSettings::GetInstance().Reset(params[0]);
-  CSettings::GetInstance().Save();
+  CServiceBroker::GetSettings().Save();
 
   return 0;
 }
@@ -425,7 +407,7 @@ static int SkinReset(const std::vector<std::string>& params)
 static int SkinResetAll(const std::vector<std::string>& params)
 {
   CSkinSettings::GetInstance().Reset();
-  CSettings::GetInstance().Save();
+  CServiceBroker::GetSettings().Save();
 
   return 0;
 }
@@ -520,15 +502,6 @@ static int SkinDebug(const std::vector<std::string>& params)
 ///     @param[in] url                   Extra URL to allow selection from (optional).
 ///   }
 ///   \table_row2_l{
-///     <b>`Skin.SetLargeImage(string)`</b>
-///     ,
-///     Pops up a file browser and allows the user to select an large image file
-///     to be used in an image control else where in the skin via the info tag
-///     `Skin.String(string)`. If the value parameter is specified\, then the
-///     file browser dialog does not pop up\, and the image path is set directly.
-///     @param[in] string                Name of skin setting.
-///   }
-///   \table_row2_l{
 ///     <b>`Skin.SetNumeric(numeric[\,value])`</b>
 ///     ,
 ///     Pops up a keyboard dialog and allows the user to input a numerical.
@@ -588,7 +561,6 @@ CBuiltins::CommandMap CSkinBuiltins::GetOperations() const
            {"skin.setbool",       {"Sets a skin setting on", 1, SetBool}},
            {"skin.setfile",       {"Prompts and sets a file", 1, SetFile}},
            {"skin.setimage",      {"Prompts and sets a skin image", 1, SetImage}},
-           {"skin.setlargeimage", {"Prompts and sets a large skin images", 1, SetLargeImage}},
            {"skin.setnumeric",    {"Prompts and sets numeric input", 1, SetNumeric}},
            {"skin.setpath",       {"Prompts and sets a skin path", 1, SetPath}},
            {"skin.setstring",     {"Prompts and sets skin string", 1, SetString}},

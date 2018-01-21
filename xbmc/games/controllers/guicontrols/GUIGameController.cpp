@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2014-2016 Team Kodi
+ *      Copyright (C) 2014-2017 Team Kodi
  *      http://kodi.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -20,9 +20,11 @@
 
 #include "GUIGameController.h"
 #include "games/controllers/Controller.h"
+#include "games/controllers/ControllerLayout.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 
+using namespace KODI;
 using namespace GAME;
 
 CGUIGameController::CGUIGameController(int parentID, int controlID, float posX, float posY, float width, float height)
@@ -52,7 +54,7 @@ void CGUIGameController::Render(void)
 
   if (m_currentController)
   {
-    // TODO: Render pressed buttons
+    //! @todo Render pressed buttons
   }
 }
 
@@ -66,7 +68,7 @@ void CGUIGameController::ActivateController(const ControllerPtr& controller)
 
     lock.Leave();
 
-    // TODO: Sometimes this fails on window init
-    SetFileName(m_currentController->ImagePath());
+    //! @todo Sometimes this fails on window init
+    SetFileName(m_currentController->Layout().ImagePath());
   }
 }

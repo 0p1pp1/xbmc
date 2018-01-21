@@ -31,7 +31,7 @@ namespace XBMCAddon
      *  that specifically checks to see if we're in an OK thread state
      *  based on Python specifics.
      */
-    class PythonCallbackHandler : public RetardedAsynchCallbackHandler
+    class PythonCallbackHandler : public RetardedAsyncCallbackHandler
     {
       PyThreadState* objectThreadState;
     public:
@@ -43,8 +43,8 @@ namespace XBMCAddon
        *  handling callbacks in the appropriate thread.
        */
       PythonCallbackHandler();
-      virtual bool isStateOk(AddonClass* obj);
-      virtual bool shouldRemoveCallback(AddonClass* obj, void* threadState);
+      bool isStateOk(AddonClass* obj) override;
+      bool shouldRemoveCallback(AddonClass* obj, void* threadState) override;
     };
   }
 }

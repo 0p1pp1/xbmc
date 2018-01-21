@@ -62,7 +62,7 @@ public:
 
   CGUIListItem(void);
   CGUIListItem(const CGUIListItem& item);
-  CGUIListItem(const std::string& strLabel);
+  explicit CGUIListItem(const std::string& strLabel);
   virtual ~CGUIListItem(void);
   virtual CGUIListItem *Clone() const { return new CGUIListItem(*this); };
 
@@ -175,7 +175,7 @@ public:
   bool       HasProperties() const { return !m_mapProperties.empty(); };
   void       ClearProperty(const std::string &strKey);
 
-  CVariant   GetProperty(const std::string &strKey) const;
+  const CVariant &GetProperty(const std::string &strKey) const;
 
 protected:
   std::string m_strLabel2;     // text of column2
