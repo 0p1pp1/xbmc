@@ -40,7 +40,8 @@ build for the first Raspberry Pi, the commands have to be adapted to use
     $ ln -s ../.. /opt/rpi/rootfs/opt
 
     $ git clone --depth 1 https://github.com/raspberrypi/tools
-    $ cp -r tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 /opt/rpi/
+    $ mkdir /opt/rpi/tools
+    $ cp -a tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64  /opt/rpi/tools
 
     $ mkdir -p /opt/rpi/kodi-bcm
     $ ln -s /opt/rpi/rootfs/usr /opt/rpi/kodi-bcm/raspberry-pi-debug
@@ -51,22 +52,23 @@ build for the first Raspberry Pi, the commands have to be adapted to use
     $ ./bootstrap
     $ ./configure --prefix=/opt/rpi/kodi-bcm \
          --host=arm-linux-gnueabihf --with-firmware=/opt/rpi/rootfs \
-         --with-toolchain=/opt/rpi/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
-         --with-target-cxxflags="-std=c++11" \
+         --with-toolchain=/opt/rpi/tools/gcc-linaro-arm-linux-gnueabihf-raspbian-x64 \
+         --with-target-cxxflags="-isystem/opt/rpi/rootfs/usr/include/arm-linux-gnueabihf -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -std=c++11" \
+         --with-target-cflags="-isystem/opt/rpi/rootfs/usr/iclude/arm-linux-gnueabihf" \
          --with-target-ldflags="--sysroot=/opt/rpi/rootfs \
-         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/lib/arm-linux-gnueabihf \
+         -L/opt/rpi/rootfs/lib -L/opt/rpi/rootfs/usr/lib \
+         -L/opt/rpi/rootfs/lib/arm-linux-gnueabihf \
          -L/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf" \
          --with-platform=raspberry-pi
 
     $ make -C native
-    $ make -C target/crossguid
+    $ export PKG_CONFIG_LIBDIR=/opt/rpi/rootfs/usr/lib/pkgconfig:/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf/pkgconfig
+    $ make -C target/crossguid ....
     $ cd ../..
 
-    $ export PKG_CONFIG_PATH=/opt/rpi/rootfs/usr/lib/pkgconfig:/opt/rpi/rootfs/usr/lib/arm-linux-gnueabihf/pkgconfig
     $ make -C tools/depends/target/cmakebuildsys
     $ cd build
 
-    $ export PKG_CONFIG_SYSROOT_DIR=/opt/rpi/rootfs
     $ make
     $ make install
 
