@@ -110,12 +110,6 @@ AC_ARG_WITH([target-ldflags],
   [linker flags. Use e.g. for -l<lib> (target)])],
   [target_ldflags=$withval])
 
-AC_ARG_WITH([ffmpeg-options],
-  [AS_HELP_STRING([--with-ffmpeg-options],
-  [FFmpeg configure options, e.g. --enable-vaapi (target)])],
-  [ffmpeg_options=$withval],
-  [ffmpeg_options=default])
-
 
 if test "$use_ccache" = "yes"; then
   AC_CHECK_PROG(HAVE_CCACHE,ccache,"yes","no",)

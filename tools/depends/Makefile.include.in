@@ -67,8 +67,6 @@ CFLAGS=@platform_cflags@ @platform_includes@ -isystem @prefix@/@deps_dir@/includ
 LDFLAGS=-L@prefix@/@deps_dir@/lib @platform_ldflags@
 CXXFLAGS=@platform_cxxflags@ @platform_includes@ -isystem @prefix@/@deps_dir@/include
 CPPFLAGS=@platform_cflags@ @platform_includes@ -isystem @prefix@/@deps_dir@/include
-# set configured FFmpeg configure options
-FFMPEG_CONFIGURE_OPTIONS=@ffmpeg_options@
 
 
 PATH:=@prefix@/@tool_dir@/bin:$(PATH)
