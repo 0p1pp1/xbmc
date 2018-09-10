@@ -88,6 +88,10 @@ if(GNUTLS_FOUND)
   list(APPEND ffmpeg_conf --enable-gnutls)
 endif()
 
+if(FFMPEG_CONFIGURE_OPTIONS)
+  list(APPEND ffmpeg_conf ${FFMPEG_CONFIGURE_OPTIONS})
+endif()
+
 message(STATUS "FFMPEG_CONF: ${ffmpeg_conf}")
 
 include(ExternalProject)
