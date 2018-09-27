@@ -15,7 +15,9 @@
 #   EGL::EGL   - The EGL library
 
 if(CORE_PLATFORM_NAME_LC STREQUAL rbpi)
+  if(NOT CPU STREQUAL "arm1176jzf-s")
     set(_brcmprefix brcm)
+  endif()
 endif()
 
 if(PKG_CONFIG_FOUND)
