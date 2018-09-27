@@ -449,6 +449,16 @@ if test "$target_platform" = "raspberry-pi" ; then
    -isystem${use_firmware}/opt/vc/include/interface/vmcs_host/linux"
   platform_ldflags+=" -L${use_firmware}/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -lvcos \
    -lvchiq_arm"
+  if test -n "$use_sdk_path"; then
+    platform_cflags+=" -idirafter${use_sdk_path}/usr/include \
+     -idirafter${use_sdk_path}/usr/include/${use_host}"
+    platform_cxxflags+=" -idirafter${use_sdk_path}/usr/include \
+     -idirafter${use_sdk_path}/usr/include/${use_host}"
+    platform_ldflags+=" -L=/lib -L=/usr/lib -L${use_sdk_path}/lib \
+     -L${use_sdk_path}/lib/${use_host} -L${use_sdk_path}/usr/lib \
+     -L${use_sdk_path}/usr/lib/${use_host} \
+     -Wl,-rpath-link=${use_toolchain}/arm-linux-gnueabihf/sysroot/lib:${use_toolchain}/arm-linux-gnueabihf/sysroot/usr/lib:${use_sdk_path}/lib:${use_sdk_path}/usr/lib:${use_sdk_path}/lib/${use_host}:${use_sdk_path}/usr/lib/${use_host}"
+  fi
 fi
 
 XBMC_SETUP_ARCH_DEFINES()
@@ -603,8 +613,8 @@ if [ ! `mkdir -p $use_tarballs` ]; then
 fi
 
 # remove unwanted optimization flags
-tmp_cflags=$(echo $c11_flags $platform_cflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}//g')
-tmp_cxxflags=$(echo $cxx11_flags $platform_cxxflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}//g')
+tmp_cflags=$(echo $c11_flags $platform_cflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}/ /g')
+tmp_cxxflags=$(echo $cxx11_flags $platform_cxxflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}/ /g')
 
 release_cflags="-DNDEBUG=1"
 
