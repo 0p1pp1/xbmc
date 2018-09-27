@@ -22,7 +22,7 @@ PKG_CHECK_MODULES([PNG], [libpng],
   [INCLUDES="$PNG_CFLAGS"; LIBS="$LIBS $(${PKG_CONFIG} --silence-errors --static --libs libpng)"],
   AC_MSG_ERROR("libpng not found"))
 
-AC_CHECK_HEADER([gif_lib.h],, AC_MSG_ERROR("gif_lib.h not found"))
+AC_CHECK_HEADER([gif_lib.h],, AC_MSG_ERROR("gif_lib.h not found"), -)
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <gif_lib.h>]], [[
 #if !defined GIFLIB_MAJOR || GIFLIB_MAJOR < 5
 #error libgif version < 5;

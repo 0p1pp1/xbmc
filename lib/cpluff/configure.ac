@@ -186,7 +186,7 @@ fi
 if test "$dlmechanism" = none && test "$with_libltdl" != no && test "$with_dlopen" != yes; then  
   AC_CHECK_HEADER([ltdl.h],
     AC_CHECK_LIB([ltdl], [lt_dlopen],
-      [LIBS_DL="-lltdl $LIBS_DL"; dlmechanism=libltdl]))
+      [LIBS_DL="-lltdl $LIBS_DL"; dlmechanism=libltdl],, -))
 fi
 case "$dlmechanism" in
   dlopen)
