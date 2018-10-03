@@ -9,6 +9,9 @@ ARCHIVE=$(SOURCE).tar.gz
 
 # configuration settings
 CONFIGURE=./configure --prefix=$(PREFIX)
+ifeq ($(CROSS_COMPILING),yes)
+  CONFIGURE+= --host=$(HOST)
+endif
 
 LIBDYLIB=$(PLATFORM)/lib/.libs/lib$(LIBNAME).a
 
@@ -20,6 +23,7 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
+	cd $(PLATFORM); patch -p0 < ../libtool.patch
 	cd $(PLATFORM); autoreconf -vif; $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)

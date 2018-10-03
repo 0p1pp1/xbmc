@@ -29,6 +29,7 @@ $(LIBDYLIB): $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 	$(MAKE) -C $(PLATFORM) install
+	rm -f $(PREFIX)/lib/libass.la $(PREFIX)/lib/libass.so*
 	touch $@
 
 clean:

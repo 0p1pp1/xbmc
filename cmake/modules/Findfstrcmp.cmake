@@ -34,7 +34,8 @@ if(ENABLE_INTERNAL_FSTRCMP)
                       URL ${FSTRCMP_URL}
                       DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/download
                       PREFIX ${CORE_BUILD_DIR}/fstrcmp
-                      CONFIGURE_COMMAND autoreconf -vif && ./configure --prefix ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}
+                      PATCH_COMMAND patch -p0 -i ${CMAKE_SOURCE_DIR}/tools/depends/target/libfstrcmp/libtool.patch
+                      CONFIGURE_COMMAND autoreconf -vif && CONFIG_SITE=${CMAKE_INSTALL_PREFIX}/share/config.site ./configure --prefix ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}
                       BUILD_BYPRODUCTS ${FSTRCMP_LIBRARY}
                       BUILD_IN_SOURCE 1)
   set_target_properties(fstrcmp PROPERTIES FOLDER "External Projects")

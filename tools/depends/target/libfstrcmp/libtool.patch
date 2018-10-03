@@ -1,0 +1,73 @@
+--- configure.ac.org	2018-09-29 23:21:43.267110471 +0900
++++ configure.ac	2018-09-29 23:57:14.210749699 +0900
+@@ -18,9 +18,10 @@
+ dnl!
+ AC_INIT(install-sh)
+ AC_CONFIG_HEADER(lib/config.h)
++AC_CONFIG_MACRO_DIR([m4])
++LT_INIT
+ AC_PROG_CC
+ AC_CANONICAL_HOST
+-AC_GNU_SOURCE
+ AC_PROG_INSTALL
+ AC_PROG_RANLIB
+ AC_CHECK_PROGS(AR, ar)
+@@ -53,37 +55,6 @@
+ dnl! AC_ADD_CFLAGS(-Werror)
+ dnl! AC_ADD_CFLAGS([-Wl,--as-needed])
+ 
+-AC_CHECK_PROGS(LIBTOOL, libtool)
+-
+-if test -z "$LIBTOOL"
+-then
+-  AC_MSG_RESULT([
+-        You must have GNU Libtool installed to build fstrcmp.
+-        Homepage: http://www.gnu.org/software/libtool/])
+-  OK=no
+-  if apt-get --version > /dev/null 2> /dev/null; then
+-    AC_MSG_RESULT([
+-        The following command may be used to install it:
+-        sudo apt-get install libtool
+-    ])
+-    OK=yes
+-  fi
+-  if yum --version > /dev/null 2> /dev/null; then
+-    AC_MSG_RESULT([
+-        The following command may be used to install it:
+-        sudo yum install libtool
+-    ])
+-    OK=yes
+-  fi
+-  if test "$OK" != "yes"; then
+-    AC_MSG_RESULT([
+-        If you are using a package based install, you will need the
+-        libtool package.
+-    ])
+-  fi
+-  exit 1
+-fi
+-
+ AC_CHECK_PROGS(GROFF, groff roff)
+ AC_CHECK_PROGS(SOELIM, gsoelim soelim)
+ AC_CHECK_PROGS(REFER, refer grefer)
+--- Makefile.in.org	2018-09-29 23:38:52.527683339 +0900
++++ Makefile.in	2018-09-30 00:11:17.567182384 +0900
+@@ -37,6 +37,9 @@
+ srcdir = @srcdir@
+ VPATH = @srcdir@
+ 
++# needed for libtool(LT_INIT)
++top_builddir = .
++
+ #
+ # the name of the install program to use
+ #
+@@ -117,7 +120,7 @@
+ #
+ # The name of the GNU Libtool command.
+ #
+-LIBTOOL = @LIBTOOL@
++LIBTOOL = ./libtool
+ 
+ #
+ # extra libraries required for your system

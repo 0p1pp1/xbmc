@@ -24,7 +24,7 @@ else()
   ExternalProject_Add(libcpluff SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/cpluff
                       BUILD_IN_SOURCE 1
                       PREFIX ${CORE_BUILD_DIR}/cpluff
-                      CONFIGURE_COMMAND AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CC=${CMAKE_C_COMPILER} ${CMAKE_SOURCE_DIR}/lib/cpluff/configure
+                      CONFIGURE_COMMAND CONFIG_SITE=${CMAKE_INSTALL_PREFIX}/share/config.site AR=${CMAKE_AR} RANLIB=${CMAKE_RANLIB} CC=${CMAKE_C_COMPILER} ${CMAKE_SOURCE_DIR}/lib/cpluff/configure
                                         --disable-nls
                                         --enable-static
                                         --disable-shared
