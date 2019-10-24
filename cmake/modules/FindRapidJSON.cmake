@@ -46,7 +46,7 @@ if(ENABLE_INTERNAL_RapidJSON)
   set_target_properties(rapidjson PROPERTIES FOLDER "External Projects")
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(rapidjson
+  find_package_handle_standard_args(RapidJSON
                                     REQUIRED_VARS RapidJSON_LIBRARY RapidJSON_INCLUDE_DIR
                                     VERSION_VAR RJSON_VER)
 
