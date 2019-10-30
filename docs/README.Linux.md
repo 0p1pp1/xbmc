@@ -1,5 +1,40 @@
 ![Kodi Logo](resources/banner_slim.png)
 
+## Kodiをネイティブビルドし、un-installedのまま使う手順
+1. 依存パッケージのインストール
+- ディストリビューションのKodiパッケージにおける依存情報、および下記[Install the required packages](#3-install-the-required-packages)を参照
+- libbluray,java関連, avahi, bluetooth...等は必要に応じて
+- [ISDBのスクランブル化されたままのTSファイルを再生したい場合のみ]
+  + libdemulti2, libpcsclite|libyakisoba
+  + ffmpegはhttps://github.com/0p1pp1/ffmpegをインストールするか、内部ビルド
+- crossguid, RapidJSON, libfmt, libfstrcmp, flatbuffers, ffmpegライブラリは内部ビルド可能。
+(Kodiだけのためにインストールしなくても良い。)
+- TexturePacker, JsonSchemaBuilder等の必須？ツールも内部ビルドできるので、同様
+
+2. Kodi本体のコンフィグ、ビルド
+```
+$ git clone --depth 1 -b isdb-18.4 https://github.com/0p1pp1/xbmc kodi
+$ mkdir kodi/kodi-build; cd kodi/kodi-build
+$ cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DENABLE_INTERNAL_CROSSGUID=ON \
+  -DENABLE_INTERNAL_RapidJSON=ON -DENABLE_INTERNAL_FLATBUFFERS=ON \
+  -DENABLE_INTERNAL_FMT=ON -DENABLE_INTERNAL_FSTRCMP=ON \
+  -DENABLE_INTERNAL_FFMPEG=ON [-DFFMPEG_CONFIGURE_OPTIONS="--enable-libdemulti2"]
+$ cmake --build .
+```
+
+3. アドオンのビルド
+```
+$ make -C ../tools/depends/target/binary-addons ADDONS="pvr.hts" \
+    PREFIX=<PATH_TO_GITREPO_DIR>/kodi-build/addons \
+    EXTRA_CMAKE_ARGS=-DPACKAGE_ZIP=ON
+```
+4. 実行
+```
+$ kodi/kodi-build/kodi-x11
+```
+
+以下、オリジナルのREADME
+
 # Linux build guide
 This is the general Linux build guide. Please read it in full before you proceed to familiarize yourself with the build procedure.
 
