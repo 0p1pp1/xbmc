@@ -16,9 +16,6 @@ else
   DEPS += ../../Makefile.include
 endif
 
-ifeq ($(NATIVE_OS), linux)
-  EXTRA_CONFIGURE = --enable-static
-endif
 ifeq ($(NATIVE_OS), android)
   EXTRA_CONFIGURE = --enable-static
 endif
