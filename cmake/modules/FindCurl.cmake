@@ -33,9 +33,8 @@ if(${CURL_LIBRARY} MATCHES ".+\.a$" AND PC_CURL_STATIC_LDFLAGS)
   set(CURL_LIB_TYPE STATIC)
   set(CURL_LDFLAGS ${PC_CURL_STATIC_LDFLAGS})
 
-  pkg_check_modules(PC_NGHTTP2 libnghttp2 QUIET)
-  find_library(NGHTTP2_LIBRARY NAMES libnghttp2 nghttp2
-                               PATHS ${PC_NGHTTP2_LIBDIR})
+  set(NGHTTP2_LIBRARY ${PC_CURL_STATIC_LIBRARIES})
+  list(REMOVE_ITEM NGHTTP2_LIBRARY curl libcurl libcurl_imp)
 endif()
 
 include(FindPackageHandleStandardArgs)
@@ -46,6 +45,7 @@ find_package_handle_standard_args(Curl
 if(CURL_FOUND)
   set(CURL_INCLUDE_DIRS ${CURL_INCLUDE_DIR})
   set(CURL_LIBRARIES ${CURL_LIBRARY} ${NGHTTP2_LIBRARY})
+  set(CURL_DEFINITIONS ${PC_CURL_CFLAGS_OTHER})
 
   if(NOT TARGET Curl::Curl)
     add_library(Curl::Curl ${CURL_LIB_TYPE} IMPORTED)
