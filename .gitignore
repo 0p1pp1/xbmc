@@ -294,6 +294,7 @@ cmake_install.cmake
 /tools/depends/target/Toolchain_binaddons.cmake
 /tools/depends/target/config-binaddons.site
 /tools/depends/target/binary-addons/native
+/tools/depends/target/*/*/
 
 # /tools/EventClients/
 /tools/EventClients/*.pyc
