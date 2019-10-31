@@ -488,7 +488,10 @@ AC_PATH_TOOL([NM], [nm],, $PATH_FOR_HOST)
 AC_PATH_TOOL([OBJDUMP], [objdump],, $PATH_FOR_HOST)
 AC_PATH_TOOL([CC],[$platform_cc],,$PATH_FOR_HOST)
 AC_PATH_TOOL([CXX],[$platform_cxx],,$PATH_FOR_HOST)
+saved_cppflags=${CPPFLAGS}
+CPPFLAGS+=" $platform_cflags"
 AC_PROG_CPP
+CPPFLAGS=$saved_cppflags
 
 AC_PATH_PROG([RANLIB_FOR_BUILD], [ranlib], ranlib, $PATH_FOR_BUILD)
 AC_PATH_PROG([LD_FOR_BUILD], [ld], ld, $PATH_FOR_BUILD)
