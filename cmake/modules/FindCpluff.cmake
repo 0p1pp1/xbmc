@@ -13,12 +13,13 @@ if(CORE_SYSTEM_NAME MATCHES windows)
 else()
   string(REPLACE ";" " " defines "${CMAKE_C_FLAGS} ${SYSTEM_DEFINES} -I${EXPAT_INCLUDE_DIR}")
   get_filename_component(expat_dir ${EXPAT_LIBRARY} DIRECTORY)
-  set(ldflags "-L${expat_dir}")
+  string(REPLACE ";" " " ldflags "${CMAKE_EXE_LINKER_FLAGS} -L${expat_dir}")
+  string(REPLACE ";" " " cppflags "${CMAKE_CPP_FLAGS}")
 
   # iOS: Without specifying -arch, configure tries to use /bin/cpp as C-preprocessor
   # http://stackoverflow.com/questions/38836754/cant-cross-compile-c-library-for-arm-ios
   if(CORE_SYSTEM_NAME STREQUAL ios)
-    set(cppflags "-arch ${CPU}")
+    set(cppflags "${cppflags} -arch ${CPU}")
   endif()
 
   ExternalProject_Add(libcpluff SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/cpluff
