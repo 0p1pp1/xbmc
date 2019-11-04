@@ -271,7 +271,9 @@ if(NOT FFMPEG_FOUND)
                                     <SOURCE_DIR> &&
                                     ${CMAKE_COMMAND} -E copy
                                     ${CMAKE_SOURCE_DIR}/tools/depends/target/ffmpeg/FindGnuTls.cmake
-                                    <SOURCE_DIR>)
+                                    <SOURCE_DIR> &&
+                                    ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>
+                                    patch -p1 -i ${CMAKE_SOURCE_DIR}/tools/depends/target/ffmpeg/pfcd_hevc_optimisations.patch)
 
   find_program(BASH_COMMAND bash)
   if(NOT BASH_COMMAND)

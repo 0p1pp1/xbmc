@@ -1,6 +1,7 @@
 include ../../Makefile.include
 include FFMPEG-VERSION
 DEPS= ../../Makefile.include FFMPEG-VERSION Makefile
+DEPS += pfcd_hevc_optimisations.patch
 
 # set to "yes" to enable patching
 # we don't apply patches until we move to a vanilla ffmpeg tarball
@@ -22,6 +23,19 @@ ffmpg_config += --enable-encoder=wmav2 --enable-protocol=http
 ffmpg_config += --enable-gnutls
 ffmpg_config += --enable-encoder=png --enable-encoder=mjpeg
 ffmpg_config += $(FFMPEG_CONFIGURE_OPTIONS)
+
+ifneq ($(findstring raspberry-pi, $(TARGET_PLATFORM)),)
+  ifeq ($(TARGET_PLATFORM), raspbery-pi4)
+    ffmpeg_config += --enable-mmal
+  else
+    ffmpeg_config += --enable-omx-rpi
+  endif
+  ffmpg_config += --enable-rpi --disable-vaapi --disable-vdpau
+  ffmpg_config += --disable-xvmc
+  ffmpg_config += --disable-libxcb --disable-libxcb-shape
+  ffmpg_config += --disable-libxcb-shm --disable-libxcb-xfixes
+  ffmpg_config += --disable-xlib
+endif
 
 ifeq ($(CROSS_COMPILING), yes)
   ffmpg_config += --arch=$(CPU) --enable-cross-compile
@@ -77,6 +91,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 	cd $(PLATFORM); sed -i".bak" -e "s%pkg_config_default=pkg-config%export PKG_CONFIG_LIBDIR=$(PREFIX)/lib/pkgconfig \&\& pkg_config_default=$(NATIVEPREFIX)/bin/pkg-config%" configure
+	cd $(PLATFORM); [[ $(TARGET_PLATFORM) = raspberry-pi4 ]] && patch -p1 < ../pfcd_hevc_optimisations.patch
 	cd $(PLATFORM);\
 	CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 	./configure $(ffmpg_config)

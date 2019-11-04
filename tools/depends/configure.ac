@@ -411,7 +411,7 @@ case $use_platform in
      platform_cxxflags="-fPIC -mcpu=cortex-a7 -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad"
      platform_ldflags="-lpthread"
      ;;
-  raspberry-pi3)
+  raspberry-pi3|raspberry-pi4)
      target_platform=raspberry-pi
      use_cpu=cortex-a53
      ffmpeg_options_default="--cpu=cortex-a53"
