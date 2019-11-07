@@ -25,10 +25,10 @@ if(PKG_CONFIG_FOUND)
 endif()
 
 find_path(EGL_INCLUDE_DIR EGL/egl.h
-                          PATHS ${PC_EGL_INCLUDEDIR})
+                          HINTS ${PC_EGL_INCLUDEDIR})
 
 find_library(EGL_LIBRARY NAMES ${_brcmprefix}EGL egl
-                         PATHS ${PC_EGL_LIBDIR})
+                         HINTS ${PC_EGL_LIBDIR})
 
 set(EGL_VERSION ${PC_EGL_VERSION})
 

@@ -94,7 +94,7 @@ elseif(CORE_SYSTEM_NAME STREQUAL osx)
                           --disable-securetransport)
 endif()
 
-if(CPU MATCHES arm OR CORE_PLATFORM_NAME STREQUAL rbpi)
+if(CPU MATCHES arm OR CORE_PLATFORM_NAME STREQUAL rbpi OR RASPBERRY_PI4_GBM)
   list(APPEND ffmpeg_conf --enable-pic --disable-armv5te --disable-armv6t2)
 elseif(CPU MATCHES mips)
   list(APPEND ffmpeg_conf --disable-mips32r2 --disable-mipsdsp --disable-mipsdspr2)

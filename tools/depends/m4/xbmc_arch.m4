@@ -77,7 +77,11 @@ if test "$target_platform" = "target_android" ; then
   AC_SUBST(ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX -DTARGET_ANDROID")
 fi
 
-if test "$target_platform" = "target_raspberry_pi" ; then
+if test "$target_platform" = "raspberry-pi" ; then
   AC_SUBST(ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX -D_ARMEL -DTARGET_RASPBERRY_PI")
+fi
+
+if test "$target_platform" = "raspberry-pi4" ; then
+  AC_SUBST(ARCH_DEFINES, "-DTARGET_POSIX -DTARGET_LINUX -D_LINUX -D_ARMEL -DTARGET_RPI4_GBM")
 fi
 ])

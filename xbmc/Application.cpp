@@ -457,7 +457,7 @@ bool CApplication::Create(const CAppParamParser &params)
   std::string specialVersion;
 
   //! @todo - move to CPlatformXXX
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
   specialVersion = " (version for Raspberry Pi)";
 //#elif defined(some_ID) // uncomment for special version/fork
 //  specialVersion = " (version for XXXX)";
@@ -2387,7 +2387,7 @@ void CApplication::FrameMove(bool processEvents, bool processGUI)
   if (processGUI && m_renderGUI)
   {
     m_skipGuiRender = false;
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
     int fps = 0;
 
     // This code reduces rendering fps of the GUI layer when playing videos in fullscreen mode

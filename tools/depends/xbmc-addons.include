@@ -7,7 +7,9 @@ ifeq ($(CROSS_COMPILING),yes)
   TOOLCHAIN = -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE)
   ifeq ($(OS),linux)
     ifneq ($(TARGET_PLATFORM),raspberry-pi)
-      DEPS += linux-system-libs
+      ifneq ($(TARGET_PLATFORM), raspberry-pi4)
+        DEPS += linux-system-libs
+      endif
     endif
   endif
 endif

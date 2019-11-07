@@ -17,7 +17,7 @@
 
 #include "pictures/Picture.h"
 
-#ifdef TARGET_RASPBERRY_PI
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
 #include "platform/linux/RBP.h"
 #endif
 
@@ -62,7 +62,7 @@ CScreenshotSurface::~CScreenshotSurface()
 
 bool CScreenshotSurface::capture()
 {
-#if defined(TARGET_RASPBERRY_PI)
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
   g_RBP.GetDisplaySize(m_width, m_height);
   m_buffer = g_RBP.CaptureDisplay(m_width, m_height, &m_stride, true, false);
   if (!m_buffer)

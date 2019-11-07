@@ -15,6 +15,9 @@ if(OS STREQUAL linux)
     if(NOT APP_RENDER_SYSTEM)
       set(APP_RENDER_SYSTEM gles)
     endif()
+  elseif(PLATFORM STREQUAL raspberry-pi4)
+    set(RASPBERRY_PI4_GBM ON)
+    set(CORE_PLATFORM_NAME gbm)
   elseif(NOT "@target_platform@" STREQUAL "")
     set(CORE_PLATFORM_NAME @target_platform@)
   endif()
@@ -67,10 +70,8 @@ if(NOT "@use_toolchain@" STREQUAL "")
 endif()
 
 # add RBPI's firmware directories
-if(CORE_PLATFORM_NAME STREQUAL rbpi)
+if(CORE_PLATFORM_NAME STREQUAL rbpi OR RASPBERRY_PI4_GBM)
   list(APPEND CMAKE_FIND_ROOT_PATH @use_firmware@/opt/vc)
-  list(APPEND CMAKE_LIBRARY_PATH @CMAKE_FIND_ROOT_PATH@/lib:@use_firmware@/opt/vc/lib)
-  list(APPEND CMAKE_INCLUDE_PATH @CMAKE_FIND_ROOT_PATH@/include:@use_firmware@/opt/vc/include)
 endif()
 
 # add Android directories and tools

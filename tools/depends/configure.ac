@@ -431,6 +431,9 @@ if test "$target_platform" = "raspberry-pi" ; then
   else
     AC_MSG_ERROR([Raspberry Pi firmware not found])
   fi
+  if test "$use_platform" = "raspberry-pi4" ; then
+    target_platform="raspberry-pi4"
+  fi
   use_arch="arm"
   use_hardcoded_tables="yes"
   ARCH="arm"
@@ -438,30 +441,30 @@ if test "$target_platform" = "raspberry-pi" ; then
   use_host="arm-linux-gnueabihf"
   deps_dir="$use_platform-$build_type"
   platform_cflags+=" -pipe -mabi=aapcs-linux -Wno-psabi \
-   -Wa,-mno-warn-deprecated -Wno-deprecated-declarations \
-   -isystem${use_firmware}/opt/vc/include \
-   -isystem${use_firmware}/opt/vc/include/interface/vcos/pthreads \
-   -isystem${use_firmware}/opt/vc/include/interface/vmcs_host/linux"
+   -Wa,-mno-warn-deprecated -Wno-deprecated-declarations"
   platform_cxxflags+=" -pipe -mabi=aapcs-linux -Wno-psabi \
-   -Wa,-mno-warn-deprecated -Wno-deprecated-declarations \
-   -isystem${use_firmware}/opt/vc/include \
-   -isystem${use_firmware}/opt/vc/include/interface/vcos/pthreads \
-   -isystem${use_firmware}/opt/vc/include/interface/vmcs_host/linux"
-  platform_ldflags+=" -Wl,-rpath-link=$prefix/$deps_dir/lib \
-   -L${use_firmware}/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -lvcos \
-   -lvchiq_arm"
+   -Wa,-mno-warn-deprecated -Wno-deprecated-declarations"
+  platform_ldflags+=" -L${use_firmware}/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -lvcos \
+   -lvchiq_arm \
+   -Wl,-rpath-link=$prefix/$deps_dir/lib:${use_firmware}/opt/vc/lib"
   if test -n "$use_sdk_path"; then
     platform_cflags+=" -idirafter${use_sdk_path}/usr/include \
      -idirafter${use_sdk_path}/usr/include/${use_host}"
     platform_cxxflags+=" -idirafter${use_sdk_path}/usr/include \
      -idirafter${use_sdk_path}/usr/include/${use_host}"
-    platform_ldflags+=" -L${use_toolchain}/arm-linux-gnueabihf/sysroot/lib \
-     -L${use_toolchain}/arm-linux-gnueabihf/sysroot/usr/lib \
+    platform_ldflags+=" -L${use_toolchain}/${use_host}/sysroot/lib \
+     -L${use_toolchain}/${use_host}/sysroot/usr/lib \
      -L${use_sdk_path}/lib \
      -L${use_sdk_path}/lib/${use_host} -L${use_sdk_path}/usr/lib \
      -L${use_sdk_path}/usr/lib/${use_host} \
-     -Wl,-rpath-link=${use_toolchain}/arm-linux-gnueabihf/sysroot/usr/lib:${use_toolchain}/arm-linux-gnueabihf/sysroot/lib:${use_sdk_path}/lib/${use_host}:${use_sdk_path}/usr/lib/${use_host}:${use_sdk_path}/lib:${use_sdk_path}/usr/lib"
+     -Wl,-rpath-link=${use_toolchain}/${use_hsot}/sysroot/usr/lib:${use_toolchain}/${use_host}/sysroot/lib:${use_sdk_path}/lib/${use_host}:${use_sdk_path}/usr/lib/${use_host}:${use_sdk_path}/lib:${use_sdk_path}/usr/lib"
   fi
+  platform_cflags+=" -idirafter${use_firmware}/opt/vc/include \
+   -idirafter${use_firmware}/opt/vc/include/interface/vcos/pthreads \
+   -idirafter${use_firmware}/opt/vc/include/interface/vmcs_host/linux"
+  platform_cxxflags+=" -idirafter${use_firmware}/opt/vc/include \
+   -idirafter${use_firmware}/opt/vc/include/interface/vcos/pthreads \
+   -idirafter${use_firmware}/opt/vc/include/interface/vmcs_host/linux"
 fi
 
 XBMC_SETUP_ARCH_DEFINES()

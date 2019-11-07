@@ -8,7 +8,7 @@
 
 #include "Application.h"
 
-#ifdef TARGET_RASPBERRY_PI
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
 #include "platform/linux/RBP.h"
 #endif
 
@@ -36,7 +36,7 @@ extern "C" int XBMC_Run(bool renderGUI, const CAppParamParser &params)
     return status;
   }
 
-#ifdef TARGET_RASPBERRY_PI
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
   if(!g_RBP.Initialize())
     return false;
   g_RBP.LogFirmwareVersion();
@@ -82,7 +82,7 @@ extern "C" int XBMC_Run(bool renderGUI, const CAppParamParser &params)
   }
 #endif
 
-#ifdef TARGET_RASPBERRY_PI
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
   g_RBP.Deinitialize();
 #elif defined(TARGET_ANDROID)
   CXBMCApp::get()->Deinitialize();

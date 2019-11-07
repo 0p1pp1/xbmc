@@ -66,13 +66,15 @@ ifeq ($(OS),linux)
   DEPENDS += dbus libuuid
   #not for raspberry pi
   ifneq ($(TARGET_PLATFORM),raspberry-pi)
-    DEPENDS += linux-system-libs
-    WAYLANDPP_DEPS += linux-system-libs
+    ifneq ($(CROSS_COMPILING),yes)
+      DEPENDS += linux-system-libs
+      WAYLANDPP_DEPS += linux-system-libs
+    endif
   endif
   DEPENDS += alsa-lib
   ALSA_LIB = alsa-lib
   CROSSGUID_DEPS = libuuid
-  ifeq ($(TARGET_PLATFORM),$(filter $(TARGET_PLATFORM),raspberry-pi aml gbm))
+  ifeq ($(TARGET_PLATFORM),$(filter $(TARGET_PLATFORM),raspberry-pi raspberry-pi4 aml gbm))
     DEPENDS += libxkbcommon libinput libudev libevdev mtdev
   endif
 endif
