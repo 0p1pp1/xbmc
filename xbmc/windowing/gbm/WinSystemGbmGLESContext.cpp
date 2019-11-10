@@ -14,6 +14,7 @@
 #else
 #include "cores/VideoPlayer/DVDCodecs/Video/MMALFFmpeg.h"
 #include "cores/VideoPlayer/DVDCodecs/Video/MMALCodec.h"
+#include "cores/VideoPlayer/Process/rbpi/ProcessInfoPi.h"
 #include "VideoSyncPi.h"
 #endif
 
@@ -52,6 +53,9 @@ bool CWinSystemGbmGLESContext::InitWindowSystem()
   CDVDFactoryCodec::ClearHWVideoCodecs();
 
   CLinuxRendererGLES::Register();
+#ifdef TARGET_RPI4_GBM
+  CProcessInfoPi::Register();
+#endif
   RETRO::CRPProcessInfoGbm::Register();
 #ifndef TARGET_RPI4_GBM
   RETRO::CRPProcessInfoGbm::RegisterRendererFactory(new RETRO::CRendererFactory);
