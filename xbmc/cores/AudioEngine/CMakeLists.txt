@@ -99,6 +99,9 @@ if(CORE_PLATFORM_NAME_LC STREQUAL rbpi)
                       Sinks/AESinkPi.cpp)
   list(APPEND HEADERS Engines/ActiveAE/ActiveAEResamplePi.h
                       Sinks/AESinkPi.h)
+elseif(RASPBERRY_PI4_GBM)
+  list(APPEND SOURCES Sinks/AESinkPi.cpp)
+  list(APPEND HEADERS Sinks/AESinkPi.h)
 endif()
 
 if(CORE_SYSTEM_NAME STREQUAL osx)

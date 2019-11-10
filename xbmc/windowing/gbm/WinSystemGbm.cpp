@@ -25,6 +25,9 @@
 #include "DRMLegacy.h"
 #include "OffScreenModeSetting.h"
 #include "messaging/ApplicationMessenger.h"
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
+#include "cores/AudioEngine/Sinks/AESinkPi.h"
+#endif
 
 using namespace KODI::WINDOWING::GBM;
 
@@ -34,6 +37,11 @@ CWinSystemGbm::CWinSystemGbm() :
   m_libinput(new CLibInputHandler)
 {
   std::string envSink;
+
+#if defined(TARGET_RASPBERRY_PI) || defined(TARGET_RPI4_GBM)
+  CAESinkPi::Register();
+#endif
+
   if (getenv("KODI_AE_SINK"))
     envSink = getenv("KODI_AE_SINK");
   if (StringUtils::EqualsNoCase(envSink, "ALSA"))
