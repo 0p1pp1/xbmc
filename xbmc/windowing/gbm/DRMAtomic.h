@@ -9,6 +9,9 @@
 #pragma once
 
 #include "DRMUtils.h"
+#ifdef TARGET_RPI4_GBM
+#include "platform/linux/RBP.h"
+#endif
 
 namespace KODI
 {
@@ -36,6 +39,9 @@ private:
   bool m_need_modeset;
   bool m_active = true;
   drmModeAtomicReq *m_req = nullptr;
+#ifdef TARGET_RPI4_GBM
+  DISPMANX_ELEMENT_HANDLE_T m_dispmanx_display = 0;
+#endif
 };
 
 }
