@@ -16,6 +16,11 @@ set(HEADERS OptionalsReg.h
             OffScreenModeSetting.h
             WinSystemGbmEGLContext.h)
 
+if (RASPBERRY_PI4_GBM)
+  list(APPEND SOURCES VideoSyncPi.cpp)
+  list(APPEND HEADERS VideoSyncPi.h)
+endif()
+
 if (OPENGL_FOUND)
   list(APPEND SOURCES WinSystemGbmGLContext.cpp)
   list(APPEND HEADERS WinSystemGbmGLContext.h)

@@ -6,15 +6,21 @@
  *  See LICENSES/README.md for more information.
  */
 
+#ifndef TARGET_RPI4_GBM
 #include "cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecDRMPRIME.h"
 #include "cores/VideoPlayer/VideoRenderers/HwDecRender/RendererDRMPRIME.h"
 #include "cores/VideoPlayer/VideoRenderers/HwDecRender/RendererDRMPRIMEGLES.h"
+#include "cores/VideoPlayer/Process/gbm/ProcessInfoGBM.h"
+#else
+#include "cores/VideoPlayer/DVDCodecs/Video/MMALFFmpeg.h"
+#include "cores/VideoPlayer/DVDCodecs/Video/MMALCodec.h"
+#include "VideoSyncPi.h"
+#endif
 
 #include "cores/RetroPlayer/process/gbm/RPProcessInfoGbm.h"
 #include "cores/RetroPlayer/rendering/VideoRenderers/RPRendererGBM.h"
 #include "cores/RetroPlayer/rendering/VideoRenderers/RPRendererOpenGLES.h"
 #include "cores/VideoPlayer/DVDCodecs/DVDFactoryCodec.h"
-#include "cores/VideoPlayer/Process/gbm/ProcessInfoGBM.h"
 #include "cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h"
 #include "cores/VideoPlayer/VideoRenderers/RenderFactory.h"
 
@@ -43,9 +49,13 @@ bool CWinSystemGbmGLESContext::InitWindowSystem()
 {
   VIDEOPLAYER::CRendererFactory::ClearRenderer();
   CDVDFactoryCodec::ClearHWAccels();
+  CDVDFactoryCodec::ClearHWVideoCodecs();
+
   CLinuxRendererGLES::Register();
   RETRO::CRPProcessInfoGbm::Register();
-  RETRO::CRPProcessInfoGbm::RegisterRendererFactory(new RETRO::CRendererFactoryGBM);
+#ifndef TARGET_RPI4_GBM
+  RETRO::CRPProcessInfoGbm::RegisterRendererFactory(new RETRO::CRendererFactory);
+#endif
   RETRO::CRPProcessInfoGbm::RegisterRendererFactory(new RETRO::CRendererFactoryOpenGLES);
 
   if (!CWinSystemGbmEGLContext::InitWindowSystemEGL(EGL_OPENGL_ES2_BIT, EGL_OPENGL_ES_API))
@@ -53,6 +63,7 @@ bool CWinSystemGbmGLESContext::InitWindowSystem()
     return false;
   }
 
+#ifndef TARGET_RPI4_GBM
   bool general, deepColor;
   m_vaapiProxy.reset(GBM::VaapiProxyCreate(m_DRM->GetRenderNodeFileDescriptor()));
   GBM::VaapiProxyConfig(m_vaapiProxy.get(), m_eglContext.GetEGLDisplay());
@@ -67,6 +78,11 @@ bool CWinSystemGbmGLESContext::InitWindowSystem()
   CRendererDRMPRIME::Register();
   CDVDVideoCodecDRMPRIME::Register();
   VIDEOPLAYER::CProcessInfoGBM::Register();
+#else
+  MMAL::CDecoder::Register();
+  MMAL::CMMALRenderer::Register();
+  MMAL::CMMALVideo::Register();
+#endif
 
   return true;
 }
@@ -143,4 +159,20 @@ bool CWinSystemGbmGLESContext::CreateContext()
     return false;
   }
   return true;
+}
+
+#ifdef TARGET_RPI4_GBM
+std::unique_ptr<CVideoSync> CWinSystemGbmGLESContext::GetVideoSync(void *clock)
+{
+  std::unique_ptr<CVideoSync> pVSync(new CVideoSyncPi(clock));
+  return pVSync;
+}
+#endif
+
+void CWinSystemGbmGLESContext::SetVSyncImpl(bool enable)
+{
+  if (!m_eglContext.SetVSync(enable))
+  {
+    CLog::Log(LOGERROR, "%s,Could not set egl vsync", __FUNCTION__);
+  }
 }
