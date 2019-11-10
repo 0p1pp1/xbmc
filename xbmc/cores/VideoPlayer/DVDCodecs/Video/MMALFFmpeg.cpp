@@ -62,7 +62,7 @@ void CMMALYUVBuffer::GetPlanes(uint8_t*(&planes)[YuvImage::MAX_PLANES])
 
   planes[0] = GetMemPtr();
   if (planes[0] && geo.getPlanesC() >= 1)
-    planes[1] = planes[0] + geo.getSizeY();
+    planes[1] = planes[0] + geo.getOffsetU();
   if (planes[1] && geo.getPlanesC() >= 2)
     planes[2] = planes[1] + geo.getSizeC();
 }
@@ -78,7 +78,7 @@ void CMMALYUVBuffer::GetStrides(int(&strides)[YuvImage::MAX_PLANES])
   strides[1] = geo.getStrideC();
   strides[2] = geo.getStrideC();
   if (geo.getStripes() > 1)
-    strides[3] = geo.getHeightY() + geo.getHeightC();      // abuse: strides[3] = stripe stride
+    strides[3] = geo.getStripeIsYc() ? geo.getHeightY() + geo.getHeightC() : geo.getHeightY();      // abuse: strides[3] = stripe stride
 }
 
 void CMMALYUVBuffer::SetDimensions(int width, int height, const int (&strides)[YuvImage::MAX_PLANES], const int (&planeOffsets)[YuvImage::MAX_PLANES])
@@ -190,7 +190,9 @@ int CDecoder::FFGetBuffer(AVCodecContext *avctx, AVFrame *frame, int flags)
   {
     int aligned_width = frame->width;
     int aligned_height = frame->height;
-    if (pool->Encoding() != MMAL_ENCODING_YUVUV128 && pool->Encoding() != MMAL_ENCODING_YUVUV64_16)
+   if (dec->m_fmt != AV_PIX_FMT_SAND128 && dec->m_fmt != AV_PIX_FMT_SAND64_10 &&
+       dec->m_fmt != AV_PIX_FMT_SAND64_16 && dec->m_fmt != AV_PIX_FMT_RPI &&
+       dec->m_fmt != AV_PIX_FMT_RPI4_8 && dec->m_fmt != AV_PIX_FMT_RPI4_10)
     {
       // ffmpeg requirements
       AlignedSize(dec->m_avctx, aligned_width, aligned_height);
@@ -287,6 +289,7 @@ CDVDVideoCodec::VCReturn CDecoder::Decode(AVCodecContext* avctx, AVFrame* frame)
   {
     if ((frame->format != AV_PIX_FMT_YUV420P && frame->format != AV_PIX_FMT_YUV420P10 && frame->format != AV_PIX_FMT_YUV420P12 && frame->format != AV_PIX_FMT_YUV420P14 && frame->format != AV_PIX_FMT_YUV420P16 &&
         frame->format != AV_PIX_FMT_SAND128 && frame->format != AV_PIX_FMT_SAND64_10 && frame->format != AV_PIX_FMT_SAND64_16 &&
+        frame->format != AV_PIX_FMT_RPI && frame->format != AV_PIX_FMT_RPI4_8 && frame->format != AV_PIX_FMT_RPI4_10 &&
         frame->format != AV_PIX_FMT_BGR0 && frame->format != AV_PIX_FMT_RGB565LE) ||
         frame->buf[1] != nullptr || frame->buf[0] == nullptr)
     {
