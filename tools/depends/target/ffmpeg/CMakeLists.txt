@@ -11,7 +11,6 @@ else()
 endif()
 
 if(CROSSCOMPILING)
-  set(pkgconf "PKG_CONFIG_LIBDIR=${DEPENDS_PATH}/lib/pkgconfig")
   list(APPEND ffmpeg_conf --pkg-config=${PKG_CONFIG_EXECUTABLE} --pkg-config-flags=--static)
   list(APPEND ffmpeg_conf --enable-cross-compile --cpu=${CPU} --arch=${CPU} --target-os=${OS})
   list(APPEND ffmpeg_conf --ar=${CMAKE_AR} --strip=${CMAKE_STRIP})
@@ -78,7 +77,7 @@ elseif(CPU MATCHES mips)
 endif()
 
 find_package(GnuTls)
-if(GNUTLS_FOUND)
+if(GnuTls_FOUND)
   list(APPEND ffmpeg_conf --enable-gnutls)
 endif()
 

@@ -65,7 +65,7 @@ if(FFMPEG_PATH)
 endif()
 
 # external FFMPEG
-if(NOT ENABLE_INTERNAL_FFMPEG OR KODI_DEPENDSBUILD)
+if(NOT ENABLE_INTERNAL_FFMPEG)
   if(FFMPEG_PATH)
     list(APPEND CMAKE_PREFIX_PATH ${FFMPEG_PATH})
   endif()
@@ -271,7 +271,6 @@ if(NOT FFMPEG_FOUND)
                                  -DCMAKE_EXE_LINKER_FLAGS=${LINKER_FLAGS}
                                  ${CROSS_ARGS}
                                  ${FFMPEG_OPTIONS}
-                                 -DPKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig
                       PATCH_COMMAND ${CMAKE_COMMAND} -E copy
                                     ${CMAKE_SOURCE_DIR}/tools/depends/target/ffmpeg/CMakeLists.txt
                                     <SOURCE_DIR> &&
@@ -291,14 +290,11 @@ if(NOT FFMPEG_FOUND)
 "#!${BASH_COMMAND}
 if [[ $@ == *${APP_NAME_LC}.bin* || $@ == *${APP_NAME_LC}${APP_BINARY_SUFFIX}* || $@ == *${APP_NAME_LC}.so* || $@ == *${APP_NAME_LC}-test* ]]
 then
-  avformat=`PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig ${PKG_CONFIG_EXECUTABLE} --libs --static libavcodec`
-  avcodec=`PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig ${PKG_CONFIG_EXECUTABLE} --libs --static libavformat`
-  avfilter=`PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig ${PKG_CONFIG_EXECUTABLE} --libs --static libavfilter`
-  avutil=`PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig ${PKG_CONFIG_EXECUTABLE} --libs --static libavutil`
-  swscale=`PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig ${PKG_CONFIG_EXECUTABLE} --libs --static libswscale`
-  swresample=`PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig ${PKG_CONFIG_EXECUTABLE} --libs --static libswresample`
-  gnutls=`PKG_CONFIG_PATH=${DEPENDS_PATH}/lib/pkgconfig/ ${PKG_CONFIG_EXECUTABLE}  --libs-only-l --static --silence-errors gnutls`
-  $@ $avcodec $avformat $avcodec $avfilter $swscale $swresample -lpostproc $gnutls
+  all_libs='avformat avcodec avfilter avutil swscale swresample postproc'
+  lib_list=\$( PKG_CONFIG_PATH=${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/pkgconfig \
+    ${PKG_CONFIG_EXECUTABLE} --libs --static lib\${all_libs// / lib} | sed -e \
+    s@-l\\\\\\(\${all_libs// /\\\\|}\\\\\\)@${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/lib/lib\\\\1.a@g )
+  $@ $lib_list
 else
   $@
 fi")

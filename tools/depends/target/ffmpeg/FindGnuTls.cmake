@@ -20,7 +20,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GnuTls DEFAULT_MSG GNUTLS_INCLUDE_DIRS GNUTLS_LIBRARIES)
 
-if(GNUTLS_FOUND)
+if(GnuTls_FOUND)
   list(APPEND GNUTLS_DEFINITIONS -DHAVE_GNUTLS=1)
 endif()
 
