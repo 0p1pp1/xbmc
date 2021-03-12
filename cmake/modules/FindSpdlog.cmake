@@ -101,6 +101,9 @@ if(SPDLOG_FOUND)
                                          IMPORTED_LOCATION "${SPDLOG_LIBRARY}"
                                          INTERFACE_INCLUDE_DIRECTORIES "${SPDLOG_INCLUDE_DIR}"
                                          INTERFACE_COMPILE_DEFINITIONS "${SPDLOG_DEFINITIONS}")
+    if(ENABLE_INTERNAL_SPDLOG)
+      add_dependencies(Spdlog::Spdlog spdlog)
+    endif()
   endif()
 endif()
 
