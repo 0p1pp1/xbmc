@@ -27,6 +27,11 @@ CPPFLAGS="@platform_cflags@ @platform_includes@ -isystem @prefix@/@deps_dir@/inc
 
 export PKG_CONFIG=@prefix@/@tool_dir@/bin/pkg-config
 export PKG_CONFIG_LIBDIR=@prefix@/@deps_dir@/lib/pkgconfig
+if test "@cross_compiling@" = "yes" && test x"@use_rootfs@" != x ; then
+  export PKG_CONFIG_PATH="@use_rootfs@/usr/lib/@use_host@/pkgconfig"
+  PKG_CONFIG_PATH+=":@use_rootfs@/usr/lib/pkgconfig"
+  PKG_CONFIG_PATH+=":@use_rootfs@/lib/@use_host@/pkgconfig:@use_rootfs@/lib/pkgconfig"
+fi
 export YASM=@prefix@/@tool_dir@/bin/yasm
 export NASM=@prefix@/@tool_dir@/bin/nasm
 LIBGCRYPT_CONFIG=@prefix@/@deps_dir@/bin/libgcrypt-config

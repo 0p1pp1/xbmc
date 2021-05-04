@@ -110,6 +110,10 @@ AC_ARG_WITH([target-ldflags],
   [linker flags. Use e.g. for -l<lib> (target)])],
   [target_ldflags=$withval])
 
+AC_ARG_WITH([rpi-rootfs],
+  [AS_HELP_STRING([--with-rpi-rootfs],
+  [rootfs path containng depend-libs (optional for cross-build rpi only)])],
+  [use_rootfs=$withval])
 
 if test "$use_ccache" = "yes"; then
   AC_CHECK_PROG(HAVE_CCACHE,ccache,"yes","no",)
@@ -221,7 +225,7 @@ case $host in
     platform_cxx=clang++
 esac
 
-if test -n $use_build_toolchain; then
+if test -n $use_toolchain; then
   PATH_FOR_HOST=$use_toolchain:$use_toolchain/usr/bin:$use_toolchain/bin:$PATH
 else
   PATH_FOR_HOST=$PATH
@@ -319,6 +323,16 @@ case $host in
     platform_cflags="-fPIC -DPIC"
     optimize_flags="-Os"
     platform_ldflags="-Wl,-rpath-link=$prefix/$deps_dir/lib"
+    if test "x$use_rootfs" != "x" && test "x$cross_compiling" = "xyes"; then
+      platform_cflags+=" -idirafter $use_rootfs/usr/include/$use_host"
+      platform_cflags+=" -idirafter $use_rootfs/usr/include"
+      platform_ldflags+=" -L$use_rootfs/usr/lib/$use_host -L$use_rootfs/usr/lib"
+      platform_ldflags+=" -L$use_rootfs/lib/$use_host -L$use_rootfs/lib"
+      platform_ldflags+=" -Wl,-rpath-link=$use_rootfs/usr/lib/$use_host"
+      platform_ldflags+=" -Wl,-rpath-link=$use_rootfs/usr/lib"
+      platform_ldflags+=" -Wl,-rpath-link=$use_rootfs/lib/$use_host"
+      platform_ldflags+=" -Wl,-rpath-link=$use_rootfs/lib"
+    fi
     platform_cxxflags="$platform_cflags"
     platform_os="linux"
     meson_system="linux"
@@ -585,8 +599,8 @@ if [ ! `mkdir -p $use_tarballs` ]; then
 fi
 
 # remove unwanted optimization flags
-tmp_cflags=$(echo $c14_flags $platform_cflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}//g')
-tmp_cxxflags=$(echo $cxx14_flags $platform_cxxflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}//g')
+tmp_cflags=$(echo $c14_flags $platform_cflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}/ /g')
+tmp_cxxflags=$(echo $cxx14_flags $platform_cxxflags | sed 's/-O@<:@123@:>@//g;s/-g //g;s/ \{2,\}/ /g')
 
 release_cflags="-DNDEBUG=1"
 
@@ -659,6 +673,7 @@ AC_SUBST(use_ccache)
 AC_SUBST(host_includes)
 AC_SUBST(app_rendersystem)
 AC_SUBST(ffmpeg_options)
+AC_SUBST(use_rootfs)
 
 AC_OUTPUT
 
@@ -670,7 +685,7 @@ if test "$platform_os" == "darwin_embedded"; then
 fi
 
 cp -vf target/config.site $prefix/$deps_dir/share
-cp -vf target/config-binaddons.site $prefix/$tool_dir/share
+cp -vf target/config-binaddons.site $prefix/$deps_dir/share
 cp -vf target/Toolchain.cmake $prefix/$deps_dir/share
 cp -vf target/Toolchain_binaddons.cmake $prefix/$deps_dir/share
 cp -vf native/config.site.native $prefix/$tool_dir/share/config.site
