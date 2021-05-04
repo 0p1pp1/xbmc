@@ -35,6 +35,8 @@ if(ENABLE_INTERNAL_FSTRCMP)
                       DOWNLOAD_DIR ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}/download
                       PREFIX ${CORE_BUILD_DIR}/fstrcmp
                       CONFIGURE_COMMAND autoreconf -vif && ./configure --prefix ${CMAKE_BINARY_DIR}/${CORE_BUILD_DIR}
+                      PATCH_COMMAND sed -i.back -e "s/^AC_CHECK_PROGS\(LIBTOOL, libtool\)/AM_PROG_LIBTOOL/" configure.ac
+                      && sed -i.back -e "/^srcdir =/a top_builddir = ." Makefile.in
                       BUILD_BYPRODUCTS ${FSTRCMP_LIBRARY}
                       BUILD_IN_SOURCE 1)
   set_target_properties(fstrcmp PROPERTIES FOLDER "External Projects")
